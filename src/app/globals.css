@@ -1,26 +1,117 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f4f7fa;
+  --ink: #1c2733;
+  --mute: #5d6b7a;
+  --line: #d9e1e9;
+  --accent: #0b7ea8;
+  --soft: #e3f3f9;
+  --surface: #ffffff;
 }
+
+/* Modo oscuro: la clase "dark" va en <html> (ver ThemeToggle y el script de layout.tsx). */
+@custom-variant dark (&:where(.dark, .dark *));
+.dark {
+  color-scheme: dark;
+  --bg: #0b1118;
+  --surface: #121b25;
+  --ink: #e6edf3;
+  --mute: #9aa9b8;
+  --line: #243242;
+  --accent: #1b9bc9;
+  --soft: rgba(27, 155, 201, 0.16);
+}
+/* Colores fijos de Tailwind que no salen de las variables: se reasignan solo en oscuro. */
+.dark .bg-white, .dark .card, .dark .btn-ghost { background-color: var(--surface); }
+.dark .input { background-color: #0e1721; }
+.dark .bg-white\/70 { background-color: color-mix(in srgb, var(--surface) 70%, transparent); }
+.dark .bg-white\/60 { background-color: color-mix(in srgb, var(--surface) 60%, transparent); }
+.dark .from-white { --tw-gradient-from: var(--surface); }
+.dark .via-white { --tw-gradient-via: var(--surface); }
+.dark .to-white { --tw-gradient-to: var(--surface); }
+.dark .from-white\/0 { --tw-gradient-from: transparent; }
+.dark .via-white\/30 { --tw-gradient-via: color-mix(in srgb, var(--surface) 30%, transparent); }
+.dark .bg-slate-50, .dark .hover\:bg-slate-50:hover { background-color: rgba(255, 255, 255, 0.04); }
+.dark .bg-slate-100 { background-color: rgba(255, 255, 255, 0.07); }
+.dark .bg-slate-300 { background-color: #3b4a5a; }
+.dark .text-slate-600 { color: var(--mute); }
+.dark .border-slate-100, .dark .tbl td { border-color: rgba(255, 255, 255, 0.07); }
+.dark .border-black\/5 { border-color: rgba(255, 255, 255, 0.08); }
+.dark .bg-emerald-100 { background-color: rgba(16, 185, 129, 0.18); } .dark .text-emerald-800 { color: #6ee7b7; }
+.dark .bg-amber-100, .dark .bg-amber-50 { background-color: rgba(245, 158, 11, 0.16); } .dark .text-amber-800, .dark .text-amber-900 { color: #fcd34d; }
+.dark .bg-red-100, .dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.16); } .dark .text-red-700, .dark .text-red-800 { color: #fca5a5; }
+.dark .svc-bg { background-color: var(--surface) !important; }
+
+/* Cambio de tema: el nuevo se revela desde el botón con el borde difuminado (220px de degradado). */
+@property --tr { syntax: "<length>"; inherits: false; initial-value: 0px; }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-old(root) { z-index: 0; }
+::view-transition-new(root) {
+  z-index: 1;
+  mask-image: radial-gradient(circle at var(--tx, 50%) var(--ty, 50%), #000 calc(var(--tr) - 220px), transparent var(--tr));
+}
+/* Respaldo sin View Transitions: los colores se mezclan despacio. */
+.theme-fade, .theme-fade *, .theme-fade *::before, .theme-fade *::after { transition: background-color .85s ease-in-out, color .85s ease-in-out, border-color .85s ease-in-out, fill .85s ease-in-out, stroke .85s ease-in-out, box-shadow .85s ease-in-out !important; }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-ink: var(--ink);
+  --color-mute: var(--mute);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-soft: var(--soft);
+  --font-sans: var(--font-inter), system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html { scroll-behavior: smooth; }
+
+/* Barra de scroll personalizada para todo el sitio (Firefox usa scrollbar-*, el resto ::-webkit-scrollbar). */
+html { scrollbar-width: thin; scrollbar-color: var(--accent) var(--bg); }
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--accent), #22d3ee); border-radius: 999px; border: 3px solid var(--bg); transition: background .3s; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-inter), system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 active:scale-[.98] disabled:opacity-50; }
+  .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-xl border-[1.5px] border-accent bg-white px-5 py-2.5 text-sm font-semibold text-accent transition hover:bg-soft active:scale-[.98]; }
+  .btn-lg { @apply px-7 py-3.5 text-base; }
+  .card { @apply rounded-2xl border border-line bg-white p-5; }
+  .input { @apply h-11 w-full rounded-xl border border-line bg-white px-3 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20; }
+  textarea.input { @apply h-auto min-h-24 py-2.5; }
+  .label { @apply mb-1.5 block text-[13px] font-semibold text-ink/80; }
+  .badge { @apply inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+  .tbl { @apply w-full text-left text-sm; }
+  .tbl th { @apply border-b border-line px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-mute; }
+  .tbl td { @apply border-b border-slate-100 px-3 py-3 align-middle; }
+  .tbl tr:last-child td { @apply border-b-0; }
+
+  /* Efectos del panel: hovers, foco y entrada escalonada de tarjetas y filas. */
+  .btn { @apply hover:-translate-y-0.5 hover:shadow-lg hover:shadow-accent/30; }
+  .btn-ghost { @apply hover:-translate-y-0.5 hover:shadow-md; }
+  .card { @apply transition duration-300 hover:border-accent/40 hover:shadow-md; animation: rise .55s cubic-bezier(.22, 1, .36, 1) both; }
+  a.card:hover { @apply -translate-y-1 shadow-lg; }
+  .input { @apply hover:border-accent/50; }
+  .tbl tbody tr { @apply transition-colors duration-200 hover:bg-soft/60; animation: rise .45s cubic-bezier(.22, 1, .36, 1) both; }
+  .tbl a { @apply transition-colors; }
+  .badge { animation: pop .4s cubic-bezier(.34, 1.56, .64, 1) both; }
+  summary { @apply transition-colors hover:text-accent; }
+  details[open] > summary { @apply text-accent; }
+  details[open] > :not(summary) { animation: rise .35s ease-out both; }
+  .card:nth-child(2), .tbl tbody tr:nth-child(2) { animation-delay: .06s; }
+  .card:nth-child(3), .tbl tbody tr:nth-child(3) { animation-delay: .12s; }
+  .card:nth-child(4), .tbl tbody tr:nth-child(4) { animation-delay: .18s; }
+  .card:nth-child(n+5), .tbl tbody tr:nth-child(n+5) { animation-delay: .24s; }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Con soporte de scroll-driven animations (Chrome/Edge/Safari recientes), tarjetas y filas aparecen al llegar a la pantalla al ir bajando. */
+@supports (animation-timeline: view()) {
+  .card, .tbl tbody tr { animation: rise linear both; animation-timeline: view(); animation-range: entry 0% entry 40%; animation-delay: 0s !important; }
 }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes pop { from { opacity: 0; transform: scale(.8); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .card, .tbl tbody tr, .badge, details[open] > :not(summary) { animation: none; } }

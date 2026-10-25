@@ -39,3 +39,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# base de datos local: scripts con contraseñas y datos de pruebas anteriores
+scripts/crear-base.sql
+scripts/conserca.sql
+.pgdata/
+.pgdata.log
+.studio.log
+
+# herramientas y editores locales
+graphify-out/
+.claude/
+.vscode/
+.idea/
+Thumbs.db
+*.log
+.env.local

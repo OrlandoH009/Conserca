@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cuéntanos qué necesitas – Conserca</title>
+<style>
+:root{--bg:#f4f7fa;--card:#fff;--ink:#1c2733;--mute:#5d6b7a;--line:#d9e1e9;--accent:#0b7ea8;--accent-soft:#e3f3f9}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px 60px}
+header{padding:40px 0 20px}
+header small{color:var(--accent);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem}
+h1{margin:6px 0 8px;font-size:1.9rem;line-height:1.2}
+header p{margin:0;color:var(--mute)}
+fieldset{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:0 0 18px;padding:22px 22px 8px}
+legend{font-weight:700;font-size:1.15rem;padding:0 8px;margin-left:-8px}
+.hint{color:var(--mute);margin:-4px 0 14px;font-size:.95rem}
+.q{margin-bottom:20px}
+.q>b{display:block;margin-bottom:8px}
+input[type=text],input[type=email],input[type=tel],textarea{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:inherit}
+textarea{min-height:90px;resize:vertical}
+input:focus,textarea:focus{outline:2px solid var(--accent);border-color:transparent}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.opt{position:relative;display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;background:#fff;transition:.15s}
+.opt:hover{border-color:var(--accent)}
+.opt input{width:18px;height:18px;accent-color:var(--accent);flex:none;margin:0}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent)}
+.opt small{display:block;color:var(--mute);font-size:.85rem;line-height:1.3}
+.dot{width:22px;height:22px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.15)}
+.req{color:#c0392b}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.row{grid-template-columns:1fr}h1{font-size:1.6rem}}
+.send{display:block;width:100%;padding:16px;border:0;border-radius:12px;background:var(--accent);color:#fff;font:inherit;font-weight:700;font-size:1.1rem;cursor:pointer}
+.send:hover{filter:brightness(1.08)}
+#out{display:none;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+#out h2{margin-top:0}
+#txt{white-space:pre-wrap;background:var(--bg);border-radius:10px;padding:14px;font:15px/1.5 ui-monospace,Consolas,monospace;max-height:420px;overflow:auto}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.btns button{flex:1;min-width:140px;padding:12px;border-radius:10px;border:1.5px solid var(--accent);background:#fff;color:var(--accent);font:inherit;font-weight:600;cursor:pointer}
+.btns button:first-child{background:var(--accent);color:#fff}
+@media print{body{background:#fff}header,#f,.btns{display:none}#out{display:block!important;border:0}#txt{max-height:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <small>Conserca, SA de C.V.</small>
+  <h1>Cuéntanos qué necesitas para tu página o sistema web</h1>
+  <p>Son unas preguntas sencillas, sin tecnicismos. No hay respuestas buenas ni malas: lo que no sepas, déjalo en blanco. Tarda unos 5 minutos.</p>
+</header>
+
+<form id="f">
+
+<fieldset>
+  <legend>1. Sobre ti</legend>
+  <div class="row">
+    <div class="q" data-q="Tu nombre"><b>Tu nombre <span class="req">*</span></b><input type="text" required></div>
+    <div class="q" data-q="Tu puesto"><b>Tu puesto</b><input type="text"></div>
+  </div>
+  <div class="row">
+    <div class="q" data-q="Correo"><b>Correo <span class="req">*</span></b><input type="email" required></div>
+    <div class="q" data-q="Teléfono / WhatsApp"><b>Teléfono / WhatsApp</b><input type="tel"></div>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend>2. Tu empresa</legend>
+  <p class="hint">Conserca diseña y supervisa sistemas de aire acondicionado y ventilación mecánica (no hace instalación).</p>
+  <div class="q" data-q="¿Qué servicios quieres que se vean en la página?">
+    <b>¿Qué servicios quieres mostrar?</b>
+    <div class="opts">
+      <label class="opt"><input type="checkbox"><span>Cálculo de cargas térmicas<small>Cuánto frío o calor necesita un espacio</small></span></label>
+      <label class="opt"><input type="checkbox"><span>Diseño de distribución de aire<small>Conductos, rejillas y difusores</small></span></label>
+      <label class="opt"><input type="checkbox"><span>Ventilación mecánica<small>Estacionamientos, baños, escaleras de emergencia, bodegas…</small></span></label>
+      <label class="opt"><input type="checkbox"><span>Memorias de cálculo y especificaciones<small>Documentos técnicos de equipos y materiales</small></span></label>
+      <label class="opt"><input type="checkbox"><span>Presupuestos estimados de obra</span></label>
+      <label class="opt"><input type="checkbox"><span>Supervisión de proyectos</span></label>
+    </div>
+  </div>
+  <div class="q" data-q="¿Qué te hace diferente de otras empresas?">
+    <b>¿Qué te hace diferente de otras empresas del ramo?</b>
+    <textarea placeholder="Ejemplo: años de experiencia, tipo de proyectos, atención personalizada…"></textarea>
+  </div>
+  <div class="q" data-q="¿Tu página actual (si existe)?">
+    <b>¿Ya tienen una página web? Si sí, pega el enlace</b>
+    <input type="text" placeholder="www.ejemplo.com">
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend>3. ¿Qué quieres lograr?</legend>
+  <div class="q" data-q="Lo que necesito">
+    <b>Marca todo lo que te gustaría tener</b>
+    <div class="opts">
+      <label class="opt"><input type="checkbox"><span>Una página para presentar la empresa<small>Quiénes somos, servicios, contacto</small></span></label>
+      <label class="opt"><input type="checkbox"><span>Mostrar proyectos realizados<small>Galería con fotos y descripción</small></span></label>
+      <label class="opt"><input type="checkbox"><span>Que me pidan cotización en línea<small>Un formulario sencillo</small></span></label>
+      <label class="opt"><input type="checkbox"><span>Un área privada para clientes<small>Ver avances y descargar documentos</small></span></label>
+      <label class="opt"><input type="checkbox"><span>Un sistema para uso interno del equipo<small>Llevar proyectos, clientes o pendientes</small></span></label>
+      <label class="opt"><input type="checkbox"><span>Una calculadora o herramienta de cálculo<small>Para uso propio o de clientes</small></span></label>
+      <label class="opt"><input type="checkbox"><span>Generar presupuestos o reportes automáticos</span></label>
+      <label class="opt"><input type="checkbox"><span>Un catálogo de equipos y materiales</span></label>
+    </div>
+  </div>
+  <div class="q" data-q="Otra cosa que necesito"><b>¿Algo más que no esté en la lista?</b><textarea></textarea></div>
+  <div class="q" data-q="¿Quién lo va a usar?">
+    <b>¿Quién lo va a usar?</b>
+    <div class="opts">
+      <label class="opt"><input type="radio" name="quien"><span>Mis clientes y visitantes</span></label>
+      <label class="opt"><input type="radio" name="quien"><span>Solo mi equipo de trabajo</span></label>
+      <label class="opt"><input type="radio" name="quien"><span>Ambos</span></label>
+    </div>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend>4. ¿Cómo quieres que se vea?</legend>
+  <div class="q" data-q="Estilo general">
+    <b>¿Qué estilo te gusta más?</b>
+    <div class="opts">
+      <label class="opt"><input type="radio" name="estilo"><span>Moderno y limpio<small>Mucho espacio en blanco, minimalista</small></span></label>
+      <label class="opt"><input type="radio" name="estilo"><span>Serio y corporativo<small>Formal, de confianza</small></span></label>
+      <label class="opt"><input type="radio" name="estilo"><span>Técnico / ingeniería<small>Datos, planos, precisión</small></span></label>
+      <label class="opt"><input type="radio" name="estilo"><span>Cercano y amigable<small>Más cálido y sencillo</small></span></label>
+    </div>
+  </div>
+  <div class="q" data-q="Colores">
+    <b>¿Qué colores te gustan? (puedes elegir varios)</b>
+    <div class="opts">
+      <label class="opt"><input type="checkbox"><i class="dot" style="background:#1565c0"></i>Azul</label>
+      <label class="opt"><input type="checkbox"><i class="dot" style="background:#00a3a3"></i>Turquesa</label>
+      <label class="opt"><input type="checkbox"><i class="dot" style="background:#2e8b57"></i>Verde</label>
+      <label class="opt"><input type="checkbox"><i class="dot" style="background:#e8742a"></i>Naranja</label>
+      <label class="opt"><input type="checkbox"><i class="dot" style="background:#c62828"></i>Rojo</label>
+      <label class="opt"><input type="checkbox"><i class="dot" style="background:#333"></i>Gris / negro</label>
+    </div>
+    <input type="text" placeholder="¿Otro color o los de tu logotipo? Escríbelo aquí" style="margin-top:10px">
+  </div>
+  <div class="q" data-q="Fondo">
+    <b>¿Fondo claro u oscuro?</b>
+    <div class="opts">
+      <label class="opt"><input type="radio" name="fondo"><span>Claro (blanco)</span></label>
+      <label class="opt"><input type="radio" name="fondo"><span>Oscuro</span></label>
+      <label class="opt"><input type="radio" name="fondo"><span>Me da igual</span></label>
+    </div>
+  </div>
+  <div class="q" data-q="Imágenes">
+    <b>¿Qué tipo de imágenes prefieres?</b>
+    <div class="opts">
+      <label class="opt"><input type="checkbox"><span>Fotos reales de proyectos</span></label>
+      <label class="opt"><input type="checkbox"><span>Ilustraciones o íconos</span></label>
+      <label class="opt"><input type="checkbox"><span>Planos y gráficas técnicas</span></label>
+      <label class="opt"><input type="checkbox"><span>Pocas imágenes, más texto</span></label>
+    </div>
+  </div>
+  <div class="q" data-q="Páginas de ejemplo que te gustan">
+    <b>¿Hay alguna página que te guste o te inspire?</b>
+    <textarea placeholder="Pega aquí los enlaces y, si quieres, qué te gusta de cada una"></textarea>
+  </div>
+  <div class="q" data-q="Páginas que NO te gustan">
+    <b>¿Algo que definitivamente NO quieres?</b>
+    <textarea></textarea>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend>5. Contenido y extras</legend>
+  <div class="q" data-q="Material que ya tienes">
+    <b>¿Con qué material ya cuentas?</b>
+    <div class="opts">
+      <label class="opt"><input type="checkbox"><span>Logotipo</span></label>
+      <label class="opt"><input type="checkbox"><span>Fotos de proyectos</span></label>
+      <label class="opt"><input type="checkbox"><span>Textos (quiénes somos, servicios)</span></label>
+      <label class="opt"><input type="checkbox"><span>Lista de clientes o proyectos</span></label>
+      <label class="opt"><input type="checkbox"><span>Nada, necesito ayuda con esto</span></label>
+    </div>
+  </div>
+  <div class="q" data-q="Extras">
+    <b>¿Te gustaría tener…?</b>
+    <div class="opts">
+      <label class="opt"><input type="checkbox"><span>Botón de WhatsApp</span></label>
+      <label class="opt"><input type="checkbox"><span>Mapa con ubicación</span></label>
+      <label class="opt"><input type="checkbox"><span>Enlaces a redes sociales</span></label>
+      <label class="opt"><input type="checkbox"><span>Versión en inglés</span></label>
+      <label class="opt"><input type="checkbox"><span>Descargar documentos en PDF</span></label>
+      <label class="opt"><input type="checkbox"><span>Usuario y contraseña para entrar</span></label>
+    </div>
+  </div>
+  <div class="q" data-q="¿Dónde lo usarán?">
+    <b>¿Desde dónde lo van a usar más?</b>
+    <div class="opts">
+      <label class="opt"><input type="radio" name="disp"><span>Computadora</span></label>
+      <label class="opt"><input type="radio" name="disp"><span>Celular</span></label>
+      <label class="opt"><input type="radio" name="disp"><span>Los dos por igual</span></label>
+    </div>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend>6. Tiempos y presupuesto</legend>
+  <div class="q" data-q="¿Para cuándo lo necesitas?">
+    <b>¿Para cuándo lo necesitas?</b>
+    <div class="opts">
+      <label class="opt"><input type="radio" name="cuando"><span>Lo antes posible</span></label>
+      <label class="opt"><input type="radio" name="cuando"><span>En 1 a 2 meses</span></label>
+      <label class="opt"><input type="radio" name="cuando"><span>En 3 meses o más</span></label>
+      <label class="opt"><input type="radio" name="cuando"><span>Sin prisa</span></label>
+    </div>
+  </div>
+  <div class="q" data-q="Presupuesto aproximado"><b>¿Tienes un presupuesto en mente? (opcional)</b><input type="text" placeholder="Ejemplo: entre $10,000 y $20,000"></div>
+  <div class="q" data-q="Comentarios finales"><b>¿Algo más que quieras contarnos?</b><textarea></textarea></div>
+</fieldset>
+
+<button class="send" type="submit">Ver mi resumen</button>
+</form>
+
+<section id="out">
+  <h2>¡Listo! Este es tu resumen</h2>
+  <p class="hint">Revísalo y envíalo a quien te pidió este formulario (cópialo, descárgalo o imprímelo).</p>
+  <div id="txt"></div>
+  <div class="btns">
+    <button id="copy">Copiar</button>
+    <button id="dl">Descargar archivo</button>
+    <button onclick="print()">Imprimir / PDF</button>
+    <button id="back">Volver a editar</button>
+  </div>
+</section>
+</div>
+
+<script>
+const f=document.getElementById('f'),out=document.getElementById('out'),txt=document.getElementById('txt');
+const clean=s=>s.replace(/\s+/g,' ').trim();
+f.onsubmit=e=>{
+  e.preventDefault();
+  let s='REQUERIMIENTOS DE PÁGINA / SISTEMA WEB – CONSERCA, SA DE C.V.\n'+new Date().toLocaleDateString('es-MX');
+  f.querySelectorAll('fieldset').forEach(fs=>{
+    let b='';
+    fs.querySelectorAll('.q').forEach(q=>{
+      const a=[];
+      q.querySelectorAll('input,textarea').forEach(i=>{
+        if(i.type=='checkbox'||i.type=='radio'){if(i.checked)a.push(clean(i.parentElement.textContent))}
+        else if(i.value.trim())a.push(i.value.trim());
+      });
+      if(a.length)b+=`\n• ${q.dataset.q}: ${a.join(' · ')}`;
+    });
+    if(b)s+=`\n\n== ${fs.querySelector('legend').textContent} ==`+b;
+  });
+  txt.textContent=s;
+  f.style.display='none';out.style.display='block';scrollTo(0,0);
+};
+document.getElementById('back').onclick=()=>{out.style.display='none';f.style.display='';scrollTo(0,0)};
+document.getElementById('copy').onclick=e=>{navigator.clipboard.writeText(txt.textContent).then(()=>e.target.textContent='¡Copiado!')};
+document.getElementById('dl').onclick=()=>{
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt.textContent],{type:'text/plain;charset=utf-8'}));
+  a.download='requerimientos-conserca.txt';a.click();
+};
+</script>
+</body>
+</html>
