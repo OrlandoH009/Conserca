@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { parse, UserError } from "@/lib/action-utils";
 import { assertAccess, requireAccess } from "@/lib/auth";
+import { fmtDate } from "@/lib/format";
 import * as VisitModel from "@/models/visit.model";
+import * as ActivityController from "./activity.controller";
 
 const pid = z.coerce.number().int().positive();
 const text = (label: string) => z.string().trim().min(1, `${label} es obligatorio`).max(300);
@@ -18,16 +20,20 @@ export async function visitsOf(projectId: number) {
 }
 
 export async function addVisit(fd: FormData) {
-  await assertAccess("supervision", "edit");
+  const u = await assertAccess("supervision", "edit");
   const v = parse(z.object({ projectId: pid, visitDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Elige la fecha"), notes: text("El motivo") }), fd);
   await VisitModel.create(v);
+  await ActivityController.record(v.projectId, "visita", `Visita programada para el ${fmtDate(v.visitDate)}: ${v.notes}`, { actorId: u.id, notifyClient: `Se programó una visita a tu proyecto para el ${fmtDate(v.visitDate)}.` });
   return v.projectId;
 }
 
 export async function markVisitDone(fd: FormData) {
-  await assertAccess("supervision", "edit");
+  const u = await assertAccess("supervision", "edit");
   const v = parse(z.object({ id: pid, projectId: pid }), fd);
+  const visit = await VisitModel.findById(v.id);
+  if (!visit || visit.projectId !== v.projectId) throw new UserError("La visita no pertenece a este proyecto");
   await VisitModel.markDone(v.id);
+  await ActivityController.record(v.projectId, "visita", `Visita realizada (${fmtDate(visit.visitDate)})`, { actorId: u.id, notifyClient: `Se realizó la visita del ${fmtDate(visit.visitDate)} a tu proyecto.` });
   return v.projectId;
 }
 

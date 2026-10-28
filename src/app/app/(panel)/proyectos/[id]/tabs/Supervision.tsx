@@ -1,4 +1,5 @@
 import * as SupervisionController from "@/controllers/supervision.controller";
+import { ActionButton } from "@/components/app/ActionButton";
 import { ActionForm, F } from "@/components/app/ActionForm";
 import { Badge, Empty } from "@/components/app/ui";
 import { fmtDate } from "@/lib/format";
@@ -22,7 +23,7 @@ export async function Supervision({ projectId, canEdit }: { projectId: number; c
                 <div className="flex items-center gap-2">
                   <Badge tone={v.status === "realizada" ? "g" : "b"}>{v.status === "realizada" ? "Realizada" : "Programada"}</Badge>
                   {canEdit && v.status === "programada" && (
-                    <form action={markVisitDone}><input type="hidden" name="id" value={v.id} /><input type="hidden" name="projectId" value={projectId} /><button className="btn-ghost px-3 py-1.5">Marcar realizada</button></form>
+                    <ActionButton action={markVisitDone} fields={{ id: v.id, projectId }} okText="Visita marcada como realizada" className="btn-ghost px-3 py-1.5">Marcar realizada</ActionButton>
                   )}
                 </div>
               </div>
@@ -34,10 +35,9 @@ export async function Supervision({ projectId, canEdit }: { projectId: number; c
                       <span className="flex items-center gap-2">
                         <Badge tone={x.status === "abierta" ? "r" : "g"}>{x.status === "abierta" ? "Abierta" : "Cerrada"}</Badge>
                         {canEdit && (
-                          <form action={toggleObservation}>
-                            <input type="hidden" name="id" value={x.id} /><input type="hidden" name="projectId" value={projectId} /><input type="hidden" name="to" value={x.status === "abierta" ? "cerrada" : "abierta"} />
-                            <button className="text-xs text-accent hover:underline">{x.status === "abierta" ? "Cerrar" : "Reabrir"}</button>
-                          </form>
+                          <ActionButton action={toggleObservation} fields={{ id: x.id, projectId, to: x.status === "abierta" ? "cerrada" : "abierta" }} okText={x.status === "abierta" ? "Observación cerrada" : "Observación reabierta"} className="text-xs font-semibold text-accent hover:underline">
+                            {x.status === "abierta" ? "Cerrar" : "Reabrir"}
+                          </ActionButton>
                         )}
                       </span>
                     </li>
@@ -45,7 +45,7 @@ export async function Supervision({ projectId, canEdit }: { projectId: number; c
                 </ul>
               )}
               {canEdit && (
-                <ActionForm action={addObservation} submit="Agregar observación" ghost className="mt-3 border-t border-slate-100 pt-3">
+                <ActionForm action={addObservation} submit="Agregar observación" ghost className="mt-3 border-t border-slate-100 pt-3" success="Observación agregada">
                   <input type="hidden" name="projectId" value={projectId} /><input type="hidden" name="visitId" value={v.id} />
                   <input name="text" className="input" placeholder="Nueva observación" required aria-label="Nueva observación" />
                 </ActionForm>
@@ -57,7 +57,7 @@ export async function Supervision({ projectId, canEdit }: { projectId: number; c
       {canEdit && (
         <section className="card self-start">
           <h2 className="mb-3 font-bold">Registrar visita</h2>
-          <ActionForm action={addVisit}>
+          <ActionForm action={addVisit} success="Visita registrada">
             <input type="hidden" name="projectId" value={projectId} />
             <div className="space-y-3">
               <F label="Fecha" name="visitDate" type="date" />

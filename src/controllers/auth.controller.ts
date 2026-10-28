@@ -7,7 +7,7 @@ import * as UserModel from "@/models/user.model";
 const fails = new Map<string, { n: number; until: number }>();
 const DUMMY = bcrypt.hashSync("no-existe", 10);
 
-export type LoginResult = { ok?: boolean; error?: string; email?: string; role?: string };
+type LoginResult = { ok?: boolean; error?: string; email?: string; role?: string };
 
 export async function login(fd: FormData): Promise<LoginResult> {
   const p = z.object({ email: z.email().transform((s) => s.toLowerCase().trim()), password: z.string().min(1) }).safeParse({
@@ -35,6 +35,7 @@ export const logout = () => endSession();
 /** Alta pública: siempre crea una cuenta "usuario" (sin acceso al panel); el rol no viene del formulario. */
 export async function register(fd: FormData): Promise<LoginResult> {
   if (fd.get("website")) return { ok: true }; // campo trampa para bots
+  if (!fd.get("terms")) return { error: "Acepta los Términos y condiciones para crear tu cuenta", email: String(fd.get("email") ?? "") };
   const p = z
     .object({
       name: z.string().trim().min(2, "Escribe tu nombre").max(120),

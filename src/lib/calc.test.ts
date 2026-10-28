@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { budgetTotals, coolingLoad, ventFlow } from "./calc";
+import { budgetTotals, kwToBtu, coolingLoad, ventFlow } from "./calc";
 
 describe("ventFlow", () => {
   it("volumen × cambios por hora", () => {
@@ -37,8 +37,16 @@ describe("coolingLoad", () => {
 });
 
 describe("budgetTotals", () => {
-  it("subtotal, IVA 16% y total", () => {
-    expect(budgetTotals([{ quantity: 2, unitPrice: 100 }, { quantity: 1, unitPrice: 50 }])).toEqual({ subtotal: 250, iva: 40, total: 290 });
+  it("subtotal, IVA 13 % y total", () => {
+    expect(budgetTotals([{ quantity: 2, unitPrice: 100 }, { quantity: 1, unitPrice: 50 }])).toEqual({ subtotal: 250, iva: 32.5, total: 282.5 });
     expect(budgetTotals([])).toEqual({ subtotal: 0, iva: 0, total: 0 });
+  });
+});
+
+describe("kwToBtu", () => {
+  it("convierte kW a BTU/h", () => {
+    expect(kwToBtu(1)).toBe(3412);
+    expect(kwToBtu(13.49)).toBe(46030);
+    expect(kwToBtu(0)).toBe(0);
   });
 });

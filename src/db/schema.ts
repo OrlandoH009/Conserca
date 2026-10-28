@@ -1,4 +1,5 @@
-import { date, double, int, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, date, double, int, json, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import type { QuoteDetails } from "../lib/quote-details"; // relativo: drizzle-kit no resuelve el alias @/
 
 const id = () => int("id").autoincrement().primaryKey();
 const createdAt = () => timestamp("created_at").defaultNow().notNull();
@@ -30,6 +31,9 @@ export const quotes = mysqlTable("quotes", {
   phone: varchar("phone", { length: 40 }),
   message: text("message").notNull(),
   status: varchar("status", { length: 20 }).$type<"nueva" | "en_proceso" | "respondida">().notNull().default("nueva"),
+  userId: int("user_id").references(() => users.id, { onDelete: "set null" }), // cuenta que la envió (cotización personalizada)
+  projectId: int("project_id").references(() => projects.id, { onDelete: "set null" }), // proyecto creado a partir de ella
+  details: json("details").$type<QuoteDetails>(), // opciones elegidas, para mostrarlas ordenadas
   createdAt: createdAt(),
 });
 
@@ -37,6 +41,10 @@ export const projects = mysqlTable("projects", {
   id: id(),
   name: varchar("name", { length: 200 }).notNull(),
   clientId: int("client_id").references(() => clients.id),
+  clientUserId: int("client_user_id").references(() => users.id), // cuenta del cliente que ve el avance en /mis-proyectos
+  progress: int("progress").notNull().default(0), // porcentaje de avance, lo actualiza el equipo
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+  archivedAt: timestamp("archived_at"), // archivado: no sale en la lista normal
   spaceType: varchar("space_type", { length: 100 }).notNull(),
   stage: varchar("stage", { length: 100 }).notNull().default("Cargas térmicas"),
   status: varchar("status", { length: 20 }).$type<"en_proceso" | "en_revision" | "entregado" | "atrasado">().notNull().default("en_proceso"),
@@ -90,6 +98,12 @@ export const documents = mysqlTable("documents", {
   kind: varchar("kind", { length: 30 }).notNull(),
   version: int("version").notNull().default(1),
   status: varchar("status", { length: 20 }).$type<"en_proceso" | "en_revision" | "entregado">().notNull().default("en_proceso"),
+  fileName: varchar("file_name", { length: 200 }), // PDF subido (nombre original)
+  filePath: varchar("file_path", { length: 60 }), // nombre generado en storage/documents
+  fileSize: int("file_size"), // bytes del PDF
+  clientStatus: varchar("client_status", { length: 20 }).$type<"pendiente" | "aprobado" | "cambios">().notNull().default("pendiente"), // revisión del cliente
+  clientComment: varchar("client_comment", { length: 500 }),
+  reviewedAt: timestamp("reviewed_at"),
   createdAt: createdAt(),
 });
 
@@ -124,4 +138,25 @@ export const equipment = mysqlTable("equipment", {
   capacity: varchar("capacity", { length: 100 }).notNull(),
   brand: varchar("brand", { length: 100 }).notNull().default("Genérico"),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Registro de lo que pasa en un proyecto; `visibleToClient` decide si el cliente lo ve en su línea de tiempo.
+export const projectEvents = mysqlTable("project_events", {
+  id: id(),
+  projectId: projectRef(),
+  type: varchar("type", { length: 30 }).notNull(), // estado, etapa, avance, documento, visita, revision, proyecto
+  message: varchar("message", { length: 300 }).notNull(),
+  visibleToClient: boolean("visible_to_client").notNull().default(true),
+  createdBy: int("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: createdAt(),
+});
+
+// Avisos dentro del sistema (sin correo): campanita con contador.
+export const notifications = mysqlTable("notifications", {
+  id: id(),
+  userId: int("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  text: varchar("text", { length: 300 }).notNull(),
+  href: varchar("href", { length: 200 }),
+  readAt: timestamp("read_at"),
+  createdAt: createdAt(),
 });

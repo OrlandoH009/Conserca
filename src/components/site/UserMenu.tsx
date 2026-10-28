@@ -6,14 +6,14 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { logoutSite } from "@/app/app/login/actions";
 import { ProfileModal } from "./ProfileModal";
+import { EASE as ease } from "@/lib/motion";
 
 type U = { name: string; email: string; phone: string | null; staff: boolean; roleLabel: string };
-const ease = [0.22, 1, 0.36, 1] as const;
 
 /** Ícono de persona fijo (no se puede cambiar) dentro de un círculo. */
 function Avatar({ className = "h-9 w-9" }: { className?: string }) {
   return (
-    <span className={`flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent to-cyan-400 text-white ${className}`}>
+    <span className={`flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent-solid to-accent-solid-2 text-white ${className}`}>
       <svg viewBox="0 0 24 24" className="h-[60%] w-[60%]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" />
       </svg>
@@ -46,7 +46,7 @@ export function UserMenu({ user }: { user: U }) {
         </button>
         <AnimatePresence>
           {open && (
-            <motion.div role="menu" initial={{ opacity: 0, y: -8, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -6, scale: 0.97 }} transition={{ duration: 0.2, ease }} style={{ transformOrigin: "top right" }} className="absolute right-0 top-full mt-3 w-64 rounded-2xl border border-line bg-white p-2 shadow-[0_24px_60px_-20px_rgba(11,126,168,0.45)]">
+            <motion.div role="menu" initial={{ opacity: 0, y: -8, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -6, scale: 0.97 }} transition={{ duration: 0.2, ease }} style={{ transformOrigin: "top right" }} className="absolute right-0 top-full mt-3 w-64 rounded-2xl border border-line bg-surface p-2 shadow-[0_24px_60px_-20px_rgba(11,126,168,0.45)]">
               <div className="flex items-center gap-3 px-3 pb-3 pt-2">
                 <Avatar className="h-11 w-11" />
                 <div className="min-w-0">
@@ -57,6 +57,7 @@ export function UserMenu({ user }: { user: U }) {
               </div>
               <div className="border-t border-line pt-2">
                 {user.staff && <Link role="menuitem" href="/app" onClick={() => setOpen(false)} className={item}>Mi panel</Link>}
+                {!user.staff && <Link role="menuitem" href="/mis-proyectos" onClick={() => setOpen(false)} className={item}>Mis proyectos</Link>}
                 <button role="menuitem" onClick={() => { setOpen(false); setEditing(true); }} className={item}>Editar perfil</button>
                 <form action={logoutSite}><button role="menuitem" className={`${item} hover:!text-red-600`}>Cerrar sesión</button></form>
               </div>

@@ -1,8 +1,9 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db, ventZones } from "@/db";
 
-export type VentZone = typeof ventZones.$inferSelect;
 
 export const listByProject = (projectId: number) => db.select().from(ventZones).where(eq(ventZones.projectId, projectId)).orderBy(ventZones.id);
 export const create = (v: typeof ventZones.$inferInsert) => db.insert(ventZones).values(v);
-export const remove = (id: number) => db.delete(ventZones).where(eq(ventZones.id, id));
+const mine = (id: number, projectId: number) => and(eq(ventZones.id, id), eq(ventZones.projectId, projectId)); // la fila debe ser de ese proyecto
+export const remove = (id: number, projectId: number) => db.delete(ventZones).where(mine(id, projectId));
+export const update = (id: number, projectId: number, v: Omit<typeof ventZones.$inferInsert, "id" | "projectId">) => db.update(ventZones).set(v).where(mine(id, projectId));

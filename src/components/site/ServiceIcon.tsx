@@ -1,14 +1,16 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { useVisible } from "@/components/motion/useVisible";
 
 const center = { transformBox: "fill-box", transformOrigin: "center" } as const;
 
 // Íconos de 48×48 con relleno suave, trazo y movimiento propio. Usan currentColor, así que toman el color del contenedor.
-function Art({ id, still }: { id: string; still: boolean }): ReactNode {
+function Art({ id, still, hot }: { id: string; still: boolean; hot: boolean }): ReactNode {
   // Con "reducir movimiento" el ícono queda quieto; si no, el movimiento se repite sin parar.
-  const loop = (duration: number, extra = {}) => (still ? { duration: 0 } : { duration, repeat: Infinity, ease: "easeInOut" as const, ...extra });
+  // `hot` (ícono activo o con el cursor encima) acelera el movimiento.
+  const loop = (duration: number, extra = {}) => (still ? { duration: 0 } : { duration: hot ? duration * 0.55 : duration, repeat: Infinity, ease: "easeInOut" as const, ...extra });
   switch (id) {
     case "cargas": // termómetro: el mercurio sube y salen ondas de calor
       return (
@@ -30,6 +32,7 @@ function Art({ id, still }: { id: string; still: boolean }): ReactNode {
             <g key={d}>
               <path d={d} stroke="currentColor" strokeOpacity=".2" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" fill="none" />
               <motion.path d={d} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" strokeDasharray="1 7" animate={still ? {} : { strokeDashoffset: [0, -16] }} transition={loop(1.1, { ease: "linear" })} />
+              <motion.circle r="2.2" fill="currentColor" initial={{ opacity: 0 }} animate={still ? {} : { opacity: [0, 1, 0] }} transition={loop(1.8, { delay: d.length * 0.03 })} cx={d.startsWith("M5") ? 12 : d.startsWith("M22") ? 32 : 28} cy={d.startsWith("M28") ? 33 : 26} />
             </g>
           ))}
           <rect x="22" y="3" width="12" height="5" rx="2" fill="currentColor" />
@@ -82,24 +85,43 @@ function Art({ id, still }: { id: string; still: boolean }): ReactNode {
   }
 }
 
-export function ServiceIcon({ id, className = "h-12 w-12" }: { id: string; className?: string }) {
-  const still = !!useReducedMotion();
+export function ServiceIcon({ id, className = "h-12 w-12", hot = false, paused }: { id: string; className?: string; hot?: boolean; paused?: boolean }) {
+  const reduce = !!useReducedMotion();
+  const [ref, visible] = useVisible<SVGSVGElement>();
+  const still = reduce || (paused ?? !visible); // `paused` lo manda el recuadro cuando el ícono va dentro de uno
   return (
-    <svg viewBox="0 0 48 48" className={className} fill="none" aria-hidden>
-      <Art id={id} still={still} />
+    <svg ref={ref} viewBox="0 0 48 48" className={className} fill="none" aria-hidden>
+      <Art id={id} still={still} hot={hot} />
     </svg>
   );
 }
 
-/** Recuadro con degradado que da peso al ícono; `active` lo llena de color y lo hace latir. */
+/** Recuadro con degradado que da peso al ícono. Flota suave; con el cursor se inclina y acelera el ícono; `active` lo llena de color, lo hace latir y le suma aro y destello. */
 export function ServiceTile({ id, active = false, size = "h-16 w-16", icon = "h-10 w-10" }: { id: string; active?: boolean; size?: string; icon?: string }) {
+  const reduce = !!useReducedMotion();
+  const [ref, visible] = useVisible<HTMLSpanElement>();
+  const still = reduce || !visible; // el recuadro deja de flotar cuando no se ve
+  const [hover, setHover] = useState(false);
   return (
     <motion.span
-      animate={active ? { scale: [1, 1.1, 1] } : { scale: 1 }}
-      transition={{ duration: 0.6 }}
-      className={`flex shrink-0 items-center justify-center rounded-2xl border transition-all duration-500 ${size} ${active ? "border-transparent bg-gradient-to-br from-accent to-cyan-400 text-white shadow-[0_12px_28px_-8px_rgba(11,126,168,0.7)]" : "border-line bg-gradient-to-br from-soft to-white text-accent"}`}
+      ref={ref}
+      onHoverStart={() => setHover(true)}
+      onHoverEnd={() => setHover(false)}
+      whileHover={still ? undefined : { scale: 1.12, rotate: -4 }}
+      animate={still ? {} : active ? { scale: [1, 1.12, 1], y: 0 } : { scale: 1, y: [0, -2.5, 0] }}
+      transition={active ? { duration: 0.6 } : { scale: { duration: 0.3 }, y: { duration: 3.4, repeat: Infinity, ease: "easeInOut" } }}
+      className={`relative flex shrink-0 items-center justify-center rounded-2xl border transition-colors duration-500 ${size} ${active ? "border-transparent bg-gradient-to-br from-accent-solid to-accent-solid-2 text-white shadow-[0_12px_28px_-8px_rgba(11,126,168,0.7)]" : "border-line bg-gradient-to-br from-soft to-surface text-accent"}`}
     >
-      <ServiceIcon id={id} className={icon} />
+      {active && !still && (
+        <>
+          <motion.span aria-hidden className="absolute inset-0 rounded-2xl ring-2 ring-accent/60" animate={{ scale: [1, 1.45], opacity: [0.7, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }} />
+          <span aria-hidden className="absolute inset-0 overflow-hidden rounded-2xl">
+            <motion.span className="absolute inset-y-0 -left-full w-1/2 -skew-x-12 bg-white/35" animate={{ left: ["-60%", "160%"] }} transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 1.2, ease: "easeInOut" }} />
+          </span>
+        </>
+      )}
+      {/* Los íconos inactivos solo se mueven con el cursor encima. */}
+      <ServiceIcon id={id} className={icon} hot={active || hover} paused={still || (!active && !hover)} />
     </motion.span>
   );
 }

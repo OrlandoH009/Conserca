@@ -10,16 +10,17 @@ const USERS = [
   { name: "Usuario Ingeniería (ejemplo)", email: "ingenieria@conserca.test", password: "Ingenieria-Prueba-2026", role: "ingenieria" },
   { name: "Usuario Presupuestos (ejemplo)", email: "presupuestos@conserca.test", password: "Presupuestos-Prueba-2026", role: "presupuestos" },
   { name: "Usuario Supervisión (ejemplo)", email: "supervision@conserca.test", password: "Supervision-Prueba-2026", role: "supervision" },
+  { name: "Cliente Prueba (ejemplo)", email: "cliente@conserca.test", password: "Cliente-Prueba-2026", role: "usuario" }, // ve el proyecto 01 en /mis-proyectos
 ] as const;
 
 async function main() {
   const d = await import("./index");
   const { db } = d;
   const t = d;
-  for (const tbl of [t.observations, t.siteVisits, t.budgetItems, t.documents, t.ventZones, t.airElements, t.spaces, t.projects, t.quotes, t.clients, t.equipment, t.users]) {
+  for (const tbl of [t.notifications, t.projectEvents, t.observations, t.siteVisits, t.budgetItems, t.documents, t.ventZones, t.airElements, t.spaces, t.projects, t.quotes, t.clients, t.equipment, t.users]) {
     await db.delete(tbl);
   }
-  for (const name of ["observations", "site_visits", "budget_items", "documents", "vent_zones", "air_elements", "spaces", "projects", "quotes", "clients", "equipment", "users"]) {
+  for (const name of ["notifications", "project_events", "observations", "site_visits", "budget_items", "documents", "vent_zones", "air_elements", "spaces", "projects", "quotes", "clients", "equipment", "users"]) {
     await db.execute(sql.raw("ALTER TABLE " + name + " AUTO_INCREMENT = 1"));
   }
 
@@ -27,6 +28,7 @@ async function main() {
   const us = await db.select().from(t.users).orderBy(t.users.id);
   const eng = us.find((u) => u.role === "ingenieria")!;
   const sup = us.find((u) => u.role === "supervision")!;
+  const cli = us.find((u) => u.role === "usuario")!;
 
   await db.insert(t.clients).values(["A", "B", "C", "D", "E"].map((x) => ({ name: `Cliente ejemplo ${x}`, contact: `Contacto ejemplo ${x}`, email: `cliente${x.toLowerCase()}@ejemplo.test` })));
   const cl = await db.select().from(t.clients).orderBy(t.clients.id);
@@ -34,14 +36,23 @@ async function main() {
   const PR = [
     ["Proyecto ejemplo 01 · Edificio de oficinas", "Oficinas", "Distribución de aire", "en_proceso", "2026-11-15"],
     ["Proyecto ejemplo 02 · Estacionamiento", "Estacionamiento", "Ventilación mecánica", "en_revision", "2026-11-22"],
-    ["Proyecto ejemplo 03 · Plaza comercial", "Plaza comercial", "Presupuesto", "en_proceso", "2026-11-30"],
-    ["Proyecto ejemplo 04 · Bodega", "Bodega", "Supervisión", "entregado", "2026-12-05"],
+    ["Proyecto ejemplo 03 · Plaza comercial", "Plaza comercial", "Memorias y presupuesto", "en_proceso", "2026-11-30"],
+    ["Proyecto ejemplo 04 · Bodega", "Bodega", "Supervisión de obra", "entregado", "2026-12-05"],
     ["Proyecto ejemplo 05 · Torre de oficinas", "Torre de oficinas", "Cargas térmicas", "en_proceso", "2026-12-12"],
-    ["Proyecto ejemplo 06 · Hospital", "Hospital", "Escalera presurizada", "atrasado", "2026-10-20"],
+    ["Proyecto ejemplo 06 · Hospital", "Hospital", "Ventilación mecánica", "atrasado", "2026-10-20"],
   ] as const;
-  await db.insert(t.projects).values(PR.map((p, i) => ({ name: p[0], spaceType: p[1], stage: p[2], status: p[3], dueDate: p[4], clientId: cl[i % cl.length].id, ownerId: i === 3 ? sup.id : eng.id })));
+  await db.insert(t.projects).values(PR.map((p, i) => ({ name: p[0], spaceType: p[1], stage: p[2], status: p[3], dueDate: p[4], clientId: cl[i % cl.length].id, ownerId: i === 3 ? sup.id : eng.id, progress: [40, 70, 25, 100, 10, 60][i], clientUserId: i === 0 ? cli.id : null })));
   const ps = await db.select().from(t.projects).orderBy(t.projects.id);
   const p1 = ps[0], p2 = ps[1], p3 = ps[2], p4 = ps[3];
+
+  await db.insert(t.projectEvents).values([
+    { projectId: p1.id, type: "proyecto", message: "Proyecto creado a partir de tu cotización", createdBy: eng.id },
+    { projectId: p1.id, type: "etapa", message: "Etapa: Cargas térmicas", createdBy: eng.id },
+    { projectId: p1.id, type: "etapa", message: "Etapa: Distribución de aire", createdBy: eng.id },
+    { projectId: p1.id, type: "avance", message: "Avance: 0 % → 40 %", createdBy: eng.id },
+    { projectId: p1.id, type: "interno", message: "Revisar caudales del ramal A con ingeniería", visibleToClient: false, createdBy: eng.id },
+  ]);
+  await db.insert(t.notifications).values({ userId: cli.id, text: "El avance de tu proyecto «Proyecto ejemplo 01 · Edificio de oficinas» es ahora de 40 %.", href: "/mis-proyectos" });
 
   const spaceRows = [
     { name: "Oficina abierta, nivel 3", areaM2: 240, heightM: 3, usage: "Oficinas", orientation: "sur" as const, people: 32, equipmentW: 6400, lightingWm2: 12 },
@@ -75,11 +86,11 @@ async function main() {
   ]);
 
   await db.insert(t.budgetItems).values([
-    { projectId: p3.id, description: "Equipo de aire acondicionado (ejemplo)", unit: "pza", quantity: 2, unitPrice: 180000 },
-    { projectId: p3.id, description: "Conducto metálico", unit: "m²", quantity: 420, unitPrice: 850 },
-    { projectId: p3.id, description: "Difusores y rejillas", unit: "pza", quantity: 48, unitPrice: 1200 },
-    { projectId: p3.id, description: "Extractores de estacionamiento", unit: "pza", quantity: 6, unitPrice: 38000 },
-    { projectId: p3.id, description: "Sistema de presurización de escalera", unit: "lote", quantity: 1, unitPrice: 210000 },
+    { projectId: p3.id, description: "Equipo de aire acondicionado (ejemplo)", unit: "pza", quantity: 2, unitPrice: 9500 },
+    { projectId: p3.id, description: "Conducto metálico", unit: "m²", quantity: 420, unitPrice: 42 },
+    { projectId: p3.id, description: "Difusores y rejillas", unit: "pza", quantity: 48, unitPrice: 65 },
+    { projectId: p3.id, description: "Extractores de estacionamiento", unit: "pza", quantity: 6, unitPrice: 1900 },
+    { projectId: p3.id, description: "Sistema de presurización de escalera", unit: "lote", quantity: 1, unitPrice: 10500 },
   ]);
 
   await db.insert(t.siteVisits).values([
@@ -105,9 +116,14 @@ async function main() {
 
   await db.insert(t.quotes).values([
     { name: "Persona ejemplo 1", contactMethod: "correo", email: "persona1@ejemplo.test", message: "Necesito el diseño de aire acondicionado de un edificio de oficinas.", status: "nueva" },
-    { name: "Persona ejemplo 2", contactMethod: "telefono", phone: "+52 55 0000 0000", message: "Ventilación de un estacionamiento de 3 niveles.", status: "nueva" },
+    { name: "Persona ejemplo 2", contactMethod: "telefono", phone: "+503 7000 0000", message: "Ventilación de un estacionamiento de 3 niveles.", status: "nueva" },
     { name: "Persona ejemplo 3", contactMethod: "correo", email: "persona3@ejemplo.test", message: "Supervisión de obra de un sistema ya diseñado.", status: "en_proceso" },
   ]);
+  await db.insert(t.quotes).values({
+    name: cli.name, contactMethod: "correo", email: cli.email, userId: cli.id, status: "nueva",
+    message: "Tipo de espacio: Oficinas\nServicios: Supervisión",
+    details: { space: "Oficinas", services: ["Supervisión"], size: "200 a 1,000 m²", stage: "Obra en curso", when: "En 1 a 3 meses", plans: "Sí, completos", contact: "Correo electrónico", time: "Por la tarde", location: "San Salvador" },
+  });
 
   console.log("Semilla lista. Usuarios de prueba:");
   for (const u of USERS) console.log(` - ${u.role}: ${u.email}`);

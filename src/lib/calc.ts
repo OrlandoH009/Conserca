@@ -1,12 +1,13 @@
 // Fórmulas simplificadas de REFERENCIA. Todo resultado es un estimado que debe validar ingeniería.
+import { CONFIG } from "./config";
 
-export const TR_PER_KW = 3.517;
-export const IVA = 0.16;
+const TR_PER_KW = 3.517;
+export const IVA = CONFIG.iva;
 
 export type Orientation = "norte" | "sur" | "este" | "oeste";
 export type VentKind = "estacionamiento" | "sanitarios" | "escalera" | "bodega";
 
-export const ORIENTATION_FACTOR: Record<Orientation, number> = { norte: 0.9, sur: 1, este: 1.1, oeste: 1.2 };
+const ORIENTATION_FACTOR: Record<Orientation, number> = { norte: 0.9, sur: 1, este: 1.1, oeste: 1.2 };
 export const DEFAULT_ACH: Record<VentKind, number> = { estacionamiento: 6, sanitarios: 10, escalera: 0, bodega: 4 };
 export const VENT_LABEL: Record<VentKind, string> = {
   estacionamiento: "Estacionamiento",
@@ -19,8 +20,8 @@ const PERSON_W = 130; // sensible + latente por persona
 const ENVELOPE_W_M2 = 40; // envolvente base
 const INFILTRATION_W_M3 = 1.224; // 0.3 cambios/h × 0.34 W·h/(m³·K) × 12 K
 const FRESH_AIR_W_PERSON = 144.9; // 10 L/s por persona, ΔT 12 K
-export const DOOR_AREA_M2 = 1.9;
-export const PRESSURIZATION_VELOCITY_MS = 0.75;
+const DOOR_AREA_M2 = 1.9;
+const PRESSURIZATION_VELOCITY_MS = 0.75;
 
 function positive(n: number, label: string) {
   if (!Number.isFinite(n) || n <= 0) throw new RangeError(`${label} debe ser mayor que 0`);
@@ -30,7 +31,7 @@ function nonNegative(n: number, label: string) {
 }
 export const round = (n: number, d = 2) => Math.round(n * 10 ** d) / 10 ** d;
 
-export interface LoadInput {
+interface LoadInput {
   areaM2: number;
   heightM: number;
   people: number;
@@ -67,7 +68,7 @@ export function coolingLoad(i: LoadInput) {
   };
 }
 
-export interface VentInput {
+interface VentInput {
   kind: VentKind;
   areaM2?: number;
   heightM?: number;
@@ -93,6 +94,9 @@ export function budgetTotals(items: { quantity: number; unitPrice: number }[]) {
   return { subtotal, iva, total: round(subtotal + iva) };
 }
 
+/** kW → BTU/h (1 kW = 3412.14 BTU/h). */
+export const kwToBtu = (kw: number) => Math.round(kw * 3412.14);
+
 export const money = (n: number) =>
-  new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(n);
-export const num = (n: number) => new Intl.NumberFormat("es-MX").format(n);
+  new Intl.NumberFormat(CONFIG.locale, { style: "currency", currency: CONFIG.currency }).format(n);
+export const num = (n: number) => new Intl.NumberFormat(CONFIG.locale).format(n);

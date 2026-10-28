@@ -4,13 +4,14 @@ import { AnimatePresence, motion, useMotionValueEvent, useScroll, useTransform }
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { ServiceTile } from "@/components/site/ServiceIcon";
+import { MobileServices } from "./MobileServices";
 import { ServiceScene } from "./ServiceScene";
 import { SERVICES } from "@/lib/services";
 
 export function ScrollServices() {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  const bg = useTransform(scrollYProgress, [0, 0.25, 0.5, 0.75, 1], ["#ffffff", "#eef7fb", "#e3f3f9", "#eaf6f3", "#ffffff"]);
+  const tint = useTransform(scrollYProgress, [0, 0.25, 0.5, 0.75, 1], [0, 0.6, 1, 0.7, 0]);
   const blobX = useTransform(scrollYProgress, [0, 1], ["0vw", "70vw"]);
   const blobY = useTransform(scrollYProgress, [0, 1], ["-10vh", "60vh"]);
   const blobScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1.4, 0.9]);
@@ -31,10 +32,12 @@ export function ScrollServices() {
   const s = SERVICES[i];
 
   return (
-    <section ref={ref} style={{ height: `${SERVICES.length * 140 + 60}vh` }} className="relative" aria-label="Servicios">
+    <>
+    <section ref={ref} style={{ height: `${SERVICES.length * 100 + 60}vh` }} className="relative hidden md:block" aria-label="Servicios">
       <div className="sticky top-0 flex h-screen items-center overflow-hidden">
         {/* Fondo que se mueve con el scroll: color, manchas y rejilla. */}
-        <motion.div aria-hidden className="svc-bg absolute inset-0" style={{ backgroundColor: bg }} />
+        <div aria-hidden className="absolute inset-0 bg-surface" />
+        <motion.div aria-hidden className="absolute inset-0 bg-soft" style={{ opacity: tint }} />
         <motion.div aria-hidden className="absolute -left-40 top-0 h-[34rem] w-[34rem] rounded-full bg-accent/25 blur-3xl" style={{ x: blobX, y: blobY, scale: blobScale }} />
         <motion.div aria-hidden className="absolute -right-40 bottom-0 h-[30rem] w-[30rem] rounded-full bg-cyan-300/30 blur-3xl" style={{ x: blob2X, y: blob2Y }} />
         <motion.div
@@ -42,8 +45,8 @@ export function ScrollServices() {
           className="absolute inset-0 opacity-[0.12]"
           style={{ backgroundImage: "linear-gradient(var(--accent) 1px, transparent 1px), linear-gradient(90deg, var(--accent) 1px, transparent 1px)", backgroundSize: "56px 56px", backgroundPositionY: gridY }}
         />
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-white to-transparent" />
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-white to-transparent" />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-surface to-transparent" />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-surface to-transparent" />
         <div className="relative mx-auto grid w-full max-w-6xl gap-10 px-6 md:grid-cols-[1fr_1.1fr] md:items-center">
           <div>
             <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-accent">Lo que hacemos</p>
@@ -61,9 +64,8 @@ export function ScrollServices() {
                 </li>
               ))}
             </ul>
-            <Link href="/cotizar" className="group relative mt-10 inline-flex items-center gap-3 rounded-full bg-accent px-8 py-4 text-lg font-bold text-white shadow-[0_14px_34px_-10px_rgba(11,126,168,0.8)] transition duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:shadow-[0_20px_40px_-10px_rgba(11,126,168,0.9)] active:scale-[.98]">
-              <span aria-hidden className="absolute inset-0 -z-10 animate-ping rounded-full bg-accent/30 [animation-duration:2.5s]" />
-              Cotizar mi proyecto
+            <Link href="/cotizar" className="pulse-ring group relative mt-10 inline-flex items-center gap-3 rounded-full bg-accent-solid px-8 py-4 text-lg font-bold text-white shadow-[0_14px_34px_-10px_rgba(11,126,168,0.8)] transition duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:shadow-[0_20px_40px_-10px_rgba(11,126,168,0.9)] active:scale-[.98]">
+                            Cotizar mi proyecto
               <svg viewBox="0 0 20 20" className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4 10h12M11 5l5 5-5 5" /></svg>
             </Link>
           </div>
@@ -75,7 +77,7 @@ export function ScrollServices() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.99, transition: { duration: 0.14, ease: "easeIn" } }}
                 transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                className="rounded-3xl border border-line bg-white p-8 shadow-[0_20px_60px_-30px_rgba(11,126,168,0.35)]"
+                className="rounded-3xl border border-line bg-surface p-8 shadow-[0_20px_60px_-30px_rgba(11,126,168,0.35)]"
               >
                 <ServiceScene id={s.id} className="mb-6 h-44" />
                 <div className="mb-3 flex items-center gap-3 text-accent">
@@ -94,5 +96,7 @@ export function ScrollServices() {
         </div>
       </div>
     </section>
+    <MobileServices />
+    </>
   );
 }

@@ -17,7 +17,7 @@ export default async function Catalogo({ searchParams }: PageProps<"/app/catalog
   return (
     <>
       <PageHead title="Catálogo de equipos y materiales" sub="Base para las especificaciones técnicas" />
-      <form className="mb-4 flex gap-2"><input name="q" defaultValue={q} className="input w-72" placeholder="Buscar equipo o material" /><button className="btn-ghost">Buscar</button></form>
+      <form className="mb-4 flex gap-2"><input name="q" defaultValue={q} className="input w-full sm:w-72" placeholder="Buscar equipo o material" /><button className="btn-ghost">Buscar</button></form>
       <div className="card overflow-x-auto">
         {rows.length === 0 ? <Empty>No hay resultados.</Empty> : (
           <table className="tbl">

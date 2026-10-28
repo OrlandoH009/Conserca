@@ -11,16 +11,20 @@ export function Airflow({ className = "" }: { className?: string }) {
     const ctx = c?.getContext("2d");
     if (!c || !ctx) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    // En celular o con pocos núcleos: menos líneas y 30 cuadros por segundo.
+    const slow = window.innerWidth < 768 || (navigator.hardwareConcurrency ?? 8) <= 4;
+    const count = window.innerWidth < 768 ? 9 : 16;
+    let last = 0;
     let w = 0, h = 0, raf = 0, visible = true;
 
-    const lines = Array.from({ length: 16 }, (_, i) => ({
-      y: (i + 0.5) / 16,
+    const lines = Array.from({ length: count }, (_, i) => ({
+      y: (i + 0.5) / count,
       amp: 14 + Math.random() * 28,
       f: 0.6 + Math.random() * 0.9,
       sp: 0.12 + Math.random() * 0.2,
       ph: Math.random() * 6.28,
-      a: 0.22 + Math.random() * 0.3,
+      a: 0.35 + Math.random() * 0.35,
       p: Math.random(),
     }));
 
@@ -39,12 +43,12 @@ export function Airflow({ className = "" }: { className?: string }) {
       ctx!.clearRect(0, 0, w, h);
       for (const l of lines) {
         ctx!.beginPath();
-        for (let x = 0; x <= w + 8; x += 8) {
+        for (let x = 0; x <= w + 8; x += slow ? 12 : 8) {
           const y = yAt(l, x / w, t);
           if (x === 0) ctx!.moveTo(x, y); else ctx!.lineTo(x, y);
         }
         ctx!.strokeStyle = `rgba(11,126,168,${l.a})`;
-        ctx!.lineWidth = 1.2;
+        ctx!.lineWidth = 1.6;
         ctx!.stroke();
         const nx = (l.p + t * l.sp * 0.08) % 1;
         ctx!.beginPath();
@@ -56,6 +60,8 @@ export function Airflow({ className = "" }: { className?: string }) {
 
     const loop = (ms: number) => {
       if (!visible) { raf = 0; return; }
+      if (slow && ms - last < 33) { raf = requestAnimationFrame(loop); return; }
+      last = ms;
       draw(ms / 1000);
       raf = requestAnimationFrame(loop);
     };

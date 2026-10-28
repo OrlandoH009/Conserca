@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { CountUp } from "@/components/motion/CountUp";
 
 const TONES = {
   g: "bg-emerald-100 text-emerald-800",
@@ -42,4 +43,15 @@ export function Estimado() {
 
 export function Empty({ children }: { children: ReactNode }) {
   return <p className="rounded-xl bg-slate-50 px-4 py-6 text-center text-sm text-mute">{children}</p>;
+}
+
+export function ProgressBar({ value }: { value: number }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100} className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+        <div className="bar-fill h-full rounded-full bg-accent" style={{ width: `${value}%` }} />
+      </div>
+      <span className="w-12 text-right text-sm font-semibold tabular-nums"><CountUp to={value} duration={1.1} />%</span>
+    </div>
+  );
 }

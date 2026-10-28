@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db, users } from "@/db";
 
 export type User = typeof users.$inferSelect;
@@ -9,9 +9,13 @@ const safe = { id: users.id, name: users.name, email: users.email, phone: users.
 
 export const findPublicById = async (id: number) => (await db.select(safe).from(users).where(eq(users.id, id)))[0] ?? null;
 export const findByEmail = async (email: string) => (await db.select().from(users).where(eq(users.email, email)))[0] ?? null;
+export const listByRoles = (roles: Role[]) => (roles.length ? db.select(safe).from(users).where(inArray(users.role, roles)) : Promise.resolve([]));
 export const listPublic = () => db.select(safe).from(users).orderBy(users.id);
 export const create = (v: typeof users.$inferInsert) => db.insert(users).values(v);
 export const setRole = (id: number, role: Role) => db.update(users).set({ role }).where(eq(users.id, id));
 export const findWithHash = async (id: number) => (await db.select().from(users).where(eq(users.id, id)))[0] ?? null;
 export const updateProfile = (id: number, v: { name: string; phone: string | null }) => db.update(users).set(v).where(eq(users.id, id));
 export const setPassword = (id: number, passwordHash: string) => db.update(users).set({ passwordHash }).where(eq(users.id, id));
+export const update = (id: number, v: { name: string; email: string; phone: string | null; role: Role }) => db.update(users).set(v).where(eq(users.id, id));
+export const remove = (id: number) => db.delete(users).where(eq(users.id, id));
+export const countByRole = (role: Role) => db.$count(users, eq(users.role, role));

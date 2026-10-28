@@ -1,57 +1,40 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# Dependencias
 /node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
 
-# testing
-/coverage
-
-# next.js
+# Next.js y compilación
 /.next/
 /out/
-
-# production
 /build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
 next-env.d.ts
+*.tsbuildinfo
 
-# base de datos local: scripts con contraseñas y datos de pruebas anteriores
+# Pruebas
+/coverage
+
+# Variables de entorno: nunca se suben (la plantilla .env.example sí)
+.env*
+!.env.example
+
+# Archivos subidos por usuarios (PDF de proyectos): datos privados, no código
+/storage/
+
+# Base de datos local: scripts con contraseñas y restos de bases anteriores
 scripts/crear-base.sql
 scripts/conserca.sql
 .pgdata/
 .pgdata.log
 .studio.log
 
-# herramientas y editores locales
+# Registros
+*.log
+
+# Herramientas y editores locales
 graphify-out/
 .claude/
 .vscode/
 .idea/
+
+# Sistema operativo
+.DS_Store
 Thumbs.db
-*.log
-.env.local
+*.pem

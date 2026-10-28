@@ -8,8 +8,8 @@ export type LoginState = { error?: string; email?: string };
 
 export async function login(_prev: LoginState, fd: FormData): Promise<LoginState> {
   const r = await AuthController.login(fd);
-  // Las cuentas "usuario" no tienen panel: van directo a cotizar.
-  if (r.ok) redirect(r.role === "usuario" ? "/cotizar" : "/app");
+  // Las cuentas "usuario" no tienen panel: van a ver sus proyectos.
+  if (r.ok) redirect(r.role === "usuario" ? "/mis-proyectos" : "/app");
   return { error: r.error, email: r.email };
 }
 

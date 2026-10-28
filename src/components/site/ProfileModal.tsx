@@ -3,9 +3,10 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { updateProfile, type ProfileState } from "@/app/app/login/actions";
+import { CONFIG } from "@/lib/config";
+import { EASE as ease } from "@/lib/motion";
 
 type U = { name: string; email: string; phone: string | null };
-const ease = [0.22, 1, 0.36, 1] as const;
 
 /**
  * Ventana de "Editar perfil". Se abre con animación y se cierra con animación (onClose se llama al terminar la salida).
@@ -62,7 +63,7 @@ export function ProfileModal({ user, onClose }: { user: U; onClose: () => void }
             animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
             exit={{ opacity: 0, y: 20, scale: 0.96, filter: "blur(6px)", transition: { duration: 0.22 } }}
             transition={{ type: "spring", stiffness: 260, damping: 24 }}
-            className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl border border-line bg-white p-7 shadow-2xl"
+            className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl border border-line bg-surface p-7 shadow-2xl"
           >
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-2xl font-semibold tracking-tight">Editar perfil</h2>
@@ -87,7 +88,7 @@ export function ProfileModal({ user, onClose }: { user: U; onClose: () => void }
                   </div>,
                   <div key="phone">
                     <label className="label" htmlFor="p-phone">Teléfono / WhatsApp</label>
-                    <input id="p-phone" name="phone" type="tel" className="input" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+52 55 0000 0000" autoComplete="tel" />
+                    <input id="p-phone" name="phone" type="tel" className="input" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={CONFIG.phoneExample} autoComplete="tel" />
                   </div>,
                   <div key="pw" className="grid gap-4 sm:grid-cols-2">
                     <div>
@@ -127,8 +128,8 @@ export function ProfileModal({ user, onClose }: { user: U; onClose: () => void }
             {/* Aviso de cambios sin guardar */}
             <AnimatePresence>
               {ask && (
-                <motion.div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-white/80 p-6 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                  <motion.div role="alertdialog" aria-label="Cambios sin guardar" initial={{ opacity: 0, y: 16, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.97 }} transition={{ type: "spring", stiffness: 300, damping: 24 }} className="w-full rounded-2xl border border-line bg-white p-6 text-center shadow-xl">
+                <motion.div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-surface/80 p-6 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                  <motion.div role="alertdialog" aria-label="Cambios sin guardar" initial={{ opacity: 0, y: 16, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.97 }} transition={{ type: "spring", stiffness: 300, damping: 24 }} className="w-full rounded-2xl border border-line bg-surface p-6 text-center shadow-xl">
                     <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-xl text-amber-800">!</div>
                     <h3 className="mt-3 text-lg font-semibold">Tienes cambios sin guardar</h3>
                     <p className="mt-1 text-sm text-mute">¿Quieres guardarlos antes de salir?</p>
