@@ -1,8 +1,10 @@
+import { getT } from "@/lib/i18n-server";
 // Esqueleto que se ve al instante mientras carga cualquier pantalla del panel.
-export default function Loading() {
+export default async function Loading() {
+  const t = await getT();
   return (
     <div aria-busy="true">
-      <span className="sr-only" role="status">Cargando…</span>
+      <span className="sr-only" role="status">{t("Cargando…")}</span>
       <div className="skeleton h-8 w-64" />
       <div className="skeleton mt-3 h-4 w-80 max-w-full" />
       <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

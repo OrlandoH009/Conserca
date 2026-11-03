@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n-server";
 import * as CalcController from "@/controllers/calc.controller";
 import { ActionForm, F } from "@/components/app/ActionForm";
 import { RowActions } from "@/components/app/RowActions";
@@ -5,26 +6,28 @@ import { Empty } from "@/components/app/ui";
 import { num } from "@/lib/calc";
 import { addAirElement, removeRow, updateAirElement } from "../../actions";
 
-function AirFields({ e }: { e?: { name: string; kind: string; flowM3h: number; size: string } }) {
+async function AirFields({ e }: { e?: { name: string; kind: string; flowM3h: number; size: string } }) {
+  const t = await getT();
   return (
     <div className="space-y-3">
-      <F label="Nombre" name="name" placeholder="Difusor D4" defaultValue={e?.name} />
-      <F label="Tipo" name="kind" placeholder="Difusor, Rectangular, Retorno…" defaultValue={e?.kind} />
-      <F label="Caudal (m³/h)" name="flowM3h" type="number" step="any" defaultValue={e?.flowM3h} />
-      <F label="Medida" name="size" placeholder="300 × 300 mm" defaultValue={e?.size} />
+      <F label={t("Nombre")} name="name" placeholder={t("Difusor D4")} defaultValue={e?.name} />
+      <F label={t("Tipo")} name="kind" placeholder={t("Difusor, Rectangular, Retorno…")} defaultValue={e?.kind} />
+      <F label={t("Caudal (m³/h)")} name="flowM3h" type="number" step="any" defaultValue={e?.flowM3h} />
+      <F label={t("Medida")} name="size" placeholder={t("300 × 300 mm")} defaultValue={e?.size} />
     </div>
   );
 }
 
 export async function Distribucion({ projectId, canEdit }: { projectId: number; canEdit: boolean }) {
+  const t = await getT();
   const rows = await CalcController.airElementsOf(projectId);
   return (
     <div className="grid gap-5 xl:grid-cols-[2fr_1fr]">
       <section className="card overflow-x-auto">
-        <h2 className="mb-3 font-bold">Conductos, rejillas y difusores</h2>
-        {rows.length === 0 ? <Empty>Aún no hay elementos de distribución.</Empty> : (
+        <h2 className="mb-3 font-bold">{t("Conductos, rejillas y difusores")}</h2>
+        {rows.length === 0 ? <Empty>{t("Aún no hay elementos de distribución.")}</Empty> : (
           <table className="tbl">
-            <thead><tr><th>Elemento</th><th>Tipo</th><th>Caudal (m³/h)</th><th>Medida</th>{canEdit && <th />}</tr></thead>
+            <thead><tr><th>{t("Elemento")}</th><th>{t("Tipo")}</th><th>{t("Caudal (m³/h)")}</th><th>{t("Medida")}</th>{canEdit && <th />}</tr></thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id}>
@@ -32,11 +35,11 @@ export async function Distribucion({ projectId, canEdit }: { projectId: number; 
                   {canEdit && (
                     <td>
                       <RowActions
-                        title={`Editar «${r.name}»`}
+                        title={t("Editar «{name}»", { name: r.name })}
                         onRemove={removeRow}
                         removeFields={{ table: "airElements", id: r.id, projectId }}
                         edit={(
-                          <ActionForm action={updateAirElement} submit="Guardar cambios" success="Elemento actualizado">
+                          <ActionForm action={updateAirElement} submit={t("Guardar cambios")} success={t("Elemento actualizado")}>
                             <input type="hidden" name="id" value={r.id} /><input type="hidden" name="projectId" value={projectId} />
                             <AirFields e={r} />
                           </ActionForm>
@@ -52,8 +55,8 @@ export async function Distribucion({ projectId, canEdit }: { projectId: number; 
       </section>
       {canEdit && (
         <section className="card">
-          <h2 className="mb-3 font-bold">Agregar elemento</h2>
-          <ActionForm action={addAirElement} success="Elemento agregado">
+          <h2 className="mb-3 font-bold">{t("Agregar elemento")}</h2>
+          <ActionForm action={addAirElement} success={t("Elemento agregado")}>
             <input type="hidden" name="projectId" value={projectId} />
             <AirFields />
           </ActionForm>

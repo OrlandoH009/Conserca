@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { CountUp } from "@/components/motion/CountUp";
+import { getT } from "@/lib/i18n-server";
 
 const TONES = {
   g: "bg-emerald-100 text-emerald-800",
@@ -20,9 +21,10 @@ export const PROJECT_STATUS = {
   atrasado: ["Atrasado", "r"],
 } as const;
 
-export function StatusBadge({ status }: { status: keyof typeof PROJECT_STATUS }) {
+export async function StatusBadge({ status }: { status: keyof typeof PROJECT_STATUS }) {
+  const t = await getT();
   const [label, tone] = PROJECT_STATUS[status] ?? ["—", "n"];
-  return <Badge tone={tone}>{label}</Badge>;
+  return <Badge tone={tone}>{t(label)}</Badge>;
 }
 
 export function PageHead({ title, sub, children }: { title: string; sub?: string; children?: ReactNode }) {
@@ -37,8 +39,9 @@ export function PageHead({ title, sub, children }: { title: string; sub?: string
   );
 }
 
-export function Estimado() {
-  return <p className="mt-3 text-xs text-mute">Estimado con fórmulas simplificadas. Validar por ingeniería antes de usarse.</p>;
+export async function Estimado() {
+  const t = await getT();
+  return <p className="mt-3 text-xs text-mute">{t("Estimado con fórmulas simplificadas. Validar por ingeniería antes de usarse.")}</p>;
 }
 
 export function Empty({ children }: { children: ReactNode }) {

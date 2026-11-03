@@ -1,5 +1,8 @@
 "use client";
 
+import { useT } from "@/components/site/LocaleProvider";
+
 export function PrintButton() {
-  return <button onClick={() => window.print()} className="btn">Imprimir / guardar como PDF</button>;
+  const t = useT();
+  return <button onClick={() => window.print()} className="btn">{t("Imprimir / guardar como PDF")}</button>;
 }

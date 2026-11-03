@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalDoc, type LegalSection } from "@/components/site/LegalDoc";
+import { getT } from "@/lib/i18n-server";
 import { contactVia, LEGAL } from "@/lib/legal";
 
-export const metadata: Metadata = { title: "Aviso de privacidad", description: "Cómo Conserca trata tus datos personales." };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Aviso de privacidad"), description: t("Cómo Conserca trata tus datos personales.") };
+}
 
 const SECTIONS: LegalSection[] = [
   {

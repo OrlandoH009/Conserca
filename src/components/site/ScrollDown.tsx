@@ -2,12 +2,14 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useT } from "./LocaleProvider";
 
 // Flecha discreta abajo de la pantalla: solo aparece al llegar a una página con bastante por bajar
 // (más de media pantalla) y se oculta en cuanto la persona empieza a bajar.
 export function ScrollDown() {
   const [show, setShow] = useState(false);
   const path = usePathname();
+  const t = useT();
 
   useEffect(() => {
     const check = () => {
@@ -29,7 +31,7 @@ export function ScrollDown() {
   return (
     <button
       onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: "smooth" })}
-      aria-label="Seguir bajando"
+      aria-label={t("Seguir bajando")}
       tabIndex={show ? 0 : -1}
       className={`fixed bottom-4 left-1/2 z-40 -translate-x-1/2 cursor-pointer text-accent transition-opacity duration-500 ${show ? "opacity-60 hover:opacity-100" : "pointer-events-none opacity-0"}`}
     >

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { useT } from "@/components/site/LocaleProvider";
 
 const CloseContext = createContext<(() => void) | null>(null);
 /** Dentro de una ventana de edición devuelve la función para cerrarla (los formularios la llaman al guardar). */
@@ -11,6 +12,7 @@ export const useDialogClose = () => useContext(CloseContext);
  * El contenido solo se dibuja mientras está abierta; así los campos no se repiten en la página.
  */
 export function EditDialog({ label, title, children, className = "text-sm font-semibold text-accent hover:underline" }: { label: React.ReactNode; title: string; children: React.ReactNode; className?: string }) {
+  const t = useT();
   const ref = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
 
@@ -32,7 +34,7 @@ export function EditDialog({ label, title, children, className = "text-sm font-s
             <div className="flex max-h-[85vh] flex-col">
               <div className="flex items-center justify-between border-b border-line px-6 py-4">
                 <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
-                <button type="button" onClick={close} aria-label="Cerrar" className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-mute transition hover:rotate-90 hover:bg-soft hover:text-accent">✕</button>
+                <button type="button" onClick={close} aria-label={t("Cerrar")} className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-mute transition hover:rotate-90 hover:bg-soft hover:text-accent">✕</button>
               </div>
               <div className="overflow-y-auto p-6">{children}</div>
             </div>

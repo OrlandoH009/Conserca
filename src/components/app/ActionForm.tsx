@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/site/LocaleProvider";
 import { useActionState, useEffect, useId, useRef } from "react";
 import type { R } from "@/lib/action-utils";
 import { useDialogClose } from "./EditDialog";
@@ -10,10 +11,10 @@ import { toast } from "./Toaster";
 export function ActionForm({
   action,
   children,
-  submit = "Guardar",
+  submit,
   className = "",
   ghost = false,
-  success = "Guardado",
+  success,
 }: {
   action: (prev: R, fd: FormData) => Promise<R>;
   children: React.ReactNode;
@@ -22,16 +23,19 @@ export function ActionForm({
   ghost?: boolean;
   success?: string;
 }) {
+  const t = useT();
+  const submitText = submit ?? t("Guardar");
+  const successText = success ?? t("Guardado");
   const [state, run, pending] = useActionState<R, FormData>(action, {});
   const ref = useRef<HTMLFormElement>(null);
   const closeDialog = useDialogClose(); // dentro de una ventana de edición, se cierra al guardar
-  useEffect(() => { if (state.ok) { ref.current?.reset(); toast.ok(success); closeDialog?.(); } }, [state, success, closeDialog]);
+  useEffect(() => { if (state.ok) { ref.current?.reset(); toast.ok(successText); closeDialog?.(); } }, [state, successText, closeDialog]);
   return (
     <form ref={ref} action={run} className={className}>
       {children}
       <div className="mt-4 flex items-center gap-3">
-        <button className={ghost ? "btn-ghost" : "btn"} disabled={pending}>{pending ? <><Spinner /> Guardando…</> : submit}</button>
-        {state.error && <p role="alert" className="text-sm text-red-700">{state.error}</p>}
+        <button className={ghost ? "btn-ghost" : "btn"} disabled={pending}>{pending ? <><Spinner /> {t("Guardando…")}</> : submitText}</button>
+        {state.error && <p role="alert" className="text-sm text-red-700">{t(state.error)}</p>}
       </div>
     </form>
   );

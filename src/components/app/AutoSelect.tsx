@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useT } from "@/components/site/LocaleProvider";
 import type { R } from "@/lib/action-utils";
 import { Spinner } from "./SubmitButton";
 import { toast } from "./Toaster";
@@ -11,7 +12,7 @@ import { toast } from "./Toaster";
  * El padre debe pasar `key={value}` para que se actualice cuando cambian los datos del servidor.
  */
 export function AutoSelect({
-  name, value, options, action, fields = {}, label, okText = "Guardado", className = "input h-9 text-xs",
+  name, value, options, action, fields = {}, label, okText, className = "input h-9 text-xs",
 }: {
   name: string;
   value: string;
@@ -22,6 +23,7 @@ export function AutoSelect({
   okText?: string;
   className?: string;
 }) {
+  const t = useT();
   const [current, setCurrent] = useState(value);
   const [pending, start] = useTransition();
 
@@ -33,9 +35,9 @@ export function AutoSelect({
       for (const [k, v] of Object.entries(fields)) fd.set(k, String(v));
       try {
         const r = await action(fd);
-        if (r.error) { toast.error(r.error); setCurrent(value); } else toast.ok(okText);
+        if (r.error) { toast.error(t(r.error)); setCurrent(value); } else toast.ok(okText ?? t("Guardado"));
       } catch {
-        toast.error("No se pudo guardar. Intenta de nuevo.");
+        toast.error(t("No se pudo guardar. Intenta de nuevo."));
         setCurrent(value);
       }
     });
@@ -43,8 +45,8 @@ export function AutoSelect({
 
   return (
     <span className="inline-flex items-center gap-2">
-      <select className={className} value={current} onChange={(e) => change(e.target.value)} disabled={pending} aria-label={label} aria-busy={pending}>
-        {options.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
+      <select className={className} value={current} onChange={(e) => change(e.target.value)} disabled={pending} aria-label={t(label)} aria-busy={pending}>
+        {options.map(([v, text]) => <option key={v} value={v}>{t(text)}</option>)}
       </select>
       {pending && <Spinner className="h-4 w-4 text-accent" />}
     </span>

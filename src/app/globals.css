@@ -12,6 +12,9 @@
   --field-line: #7f8e9d;
   --soft: #e3f3f9;
   --surface: #ffffff;
+  /* Acento monocromo (negro/blanco): paneles y cifras minimalistas. En oscuro se invierte. */
+  --mono: #0a0a0a;
+  --on-mono: #ffffff;
 }
 
 /* Modo oscuro: la clase "dark" va en <html> (ver ThemeToggle y el script de layout.tsx). */
@@ -26,6 +29,8 @@
   --accent: #29a9da;
   --field-line: #5d6e7f;
   --soft: rgba(41, 169, 218, 0.16);
+  --mono: #f5f5f5;
+  --on-mono: #0a0a0a;
 }
 /* Colores fijos de Tailwind que no salen de las variables: se reasignan solo en oscuro. */
 .dark .input { background-color: #0e1721; }
@@ -62,16 +67,18 @@
   --color-accent-solid-2: var(--accent-solid-2);
   --color-field: var(--field-line);
   --color-soft: var(--soft);
+  --color-mono: var(--mono);
+  --color-on-mono: var(--on-mono);
   --font-sans: var(--font-inter), system-ui, sans-serif;
 }
 
 html { scroll-behavior: smooth; }
 
 /* Barra de scroll personalizada para todo el sitio (Firefox usa scrollbar-*, el resto ::-webkit-scrollbar). */
-html { scrollbar-width: thin; scrollbar-color: var(--accent) var(--bg); }
+html { scrollbar-width: thin; scrollbar-color: var(--field-line) var(--bg); }
 ::-webkit-scrollbar { width: 12px; height: 12px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--accent), #22d3ee); border-radius: 999px; border: 3px solid var(--bg); transition: background .3s; }
+::-webkit-scrollbar-thumb { background: var(--field-line); border-radius: 999px; border: 3px solid var(--bg); transition: background .3s; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 ::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }
 /* Foco de teclado visible en enlaces y botones (los campos tienen su propio aro, ver .input). */
@@ -85,6 +92,11 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-inter),
   .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl bg-accent-solid px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 active:scale-[.98] disabled:opacity-50; }
   .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-xl border-[1.5px] border-accent bg-surface px-5 py-2.5 text-sm font-semibold text-accent transition hover:bg-soft active:scale-[.98]; }
   .btn-lg { @apply px-6 py-3 text-sm sm:px-7 sm:py-3.5 sm:text-base; }
+  /* Variantes neutras (se usan junto a .btn / .btn-ghost): negro sólido y contorno gris. */
+  .btn-dark { background: var(--mono); color: var(--on-mono); }
+  .dark .btn-dark { background: var(--accent-solid); color: #fff; } /* en oscuro el "negro" sería blanco: se queda el azul de la marca */
+  .btn-line { border-color: var(--line); color: var(--ink); }
+  .btn-line:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
   .card { @apply rounded-2xl border border-line bg-surface p-5; }
   .input { @apply h-11 w-full rounded-xl border border-field bg-surface px-3 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20; }
   textarea.input { @apply h-auto min-h-24 py-2.5; }
@@ -98,10 +110,10 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-inter),
   /* Efectos del panel: hovers, foco y entrada escalonada de tarjetas y filas. */
   .btn { @apply hover:-translate-y-0.5 hover:shadow-lg hover:shadow-accent/30; }
   .btn-ghost { @apply hover:-translate-y-0.5 hover:shadow-md; }
-  .card { @apply transition duration-300 hover:border-accent/40 hover:shadow-md; animation: rise .55s cubic-bezier(.22, 1, .36, 1) both; }
+  .card { @apply transition duration-300 hover:border-ink/25 hover:shadow-md; animation: rise .55s cubic-bezier(.22, 1, .36, 1) both; }
   a.card:hover { @apply -translate-y-1 shadow-lg; }
   .input { @apply hover:border-accent/50; }
-  .tbl tbody tr { @apply transition-colors duration-200 hover:bg-soft/60; animation: rise .45s cubic-bezier(.22, 1, .36, 1) both; }
+  .tbl tbody tr { @apply transition-colors duration-200 hover:bg-line/40; animation: rise .45s cubic-bezier(.22, 1, .36, 1) both; }
   .tbl a { @apply transition-colors; }
   .badge { animation: pop .4s cubic-bezier(.34, 1.56, .64, 1) both; }
   summary { @apply transition-colors hover:text-accent; }
@@ -161,7 +173,7 @@ a.card:active { transform: scale(.98); }
 /* Impresión: siempre en claro aunque el sitio esté en modo oscuro (si no, el texto claro sale casi invisible sobre el papel). */
 @media print {
   @page { margin: 16mm 14mm; }
-  :root, .dark { color-scheme: light; --bg: #fff; --surface: #fff; --ink: #111827; --mute: #374151; --line: #d1d5db; --accent: #0a7099; --soft: #f1f5f9; --field-line: #9ca3af; }
+  :root, .dark { color-scheme: light; --bg: #fff; --surface: #fff; --ink: #111827; --mute: #374151; --line: #d1d5db; --accent: #0a7099; --soft: #f1f5f9; --field-line: #9ca3af; --mono: #0a0a0a; --on-mono: #fff; }
   body { background: #fff !important; color: #111827 !important; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .dark .bg-amber-50, .dark .bg-amber-100 { background-color: #fef3c7; }

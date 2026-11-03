@@ -13,16 +13,16 @@ export type QuoteDetails = {
 };
 
 /** Pares (etiqueta, valor) para mostrar los detalles en el panel y en "Mis cotizaciones". */
-export function detailRows(d: QuoteDetails): [string, string][] {
+export function detailRows(d: QuoteDetails, t: (es: string) => string = (s) => s): [string, string][] {
   return [
-    ["Tipo de espacio", d.space],
-    ["Servicios", d.services.join(", ")],
-    ["Tamaño aproximado", d.size],
-    ["Etapa", d.stage],
-    ["Lo necesita", d.when],
-    ...(d.location ? ([["Ubicación", d.location]] as [string, string][]) : []),
-    ["¿Tiene planos?", d.plans],
-    ["Contacto preferido", `${d.contact}, ${d.time.toLowerCase()}`],
-    ...(d.detail ? ([["Detalle", d.detail]] as [string, string][]) : []),
+    [t("Tipo de espacio"), t(d.space)],
+    [t("Servicios"), d.services.map((s) => t(s)).join(", ")],
+    [t("Tamaño aproximado"), t(d.size)],
+    [t("Etapa"), t(d.stage)],
+    [t("Lo necesita"), t(d.when)],
+    ...(d.location ? ([[t("Ubicación"), d.location]] as [string, string][]) : []),
+    [t("¿Tiene planos?"), t(d.plans)],
+    [t("Contacto preferido"), `${t(d.contact)}, ${t(d.time).toLowerCase()}`],
+    ...(d.detail ? ([[t("Detalle"), d.detail]] as [string, string][]) : []),
   ];
 }

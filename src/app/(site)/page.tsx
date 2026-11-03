@@ -4,6 +4,7 @@ import { Reveal } from "@/components/motion/Reveal";
 import { ScrollServices } from "@/components/motion/ScrollServices";
 import { ServiceScene } from "@/components/motion/ServiceScene";
 import { Hero } from "@/components/site/Hero";
+import { getT } from "@/lib/i18n-server";
 
 const STEPS = [
   ["01", "Entendemos tu espacio", "Nos cuentas qué necesitas y revisamos el uso, el tamaño y las condiciones del lugar."],
@@ -25,18 +26,19 @@ const NUMBERS: [number, string][] = [
   [3, "documentos técnicos por proyecto"],
 ];
 
-export default function Home() {
+export default async function Home() {
+  const t = await getT();
   return (
     <>
       <Hero />
 
       <section className="bg-surface py-16 sm:py-28">
         <div className="mx-auto max-w-4xl px-6 text-center">
-          <Reveal><h2 className="text-3xl font-semibold leading-tight tracking-tight sm:text-6xl">Calculamos.</h2></Reveal>
-          <Reveal delay={0.12}><h2 className="text-3xl font-semibold leading-tight tracking-tight sm:text-6xl">Diseñamos.</h2></Reveal>
-          <Reveal delay={0.24}><h2 className="text-3xl font-semibold leading-tight tracking-tight text-accent sm:text-6xl">Supervisamos.</h2></Reveal>
+          <Reveal><h2 className="text-3xl font-semibold leading-tight tracking-tight sm:text-6xl">{t("Calculamos.")}</h2></Reveal>
+          <Reveal delay={0.12}><h2 className="text-3xl font-semibold leading-tight tracking-tight sm:text-6xl">{t("Diseñamos.")}</h2></Reveal>
+          <Reveal delay={0.24}><h2 className="text-3xl font-semibold leading-tight tracking-tight text-accent sm:text-6xl">{t("Supervisamos.")}</h2></Reveal>
           <Reveal delay={0.36}>
-            <p className="mx-auto mt-6 max-w-2xl text-base text-mute sm:mt-8 sm:text-lg">Nos enfocamos en lo que importa: que el sistema esté bien calculado, bien especificado y bien supervisado.</p>
+            <p className="mx-auto mt-6 max-w-2xl text-base text-mute sm:mt-8 sm:text-lg">{t("Nos enfocamos en lo que importa: que el sistema esté bien calculado, bien especificado y bien supervisado.")}</p>
           </Reveal>
         </div>
       </section>
@@ -48,8 +50,8 @@ export default function Home() {
           {NUMBERS.map(([n, label], i) => (
             <Reveal key={label} delay={i * 0.08}>
               <div className="text-center">
-                <div className="text-5xl font-semibold tracking-tight text-accent sm:text-7xl"><CountUp to={n} /></div>
-                <p className="mx-auto mt-3 max-w-[14rem] text-sm text-mute">{label}</p>
+                <div className="text-5xl font-semibold tracking-tight text-ink sm:text-7xl"><CountUp to={n} /></div>
+                <p className="mx-auto mt-3 max-w-[14rem] text-sm text-mute">{t(label)}</p>
               </div>
             </Reveal>
           ))}
@@ -59,9 +61,9 @@ export default function Home() {
       <section className="defer-render pb-14 pt-4 sm:pb-24 sm:pt-8">
         <div className="mx-auto max-w-6xl px-6">
           <Reveal>
-            <p className="text-center text-xs font-semibold uppercase tracking-widest sm:text-sm text-accent">Ejemplos de proyecto</p>
-            <h2 className="mb-3 mt-3 text-center text-3xl font-semibold tracking-tight sm:text-5xl">Lo que entregamos</h2>
-            <p className="mx-auto mb-8 max-w-2xl text-center text-sm text-mute sm:mb-12 sm:text-base">Así se ve el trabajo en distintos tipos de espacio. Son ejemplos ilustrativos con cifras de referencia.</p>
+            <p className="text-center text-xs font-semibold uppercase tracking-widest sm:text-sm text-mute">{t("Ejemplos de proyecto")}</p>
+            <h2 className="mb-3 mt-3 text-center text-3xl font-semibold tracking-tight sm:text-5xl">{t("Lo que entregamos")}</h2>
+            <p className="mx-auto mb-8 max-w-2xl text-center text-sm text-mute sm:mb-12 sm:text-base">{t("Así se ve el trabajo en distintos tipos de espacio. Son ejemplos ilustrativos con cifras de referencia.")}</p>
           </Reveal>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {PROJECTS.map((p, i) => (
@@ -69,10 +71,10 @@ export default function Home() {
                 <article data-scene-host className="group h-full overflow-hidden rounded-3xl border border-line bg-surface transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_24px_50px_-28px_rgba(11,126,168,0.45)]">
                   <ServiceScene id={p.scene} mode="hover" className="h-32 rounded-none sm:h-40 border-0 border-b border-line" />
                   <div className="p-5 sm:p-6">
-                    <span className="rounded-full bg-soft px-3 py-1 text-xs font-semibold text-accent">{p.type}</span>
-                    <h3 className="mt-3 text-base font-semibold tracking-tight sm:text-lg">{p.title}</h3>
-                    <p className="mt-2 text-sm text-mute">{p.note}</p>
-                    <p className="mt-4 border-t border-line pt-4"><span className="text-xl font-semibold text-accent">{p.stat}</span> <span className="text-xs text-mute">{p.statLabel}</span></p>
+                    <span className="rounded-full border border-line bg-bg px-3 py-1 text-xs font-semibold text-ink">{t(p.type)}</span>
+                    <h3 className="mt-3 text-base font-semibold tracking-tight sm:text-lg">{t(p.title)}</h3>
+                    <p className="mt-2 text-sm text-mute">{t(p.note)}</p>
+                    <p className="mt-4 border-t border-line pt-4"><span className="text-xl font-semibold text-ink">{t(p.stat)}</span> <span className="text-xs text-mute">{t(p.statLabel)}</span></p>
                   </div>
                 </article>
               </Reveal>
@@ -83,14 +85,14 @@ export default function Home() {
 
       <section className="defer-render py-16 sm:py-28">
         <div className="mx-auto max-w-6xl px-6">
-          <Reveal><h2 className="mb-8 text-center text-3xl sm:mb-12 font-semibold tracking-tight sm:text-5xl">Así trabajamos</h2></Reveal>
+          <Reveal><h2 className="mb-8 text-center text-3xl sm:mb-12 font-semibold tracking-tight sm:text-5xl">{t("Así trabajamos")}</h2></Reveal>
           <div className="grid gap-5 md:grid-cols-3">
-            {STEPS.map(([n, t, d], i) => (
+            {STEPS.map(([n, title, d], i) => (
               <Reveal key={n} delay={i * 0.1}>
                 <div className="h-full rounded-3xl border border-line bg-surface p-6 transition sm:p-8 duration-300 hover:-translate-y-1.5 hover:shadow-[0_24px_50px_-28px_rgba(11,126,168,0.45)]">
-                  <div className="text-sm font-semibold text-accent">{n}</div>
-                  <h3 className="mt-2 text-xl font-semibold tracking-tight sm:mt-3 sm:text-2xl">{t}</h3>
-                  <p className="mt-2 text-sm text-mute sm:mt-3 sm:text-base">{d}</p>
+                  <div className="text-sm font-semibold text-mute">{n}</div>
+                  <h3 className="mt-2 text-xl font-semibold tracking-tight sm:mt-3 sm:text-2xl">{t(title)}</h3>
+                  <p className="mt-2 text-sm text-mute sm:mt-3 sm:text-base">{t(d)}</p>
                 </div>
               </Reveal>
             ))}
@@ -100,10 +102,10 @@ export default function Home() {
 
       <section className="defer-render px-4 pb-16 sm:px-6 sm:pb-28">
         <Reveal>
-          <div className="mx-auto max-w-5xl rounded-[2rem] bg-accent-solid px-6 py-12 sm:px-8 sm:py-16 text-center text-white">
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-5xl">Cuéntanos tu proyecto.</h2>
-            <p className="mx-auto mt-3 max-w-xl text-sm text-white sm:mt-4 sm:text-base">Respóndenos unas preguntas sencillas y te contactamos por correo o teléfono, como prefieras.</p>
-            <Link href="/cotizar" className="mt-6 inline-flex rounded-full bg-white px-6 py-3 text-sm sm:mt-8 sm:px-7 sm:py-3.5 sm:text-base font-semibold text-accent-solid transition hover:scale-[1.03]">Solicitar cotización</Link>
+          <div className="mx-auto max-w-5xl rounded-[2rem] bg-mono px-6 py-12 text-center text-on-mono sm:px-8 sm:py-16 dark:bg-accent-solid dark:text-white">
+            <h2 className="text-3xl font-semibold tracking-tight sm:text-5xl">{t("Cuéntanos tu proyecto.")}</h2>
+            <p className="mx-auto mt-3 max-w-xl text-sm opacity-80 sm:mt-4 sm:text-base">{t("Respóndenos unas preguntas sencillas y te contactamos por correo o teléfono, como prefieras.")}</p>
+            <Link href="/cotizar" className="mt-6 inline-flex rounded-full bg-on-mono px-6 py-3 text-sm sm:mt-8 sm:px-7 sm:py-3.5 sm:text-base font-semibold text-mono transition dark:bg-white dark:text-accent-solid hover:scale-[1.03]">{t("Solicitar cotización")}</Link>
           </div>
         </Reveal>
       </section>

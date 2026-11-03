@@ -35,9 +35,10 @@ export function PageWipe() {
       const url = new URL(a.href, location.href);
       const here = location.pathname;
       if (url.origin !== location.origin || url.pathname === here) return;
-      // Solo los saltos entre el sitio y el panel llevan cortina (entrar al panel y volver al sitio desde él). El login usa las animaciones normales.
+      // Llevan cortina los saltos entre el sitio y el panel (entrar y volver) y desde el sitio al login o registro.
       const inPanel = here.startsWith("/app") && here !== "/app/login"; // el login no cuenta como panel
-      const wipe = (url.pathname === "/app" && !here.startsWith("/app")) || (url.pathname === "/" && inPanel);
+      const toAuth = (url.pathname === "/app/login" || url.pathname === "/registro") && !here.startsWith("/app");
+      const wipe = (url.pathname === "/app" && !here.startsWith("/app")) || (url.pathname === "/" && inPanel) || toAuth;
       if (!wipe) return;
       // En captura y con stopPropagation: así el Link de Next no navega antes de que la cortina cubra la pantalla.
       e.preventDefault();

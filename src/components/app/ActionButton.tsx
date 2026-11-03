@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { useT } from "@/components/site/LocaleProvider";
 import type { R } from "@/lib/action-utils";
 import { Spinner } from "./SubmitButton";
 import { toast } from "./Toaster";
@@ -10,7 +11,7 @@ import { toast } from "./Toaster";
  * mientras trabaja y avisa del resultado (o del motivo si no se pudo). Sustituye al formulario + botón de "Quitar", "Eliminar", etc.
  */
 export function ActionButton({
-  action, fields = {}, confirm, okText = "Listo", className = "", children,
+  action, fields = {}, confirm, okText, className = "", children,
 }: {
   action: (fd: FormData) => Promise<R>;
   fields?: Record<string, string | number>;
@@ -19,6 +20,7 @@ export function ActionButton({
   className?: string;
   children: React.ReactNode;
 }) {
+  const t = useT();
   const [pending, start] = useTransition();
   const click = () => {
     if (confirm && !window.confirm(confirm)) return;
@@ -27,9 +29,9 @@ export function ActionButton({
       for (const [k, v] of Object.entries(fields)) fd.set(k, String(v));
       try {
         const r = await action(fd);
-        if (r.error) toast.error(r.error); else toast.ok(okText);
+        if (r.error) toast.error(t(r.error)); else toast.ok(okText ?? t("Listo"));
       } catch {
-        toast.error("No se pudo completar. Intenta de nuevo.");
+        toast.error(t("No se pudo completar. Intenta de nuevo."));
       }
     });
   };

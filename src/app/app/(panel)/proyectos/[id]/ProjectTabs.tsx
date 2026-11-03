@@ -2,20 +2,22 @@
 
 import { MotionConfig, motion } from "motion/react";
 import Link from "next/link";
+import { useT } from "@/components/site/LocaleProvider";
 import { EASE as ease } from "@/lib/motion";
 
 
 /** Pestañas del proyecto: la línea azul se desliza de una a otra y cada pestaña entra escalonada. */
 export function ProjectTabs({ projectId, tabs, active }: { projectId: number; tabs: { key: string; label: string }[]; active: string }) {
+  const t = useT();
   return (
     <MotionConfig reducedMotion="user">
       <div className="mb-6 flex gap-1 overflow-x-auto overflow-y-hidden border-b border-line">
-        {tabs.map((t, i) => (
-          <motion.div key={t.key} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.05, ease }} className="relative">
-            <Link href={`/app/proyectos/${projectId}?tab=${t.key}`} scroll={false} className={`block whitespace-nowrap px-4 py-2.5 text-sm transition-colors ${t.key === active ? "font-semibold text-accent" : "text-mute hover:text-ink"}`}>
-              {t.label}
+        {tabs.map((tab, i) => (
+          <motion.div key={tab.key} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.05, ease }} className="relative">
+            <Link href={`/app/proyectos/${projectId}?tab=${tab.key}`} scroll={false} className={`block whitespace-nowrap px-4 py-2.5 text-sm transition-colors ${tab.key === active ? "font-semibold text-accent" : "text-mute hover:text-ink"}`}>
+              {t(tab.label)}
             </Link>
-            {t.key === active && <motion.span layoutId="project-tab-line" className="absolute inset-x-0 -bottom-px h-[3px] rounded-full bg-accent" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
+            {tab.key === active && <motion.span layoutId="project-tab-line" className="absolute inset-x-0 -bottom-px h-[3px] rounded-full bg-accent" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
           </motion.div>
         ))}
       </div>

@@ -12,10 +12,12 @@ Fuente de verdad: variables de `src/app/globals.css`. Los componentes usan solo 
 | `--accent` | `text-accent`, `border-accent` | `#0a7099` | `#29a9da` | texto, enlaces y bordes de acento |
 | `--accent-solid` / `-2` | `bg-accent-solid`, `to-accent-solid-2` | `#0a7099` / `#0b7ea8` | igual | rellenos con texto blanco (botones, paneles); contraste ≥ 4.5:1 |
 | `--field-line` | `border-field` | `#7f8e9d` | `#5d6e7f` | borde de campos y opciones (≥ 3:1) |
+| `--mono` / `--on-mono` | `bg-mono`, `text-on-mono` | `#0a0a0a` / `#fff` | `#f5f5f5` / `#0a0a0a` | acento minimalista blanco y negro (banda final); se invierte en oscuro |
 | `--soft` | `bg-soft` | `#e3f3f9` | acento al 16 % | fondos suaves, hover |
 
 - Tipografía: Inter.
 - Modo oscuro: clase `dark` en `<html>` (ver `ThemeToggle` y el script de `layout.tsx`).
+- Variantes neutras: `.btn-dark` (con `.btn`) y `.btn-line` (con `.btn-ghost`).
 - Componentes base (`@layer components`): `.btn`, `.btn-ghost`, `.btn-lg`, `.card`, `.input`, `.label`, `.badge`, `.tbl`.
 - Excepción conocida: los colores de estado (`emerald`, `amber`, `red`, `slate`) siguen reasignándose en `.dark` dentro de `globals.css`.
 - Movimiento: respetar `prefers-reduced-motion`.

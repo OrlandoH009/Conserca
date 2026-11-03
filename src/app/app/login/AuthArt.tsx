@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useT } from "@/components/site/LocaleProvider";
 
 /**
  * Fondo animado del panel azul. Login: corrientes de aire que fluyen. Registro: ondas que se expanden y tarjetas que suben.
@@ -54,6 +55,7 @@ const CARDS = [
 ];
 
 function Ripples({ still }: { still: boolean }) {
+  const t = useT();
   return (
     <>
       <div className="absolute -bottom-32 -right-32 h-80 w-80">
@@ -66,7 +68,7 @@ function Ripples({ still }: { still: boolean }) {
       {CARDS.map((c) => (
         <motion.div key={c.label} className="absolute flex items-center gap-2 rounded-2xl border border-white/30 bg-white/15 px-4 py-2.5 text-sm font-medium text-white backdrop-blur-sm" style={{ left: c.x }} initial={{ y: "92vh", opacity: 0 }} animate={still ? { y: "64vh", opacity: 0.8 } : { y: ["92vh", "6vh"], opacity: [0, 0.6, 0.6, 0] }} transition={{ duration: c.dur, repeat: Infinity, delay: c.delay, ease: "linear", times: [0, 0.12, 0.85, 1] }}>
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-xs text-accent">✓</span>
-          {c.label}
+          {t(c.label)}
         </motion.div>
       ))}
     </>

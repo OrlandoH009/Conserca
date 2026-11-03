@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n-server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -23,7 +24,9 @@ import { Presupuesto } from "./tabs/Presupuesto";
 import { Supervision } from "./tabs/Supervision";
 import { Ventilacion } from "./tabs/Ventilacion";
 
-export const metadata: Metadata = { title: "Proyecto" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getT())("Proyecto") };
+}
 
 const TABS: { key: string; label: string; area: Area; C: (p: { projectId: number; canEdit: boolean }) => Promise<React.ReactNode> | React.ReactNode }[] = [
   { key: "cargas", label: "Cargas térmicas", area: "calculos", C: Cargas },
@@ -36,6 +39,7 @@ const TABS: { key: string; label: string; area: Area; C: (p: { projectId: number
 ];
 
 export default async function Proyecto({ params, searchParams }: PageProps<"/app/proyectos/[id]">) {
+  const t = await getT();
   const u = await requireAccess("proyectos");
   const { id } = await params;
   const sp = await searchParams;
@@ -59,27 +63,27 @@ export default async function Proyecto({ params, searchParams }: PageProps<"/app
 
   return (
     <>
-      <p className="text-sm text-mute"><Link href="/app/proyectos" className="hover:text-accent">Proyectos</Link> / {p.name}</p>
-      <PageHead title={p.name} sub={`${projectCode(p.id, p.createdAt)} · ${client ?? account ?? "Sin cliente"} · ${p.spaceType} · Entrega ${fmtDate(p.dueDate)}`}>
+      <p className="text-sm text-mute"><Link href="/app/proyectos" className="hover:text-accent">{t("Proyectos")}</Link> / {p.name}</p>
+      <PageHead title={p.name} sub={`${projectCode(p.id, p.createdAt)} · ${client ?? account ?? t("Sin cliente")} · ${t(p.spaceType)} · ${t("Entrega")} ${fmtDate(p.dueDate)}`}>
         {canEditProject && (
           <div className="flex flex-wrap items-center gap-3">
-            <EditDialog label="Editar datos" title="Editar datos del proyecto" className="btn-ghost">
-              <ActionForm action={updateProject} submit="Guardar cambios" success="Proyecto actualizado">
+            <EditDialog label={t("Editar datos")} title={t("Editar datos del proyecto")} className="btn-ghost">
+              <ActionForm action={updateProject} submit={t("Guardar cambios")} success={t("Proyecto actualizado")}>
                 <input type="hidden" name="id" value={p.id} />
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="sm:col-span-2"><F label="Nombre del proyecto" name="name" defaultValue={p.name} /></div>
-                  <F label="Tipo de espacio" name="spaceType" defaultValue={p.spaceType} />
-                  <F label="Fecha de entrega" name="dueDate" type="date" required={false} defaultValue={p.dueDate ?? ""} />
-                  <F label="Cliente" name="clientId" required={false}>
+                  <div className="sm:col-span-2"><F label={t("Nombre del proyecto")} name="name" defaultValue={p.name} /></div>
+                  <F label={t("Tipo de espacio")} name="spaceType" defaultValue={p.spaceType} />
+                  <F label={t("Fecha de entrega")} name="dueDate" type="date" required={false} defaultValue={p.dueDate ?? ""} />
+                  <F label={t("Cliente")} name="clientId" required={false}>
                     <select key={p.clientId ?? "none"} id="clientId" name="clientId" className="input" defaultValue={p.clientId ?? ""}>
-                      <option value="">Sin cliente</option>
+                      <option value="">{t("Sin cliente")}</option>
                       {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                   </F>
-                  <F label="Responsable" name="ownerId" required={false}>
+                  <F label={t("Responsable")} name="ownerId" required={false}>
                     <select key={p.ownerId ?? "none"} id="ownerId" name="ownerId" className="input" defaultValue={p.ownerId ?? ""}>
-                      <option value="">Sin responsable</option>
-                      {staff.map((s) => <option key={s.id} value={s.id}>{s.name} · {ROLE_LABEL[s.role]}</option>)}
+                      <option value="">{t("Sin responsable")}</option>
+                      {staff.map((s) => <option key={s.id} value={s.id}>{s.name} · {t(ROLE_LABEL[s.role])}</option>)}
                     </select>
                   </F>
                 </div>
@@ -87,57 +91,57 @@ export default async function Proyecto({ params, searchParams }: PageProps<"/app
             </EditDialog>
             {archived ? (
               <>
-                <ActionButton action={restoreProject} fields={{ id: p.id, on: 0 }} okText="Proyecto restaurado" className="btn-ghost">Restaurar</ActionButton>
+                <ActionButton action={restoreProject} fields={{ id: p.id, on: 0 }} okText={t("Proyecto restaurado")} className="btn-ghost">{t("Restaurar")}</ActionButton>
                 {can(u.role, "usuarios", "edit") && (
-                  <ActionButton action={deleteProject} fields={{ id: p.id }} confirm={`¿Eliminar «${p.name}» para siempre? Se borran sus cálculos, documentos y PDF. No se puede deshacer.`} okText="Proyecto eliminado" className="btn-ghost !border-red-300 !text-red-600">Eliminar definitivamente</ActionButton>
+                  <ActionButton action={deleteProject} fields={{ id: p.id }} confirm={t("¿Eliminar «{name}» para siempre? Se borran sus cálculos, documentos y PDF. No se puede deshacer.", { name: p.name })} okText={t("Proyecto eliminado")} className="btn-ghost !border-red-300 !text-red-600">{t("Eliminar definitivamente")}</ActionButton>
                 )}
               </>
             ) : (
-              <ActionButton action={archiveProject} fields={{ id: p.id, on: 1 }} confirm={`¿Archivar «${p.name}»? Deja de salir en la lista y el cliente ya no lo ve; se puede restaurar.`} okText="Proyecto archivado" className="btn-ghost">Archivar</ActionButton>
+              <ActionButton action={archiveProject} fields={{ id: p.id, on: 1 }} confirm={t("¿Archivar «{name}»? Deja de salir en la lista y el cliente ya no lo ve; se puede restaurar.", { name: p.name })} okText={t("Proyecto archivado")} className="btn-ghost">{t("Archivar")}</ActionButton>
             )}
           </div>
         )}
       </PageHead>
       {(archived || late > 0) && (
         <p className="-mt-3 mb-4 flex flex-wrap gap-2">
-          {archived && <Badge tone="n">Archivado: no sale en la lista ni lo ve el cliente</Badge>}
-          {late > 0 && <Badge tone="r">Vencido hace {late} {late === 1 ? "día" : "días"}</Badge>}
+          {archived && <Badge tone="n">{t("Archivado: no sale en la lista ni lo ve el cliente")}</Badge>}
+          {late > 0 && <Badge tone="r">{t("Vencido hace")} {late} {late === 1 ? t("día") : t("días")}</Badge>}
         </p>
       )}
 
-      <section className="card mb-5 grid gap-5 md:grid-cols-2 xl:grid-cols-[0.8fr_1fr_1.3fr_1.3fr]" aria-label="Estado, etapa y avance">
+      <section className="card mb-5 grid gap-5 md:grid-cols-2 xl:grid-cols-[0.8fr_1fr_1.3fr_1.3fr]" aria-label={t("Estado, etapa y avance")}>
         <div>
-          <p className="label">Estado</p>
+          <p className="label">{t("Estado")}</p>
           {canEditProject ? (
-            <AutoSelect key={p.status} name="status" value={p.status} options={Object.entries(PROJECT_STATUS).map(([k, [l]]) => [k, l])} action={setProjectStatus} fields={{ id: p.id }} label="Estado del proyecto" okText="Estado actualizado" className="input w-full" />
+            <AutoSelect key={p.status} name="status" value={p.status} options={Object.entries(PROJECT_STATUS).map(([k, [l]]) => [k, l])} action={setProjectStatus} fields={{ id: p.id }} label={t("Estado del proyecto")} okText={t("Estado actualizado")} className="input w-full" />
           ) : <StatusBadge status={p.status} />}
         </div>
         <div>
-          <p className="label">Etapa actual</p>
+          <p className="label">{t("Etapa actual")}</p>
           {canEditProject ? (
-            <AutoSelect key={p.stage} name="stage" value={p.stage} options={stageOptions} action={setProjectStage} fields={{ id: p.id }} label="Etapa del proyecto" okText="Etapa actualizada" className="input w-full" />
-          ) : <p className="font-semibold">{p.stage}</p>}
+            <AutoSelect key={p.stage} name="stage" value={p.stage} options={stageOptions} action={setProjectStage} fields={{ id: p.id }} label={t("Etapa del proyecto")} okText={t("Etapa actualizada")} className="input w-full" />
+          ) : <p className="font-semibold">{t(p.stage)}</p>}
         </div>
         <div>
-          <p className="label">Avance que ve el cliente</p>
+          <p className="label">{t("Avance que ve el cliente")}</p>
           <ProgressBar value={p.progress} />
           {canEditProject && <div className="mt-3"><ProgressControl key={p.progress} projectId={p.id} value={p.progress} suggested={suggestedProgress(p.stage)} action={setProjectProgress} /></div>}
         </div>
         <div>
-          <p className="label">Cuenta del cliente en el sitio</p>
+          <p className="label">{t("Cuenta del cliente en el sitio")}</p>
           {canEditProject ? (
             <AutoSelect
               key={p.clientUserId ?? "none"}
               name="userId"
               value={String(p.clientUserId ?? "")}
-              options={[["", "Sin cuenta (el cliente no ve este proyecto)"], ...clientUsers.map((c) => [String(c.id), `${c.name} · ${c.email}`] as [string, string])]}
+              options={[["", t("Sin cuenta (el cliente no ve este proyecto)")], ...clientUsers.map((c) => [String(c.id), `${c.name} · ${c.email}`] as [string, string])]}
               action={setProjectClientUser}
               fields={{ id: p.id }}
-              label="Cuenta del cliente"
-              okText="Cuenta del cliente actualizada"
+              label={t("Cuenta del cliente")}
+              okText={t("Cuenta del cliente actualizada")}
               className="input w-full"
             />
-          ) : <p className="text-sm text-mute">{account ?? "Sin cuenta ligada"}</p>}
+          ) : <p className="text-sm text-mute">{account ?? t("Sin cuenta ligada")}</p>}
         </div>
       </section>
 

@@ -1,18 +1,22 @@
+import { getLocale, getT } from "@/lib/i18n-server";
 import { LEGAL } from "@/lib/legal";
 import { BackButton } from "./BackButton";
 
 export type LegalSection = { title: string; body: (string | string[])[] };
 
 /** Documento legal con índice y secciones numeradas; lo comparten los Términos y el Aviso de privacidad. */
-export function LegalDoc({ title, sections, children }: { title: string; sections: LegalSection[]; children?: React.ReactNode }) {
+export async function LegalDoc({ title, sections, children }: { title: string; sections: LegalSection[]; children?: React.ReactNode }) {
+  const t = await getT();
+  const en = (await getLocale()) === "en";
   return (
     <div className="mx-auto max-w-3xl px-4 pb-16 pt-20 sm:px-6 sm:pb-28 sm:pt-32">
       <BackButton />
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-5xl">{title}</h1>
-      <p className="mt-2 text-xs text-mute sm:mt-3 sm:text-sm">Última actualización: {LEGAL.updated}</p>
+      <h1 className="text-3xl font-semibold tracking-tight sm:text-5xl">{t(title)}</h1>
+      <p className="mt-2 text-xs text-mute sm:mt-3 sm:text-sm">{t("Última actualización:")} {LEGAL.updated}</p>
+      {en && <p role="note" className="mt-4 rounded-xl bg-soft px-4 py-3 text-sm">{t("Este documento legal está disponible solo en español, que es la versión que rige.")}</p>}
 
-      <nav aria-label="Contenido" className="mt-8 rounded-2xl border border-line bg-surface p-5">
-        <p className="mb-2 text-sm font-semibold">Contenido</p>
+      <nav aria-label={t("Contenido")} className="mt-8 rounded-2xl border border-line bg-surface p-5">
+        <p className="mb-2 text-sm font-semibold">{t("Contenido")}</p>
         <ol className="grid list-inside list-decimal gap-x-8 gap-y-1 text-sm text-mute sm:grid-cols-2">
           {sections.map((s, i) => <li key={s.title}><a href={`#s${i + 1}`} className="hover:text-accent">{s.title}</a></li>)}
         </ol>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { logoutSite } from "@/app/app/login/actions";
+import { useT } from "./LocaleProvider";
 import { ProfileModal } from "./ProfileModal";
 import { EASE as ease } from "@/lib/motion";
 
@@ -22,6 +23,7 @@ function Avatar({ className = "h-9 w-9" }: { className?: string }) {
 }
 
 export function UserMenu({ user }: { user: U }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const box = useRef<HTMLDivElement>(null);
@@ -41,7 +43,7 @@ export function UserMenu({ user }: { user: U }) {
   return (
     <MotionConfig reducedMotion="user">
       <div ref={box} className="relative">
-        <button onClick={() => setOpen(!open)} aria-haspopup="menu" aria-expanded={open} aria-label={`Menú de ${user.name}`} className="cursor-pointer rounded-full ring-2 ring-transparent transition duration-300 hover:scale-105 hover:ring-accent/40 aria-expanded:ring-accent">
+        <button onClick={() => setOpen(!open)} aria-haspopup="menu" aria-expanded={open} aria-label={t("Menú de {name}", { name: user.name })} className="cursor-pointer rounded-full ring-2 ring-transparent transition duration-300 hover:scale-105 hover:ring-accent/40 aria-expanded:ring-accent">
           <Avatar />
         </button>
         <AnimatePresence>
@@ -56,10 +58,10 @@ export function UserMenu({ user }: { user: U }) {
                 </div>
               </div>
               <div className="border-t border-line pt-2">
-                {user.staff && <Link role="menuitem" href="/app" onClick={() => setOpen(false)} className={item}>Mi panel</Link>}
-                {!user.staff && <Link role="menuitem" href="/mis-proyectos" onClick={() => setOpen(false)} className={item}>Mis proyectos</Link>}
-                <button role="menuitem" onClick={() => { setOpen(false); setEditing(true); }} className={item}>Editar perfil</button>
-                <form action={logoutSite}><button role="menuitem" className={`${item} hover:!text-red-600`}>Cerrar sesión</button></form>
+                {user.staff && <Link role="menuitem" href="/app" onClick={() => setOpen(false)} className={item}>{t("Mi panel")}</Link>}
+                {!user.staff && <Link role="menuitem" href="/mis-proyectos" onClick={() => setOpen(false)} className={item}>{t("Mis proyectos")}</Link>}
+                <button role="menuitem" onClick={() => { setOpen(false); setEditing(true); }} className={item}>{t("Editar perfil")}</button>
+                <form action={logoutSite}><button role="menuitem" className={`${item} hover:!text-red-600`}>{t("Cerrar sesión")}</button></form>
               </div>
             </motion.div>
           )}

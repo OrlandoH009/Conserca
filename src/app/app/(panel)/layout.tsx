@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n-server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BellLink } from "@/components/app/BellLink";
@@ -22,6 +23,7 @@ const ITEMS: Item[] = [
 ];
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
+  const t = await getT();
   const u = await currentUser();
   if (!u) redirect("/app/login");
   if (u.role === "usuario") redirect("/"); // cuentas del sitio: sin panel interno
@@ -35,12 +37,12 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         <SideNav items={items} />
         <div className="mt-auto border-t border-line pt-4">
           <p className="truncate px-2 text-sm font-semibold">{u.name}</p>
-          <p className="px-2 pb-3 text-xs text-mute">{ROLE_LABEL[u.role]}</p>
-          <Link href="/" className="btn mb-2 w-full py-2">← Ir al sitio</Link>
-          <form action={logout}><button className="btn-ghost w-full py-2">Cerrar sesión</button></form>
+          <p className="px-2 pb-3 text-xs text-mute">{t(ROLE_LABEL[u.role])}</p>
+          <Link href="/" className="btn btn-dark mb-2 w-full py-2">{t("← Ir al sitio")}</Link>
+          <form action={logout}><button className="btn-ghost btn-line w-full py-2">{t("Cerrar sesión")}</button></form>
         </div>
       </aside>
-      <MobileNav items={items} name={u.name} role={ROLE_LABEL[u.role]} unread={badges.unread} logout={logout} />
+      <MobileNav items={items} name={u.name} role={t(ROLE_LABEL[u.role])} unread={badges.unread} logout={logout} />
       <main id="contenido" tabIndex={-1} className="min-w-0 flex-1 outline-none p-4 pt-[4.5rem] sm:p-6 sm:pt-[4.5rem] lg:p-8 print:p-0">{children}</main>
     </div>
   );

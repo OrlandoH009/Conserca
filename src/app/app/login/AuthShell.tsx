@@ -3,6 +3,8 @@
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
+import { LangToggle } from "@/components/site/LangToggle";
+import { useT } from "@/components/site/LocaleProvider";
 import { Logo } from "@/components/site/Logo";
 import { AuthArt } from "./AuthArt";
 import { LoginForm } from "./LoginForm";
@@ -16,13 +18,14 @@ const COPY = {
 // Los textos del panel aparecen subiendo desde abajo y desenfocados; al salir se desvanecen.
 const onResize = (cb: () => void) => { const m = matchMedia("(max-width: 767px)"); m.addEventListener("change", cb); return () => m.removeEventListener("change", cb); };
 const rise = { hidden: { opacity: 0, y: 48, filter: "blur(6px)" }, show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.9, ease } }, out: { opacity: 0, transition: { duration: 0.25 } } };
-const BACK = "mb-6 hidden md:inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-sm font-semibold text-accent transition duration-300 hover:-translate-x-1 hover:bg-soft";
+const BACK = "inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-sm font-semibold text-accent transition duration-300 hover:-translate-x-1 hover:bg-soft";
 
 /** Login y registro en una sola pantalla: el panel azul con el texto se desliza al otro lado y deja ver el otro formulario. */
 export function AuthShell({ initial }: { initial: "login" | "registro" }) {
   const [mode, setMode] = useState(initial);
   const reg = mode === "registro";
   const mobile = useSyncExternalStore(onResize, () => matchMedia("(max-width: 767px)").matches, () => false); // sin panel que deslizar: el formulario aparece sin esperar
+  const t = useT();
   const c = COPY[mode];
 
   // Cada formulario ocupa una mitad en pantallas anchas; en móvil solo se muestra el activo.
@@ -41,38 +44,38 @@ export function AuthShell({ initial }: { initial: "login" | "registro" }) {
         <MobileBanner mode={mode} />
         <motion.div {...side(reg, false)}>
           <div className="mx-auto w-full max-w-sm">
-            <Link href="/" className={BACK}>← Ir al sitio</Link>
-            <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Crear cuenta</h2>
-            <p className="mb-6 mt-2 text-mute">Cuenta de cliente: no da acceso al panel interno.</p>
+            <div className="mb-6 hidden items-center justify-between md:flex"><Link href="/" className={BACK}>{t("← Ir al sitio")}</Link><LangToggle /></div>
+            <h2 className="text-2xl font-bold tracking-tight md:text-3xl">{t("Crear cuenta")}</h2>
+            <p className="mb-6 mt-2 text-mute">{t("Cuenta de cliente: no da acceso al panel interno.")}</p>
             <RegistroForm />
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm text-mute md:hidden">¿Ya tienes cuenta? <button onClick={() => setMode("login")} className="btn-ghost px-4 py-1.5">Inicia sesión</button></div>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm text-mute md:hidden">{t("¿Ya tienes cuenta?")} <button onClick={() => setMode("login")} className="btn-ghost px-4 py-1.5">{t("Inicia sesión")}</button></div>
           </div>
         </motion.div>
 
         <motion.div {...side(!reg, true)}>
           <div className="mx-auto w-full max-w-sm">
-            <Link href="/" className={BACK}>← Ir al sitio</Link>
-            <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Iniciar sesión</h2>
-            <p className="mb-7 mt-2 text-mute">Para el equipo de Conserca y para clientes con cuenta.</p>
+            <div className="mb-6 hidden items-center justify-between md:flex"><Link href="/" className={BACK}>{t("← Ir al sitio")}</Link><LangToggle /></div>
+            <h2 className="text-2xl font-bold tracking-tight md:text-3xl">{t("Iniciar sesión")}</h2>
+            <p className="mb-7 mt-2 text-mute">{t("Para el equipo de Conserca y para clientes con cuenta.")}</p>
             <LoginForm />
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm text-mute md:hidden">¿No tienes cuenta? <button onClick={() => setMode("registro")} className="btn-ghost px-4 py-1.5">Regístrate</button></div>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm text-mute md:hidden">{t("¿No tienes cuenta?")} <button onClick={() => setMode("registro")} className="btn-ghost px-4 py-1.5">{t("Regístrate")}</button></div>
           </div>
         </motion.div>
 
         {/* Panel azul con el texto: se desliza de un lado al otro. Solo en pantallas anchas. */}
         <motion.div className="absolute inset-y-0 left-0 z-10 hidden w-1/2 flex-col justify-between bg-accent-solid p-14 text-white md:flex" initial={false} animate={{ x: reg ? "100%" : "0%" }} transition={{ duration: 1.2, ease: [0.65, 0, 0.35, 1] }}>
           <AuthArt mode={mode} />
-          <div className="relative"><Logo onAccent className="h-10" /></div>
+          <div className="relative"><Link href="/" aria-label={t("Conserca, ir al inicio")} className="inline-flex"><Logo onAccent className="h-10" /></Link></div>
           <AnimatePresence mode="wait">
             <motion.div key={mode} className="relative flex flex-1 flex-col justify-between" initial="hidden" animate="show" exit="out" transition={{ delayChildren: 0.35, staggerChildren: 0.18 }}>
               <div className="my-auto">
-                <motion.h1 variants={rise} className="text-4xl font-semibold leading-tight tracking-tight">{c.title}</motion.h1>
-                <motion.p variants={rise} className="mt-4 max-w-md text-white">{c.text}</motion.p>
+                <motion.h1 variants={rise} className="text-4xl font-semibold leading-tight tracking-tight">{t(c.title)}</motion.h1>
+                <motion.p variants={rise} className="mt-4 max-w-md text-white">{t(c.text)}</motion.p>
               </div>
               <motion.div variants={rise}>
-                <p className="mb-3 text-sm text-white">{reg ? "¿Ya tienes cuenta?" : "¿Aún no tienes cuenta?"}</p>
+                <p className="mb-3 text-sm text-white">{reg ? t("¿Ya tienes cuenta?") : t("¿Aún no tienes cuenta?")}</p>
                 <button onClick={() => setMode(reg ? "login" : "registro")} className="group inline-flex cursor-pointer items-center gap-3 rounded-full bg-surface px-7 py-3 text-base font-bold text-accent shadow-[0_14px_30px_-12px_rgba(0,0,0,0.5)] transition duration-300 hover:scale-105 hover:shadow-[0_18px_36px_-12px_rgba(0,0,0,0.6)] active:scale-95">
-                  {reg ? "Iniciar sesión" : "Crear cuenta"}
+                  {reg ? t("Iniciar sesión") : t("Crear cuenta")}
                   <svg viewBox="0 0 20 20" className={`h-5 w-5 transition-transform duration-300 ${reg ? "rotate-180 group-hover:-translate-x-1" : "group-hover:translate-x-1"}`} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4 10h12M11 5l5 5-5 5" /></svg>
                 </button>
               </motion.div>
@@ -86,17 +89,21 @@ export function AuthShell({ initial }: { initial: "login" | "registro" }) {
 
 /** Celular: franja azul animada arriba (la versión corta del panel de pantallas anchas) y el formulario sube sobre ella como una hoja. */
 function MobileBanner({ mode }: { mode: "login" | "registro" }) {
+  const t = useT();
   const c = COPY[mode];
   return (
     <header className="relative shrink-0 overflow-hidden bg-accent-solid px-5 pb-10 pt-5 text-white md:hidden">
       <AuthArt mode={mode} />
       <div className="relative flex items-center justify-between">
-        <Logo onAccent className="h-10" />
-        <Link href="/" className="rounded-full border border-white/40 bg-white/10 px-3.5 py-1.5 text-xs font-semibold backdrop-blur-sm transition active:scale-95">← Ir al sitio</Link>
+        <Link href="/" aria-label={t("Conserca, ir al inicio")} className="inline-flex"><Logo onAccent className="h-10" /></Link>
+        <div className="flex items-center gap-1">
+          <LangToggle className="text-white hover:bg-white/15 hover:text-white" />
+          <Link href="/" className="rounded-full border border-white/40 bg-white/10 px-3.5 py-1.5 text-xs font-semibold backdrop-blur-sm transition active:scale-95">{t("← Ir al sitio")}</Link>
+        </div>
       </div>
       <AnimatePresence mode="wait">
         <motion.div key={mode} className="relative mt-4" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.4, ease }}>
-          <h1 className="text-lg font-semibold leading-snug tracking-tight">{c.title}</h1>
+          <h1 className="text-lg font-semibold leading-snug tracking-tight">{t(c.title)}</h1>
         </motion.div>
       </AnimatePresence>
     </header>

@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalDoc, type LegalSection } from "@/components/site/LegalDoc";
+import { getT } from "@/lib/i18n-server";
 import { contactVia, LEGAL } from "@/lib/legal";
 
-export const metadata: Metadata = { title: "Términos y condiciones", description: "Condiciones de uso del sitio y de los servicios de Conserca." };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Términos y condiciones"), description: t("Condiciones de uso del sitio y de los servicios de Conserca.") };
+}
 
 const { company, country, email } = LEGAL;
 

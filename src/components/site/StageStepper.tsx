@@ -1,14 +1,16 @@
+import { getT } from "@/lib/i18n-server";
 import { STAGES, stageIndex } from "@/lib/stages";
 
 /**
  * Las etapas del proyecto como línea de pasos: las hechas llevan palomita, la actual resalta y las que faltan quedan apagadas.
  * Un proyecto entregado las muestra todas hechas. Si la etapa guardada no está en la lista, solo se escribe su nombre.
  */
-export function StageStepper({ stage, delivered }: { stage: string; delivered: boolean }) {
+export async function StageStepper({ stage, delivered }: { stage: string; delivered: boolean }) {
+  const t = await getT();
   const current = delivered ? STAGES.length : stageIndex(stage);
-  if (current < 0) return <p className="text-sm text-mute">Etapa actual: <b className="text-ink">{stage}</b></p>;
+  if (current < 0) return <p className="text-sm text-mute">{t("Etapa actual:")} <b className="text-ink">{t(stage)}</b></p>;
   return (
-    <ol className="grid gap-2 sm:grid-cols-6 sm:gap-1" aria-label="Etapas del proyecto">
+    <ol className="grid gap-2 sm:grid-cols-6 sm:gap-1" aria-label={t("Etapas del proyecto")}>
       {STAGES.map((s, i) => {
         const done = i < current;
         const now = i === current;
@@ -20,8 +22,8 @@ export function StageStepper({ stage, delivered }: { stage: string; delivered: b
               {done ? "✓" : i + 1}
             </span>
             <span className={`text-sm leading-tight ${now ? "font-semibold text-ink" : done ? "text-ink" : "text-mute"}`}>
-              {s}
-              {now && <span className="sr-only"> (etapa actual)</span>}
+              {t(s)}
+              {now && <span className="sr-only"> {t("(etapa actual)")}</span>}
             </span>
           </li>
         );
