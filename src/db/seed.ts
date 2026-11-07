@@ -6,11 +6,10 @@ import { coolingLoad, ventFlow } from "../lib/calc";
 
 // Contraseñas de prueba para uso LOCAL. Cámbialas antes de publicar.
 const USERS = [
-  { name: "Usuario Administración (ejemplo)", email: "admin@conserca.test", password: "Admin-Prueba-2026", role: "admin" },
-  { name: "Usuario Ingeniería (ejemplo)", email: "ingenieria@conserca.test", password: "Ingenieria-Prueba-2026", role: "ingenieria" },
-  { name: "Usuario Presupuestos (ejemplo)", email: "presupuestos@conserca.test", password: "Presupuestos-Prueba-2026", role: "presupuestos" },
-  { name: "Usuario Supervisión (ejemplo)", email: "supervision@conserca.test", password: "Supervision-Prueba-2026", role: "supervision" },
-  { name: "Cliente Prueba (ejemplo)", email: "cliente@conserca.test", password: "Cliente-Prueba-2026", role: "usuario" }, // ve el proyecto 01 en /mis-proyectos
+  { name: "Gerente de Diseño (ejemplo)", email: "admin@conserca.test", password: "Admin-Prueba-2026", role: "admin" },
+  { name: "Ing. Diseñador (ejemplo)", email: "ingenieria@conserca.test", password: "Ingenieria-Prueba-2026", role: "ingenieria" },
+  { name: "Técnico en Dibujo (ejemplo)", email: "dibujo@conserca.test", password: "Dibujo-Prueba-2026", role: "dibujo" },
+  { name: "Usuario de prueba (ejemplo)", email: "cliente@conserca.test", password: "Cliente-Prueba-2026", role: "usuario" }, // ve el proyecto 01 en /mis-proyectos
 ] as const;
 
 async function main() {
@@ -27,7 +26,6 @@ async function main() {
   await db.insert(t.users).values(USERS.map((u) => ({ name: u.name, email: u.email, role: u.role, passwordHash: bcrypt.hashSync(u.password, 10) })));
   const us = await db.select().from(t.users).orderBy(t.users.id);
   const eng = us.find((u) => u.role === "ingenieria")!;
-  const sup = us.find((u) => u.role === "supervision")!;
   const cli = us.find((u) => u.role === "usuario")!;
 
   await db.insert(t.clients).values(["A", "B", "C", "D", "E"].map((x) => ({ name: `Cliente ejemplo ${x}`, contact: `Contacto ejemplo ${x}`, email: `cliente${x.toLowerCase()}@ejemplo.test` })));
@@ -41,7 +39,7 @@ async function main() {
     ["Proyecto ejemplo 05 · Torre de oficinas", "Torre de oficinas", "Cargas térmicas", "en_proceso", "2026-12-12"],
     ["Proyecto ejemplo 06 · Hospital", "Hospital", "Ventilación mecánica", "atrasado", "2026-10-20"],
   ] as const;
-  await db.insert(t.projects).values(PR.map((p, i) => ({ name: p[0], spaceType: p[1], stage: p[2], status: p[3], dueDate: p[4], clientId: cl[i % cl.length].id, ownerId: i === 3 ? sup.id : eng.id, progress: [40, 70, 25, 100, 10, 60][i], clientUserId: i === 0 ? cli.id : null })));
+  await db.insert(t.projects).values(PR.map((p, i) => ({ name: p[0], spaceType: p[1], stage: p[2], status: p[3], dueDate: p[4], clientId: cl[i % cl.length].id, ownerId: eng.id, progress: [40, 70, 25, 100, 10, 60][i], clientUserId: i === 0 ? cli.id : null })));
   const ps = await db.select().from(t.projects).orderBy(t.projects.id);
   const p1 = ps[0], p2 = ps[1], p3 = ps[2], p4 = ps[3];
 

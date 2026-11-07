@@ -18,6 +18,7 @@ import { archiveProject, deleteProject, restoreProject, setProjectClientUser, se
 import { ProjectTabs, TabPane } from "./ProjectTabs";
 import { Actividad } from "./tabs/Actividad";
 import { Cargas } from "./tabs/Cargas";
+import { Cobros } from "./tabs/Cobros";
 import { Distribucion } from "./tabs/Distribucion";
 import { Documentos } from "./tabs/Documentos";
 import { Presupuesto } from "./tabs/Presupuesto";
@@ -32,8 +33,9 @@ const TABS: { key: string; label: string; area: Area; C: (p: { projectId: number
   { key: "cargas", label: "Cargas térmicas", area: "calculos", C: Cargas },
   { key: "distribucion", label: "Distribución de aire", area: "calculos", C: Distribucion },
   { key: "ventilacion", label: "Ventilación mecánica", area: "calculos", C: Ventilacion },
-  { key: "documentos", label: "Documentos", area: "proyectos", C: Documentos },
+  { key: "documentos", label: "Documentos", area: "documentos", C: Documentos },
   { key: "presupuesto", label: "Presupuesto", area: "presupuestos", C: Presupuesto },
+  { key: "cobros", label: "Cobros", area: "cobros", C: Cobros },
   { key: "supervision", label: "Supervisión", area: "supervision", C: Supervision },
   { key: "actividad", label: "Actividad", area: "proyectos", C: Actividad },
 ];

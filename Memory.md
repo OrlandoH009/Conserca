@@ -13,6 +13,27 @@ Para detalles estables ver: `README.md` (qué incluye, roles, stack), `DESIGN.md
 
 ## Historial
 
+### 2026-11-06 — Roles fijos: solo los 3 del equipo + usuario de prueba (sin commit aún)
+- Por indicación del usuario (el PDF menciona a las 3 personas del equipo), los roles quedan **fijos en 4**: `admin` = Gerente de Diseño, `ingenieria` = Ing. Diseñador, `dibujo` = Técnico en Dibujo y `usuario` = cuenta de prueba/cliente del sitio. Se **quitaron** los roles `presupuestos` y `supervision` (permisos, tipos, semilla, README, pruebas).
+- Consecuencias: el Ing. Diseñador ahora **edita supervisión** (antes solo la veía; era un rol aparte); presupuestos lo edita solo el Gerente (Ingeniería lo ve); cobros solo el Gerente.
+- **Base de datos actualizada:** quedan 4 usuarios (`admin@`, `ingenieria@`, `dibujo@`, `cliente@conserca.test`); se borraron `presupuestos@` y `supervision@` y el proyecto que tenía el supervisor pasó al Ing. Diseñador. Contraseña de `dibujo@`: la de la semilla (`Dibujo-Prueba-2026`). La cuenta de prueba ve el proyecto 07 («Proyecto de prueba»), no el 01.
+- Probado en navegador con las 4 cuentas; `tsc`, `eslint` y `vitest` (26) sin errores.
+
+### 2026-11-06 — Roles según el PDF del cliente (sin commit aún)
+- **Equipo según el PDF** (máx. 3 personas por proyecto): Gerente de Diseño (decide, aprueba, factura; = rol `admin`), Ing. Diseñador (= `ingenieria`) y **Técnico en Dibujo** (nuevo rol `dibujo`). `presupuestos` y `supervision` se conservaron como roles opcionales (el PDF no los menciona; se pueden quitar si no se usan).
+- **Áreas nuevas** en `lib/permissions.ts`: `cobros` (solo Gerente y Presupuestos; **Ingeniería ya no ve la pestaña Cobros**, antes la veía por colgar de presupuestos) y `documentos` (subir/cambiar/quitar documentos; Gerente, Ingeniería y Dibujo editan, el resto solo ve). El Técnico en Dibujo ve proyectos y cálculos pero no cambia estado/etapa/avance ni ve clientes, cobros ni presupuesto. Los avisos de revisión del cliente ahora llegan a quienes editan documentos.
+- Etiquetas: Gerente de Diseño / Ing. Diseñador / Técnico en Dibujo (con EN). Semilla con usuario `dibujo@conserca.test`; README con la tabla nueva.
+- **Cuentas existentes:** la base no se tocó; para usar el rol nuevo hay que crear (o cambiar de rol a) un usuario en Usuarios y permisos. Probado en navegador con los 5 roles (pestañas, botones, rutas y subida de documentos); `tsc`, `eslint` y `vitest` (27) sin errores.
+
+### 2026-11-06 — Cobros y facturación, según las respuestas del cliente (sin commit aún)
+- **Origen:** PDF «Preguntas_levantamiento_HVAC - RESPUESTAS RAZM» (las respuestas están como notas del PDF). Dolor principal: se olvida llevar el control de avances y facturar (Anticipo → Estimación 1 → Estimación 2 → Pago final); un proyecto se quedó sin facturar por cierre de año. Quien decide y aprueba: el Gerente de Diseño HVAC / Representante Legal. Son ~50 proyectos al año (25 % grandes, 50 % medianos, 25 % pequeños), equipo de 3 personas.
+- **Nueva pestaña «Cobros»** en el proyecto (`tabs/Cobros.tsx`, área `presupuestos`): plan de 4 cobros a partir del monto del contrato (30/30/20/20 % y avance 0/40/70/100 %, **valores de partida que hay que confirmar con el cliente**, se editan por cobro), estados Pendiente → Facturado → Cobrado con n.º de factura y fechas, alerta «Toca facturar» cuando el avance del proyecto llega al del cobro (o ya está entregado) y aviso en nov–dic por el cierre de año. Reglas puras en `lib/payments.ts` (+ test).
+- **Panel general:** tarjeta «Por facturar», lista «Cobros por atender» y aviso de cierre de año (solo roles con acceso a presupuestos).
+- **Clientes:** campos NIT/NRC, correo de facturación y quién autoriza que se facture; la pestaña Cobros avisa lo que falte.
+- **Documentos:** nuevos tipos del flujo real: oferta firmada, orden de compra, contrato, fichas técnicas, cuadros de equipos.
+- **Base de datos:** tabla nueva `payments` y 3 columnas en `clients` → hace falta `npm run db:push` con MySQL encendido (no se pudo aplicar ni ver en el navegador: estaba apagado). `tsc`, `eslint` y `vitest` (25 pruebas) sin errores; traducciones EN añadidas.
+- **No hecho (siguiente):** seguimiento de ofertas con fecha límite (cotizaciones → oferta → negociación → aceptada), avisos automáticos por correo, roles Técnico en Dibujo / Ing. Diseñador, facturación electrónica real.
+
 ### 2026-11-02 — Panel del equipo también en inglés (sin commit aún)
 - Mismo mecanismo (`t()` + `lib/i18n-en.ts` + cookie `lang`): ahora cubre `/app` completo (menú, panel general, proyectos y sus 7 pestañas, memoria imprimible, calculadoras, catálogo, clientes y cotizaciones, usuarios y permisos, avisos) y los componentes compartidos (`ActionForm`, `ActionButton`, `AutoSelect`, `EditDialog`, `PdfInput`, `Calculators`, `ProgressControl`, `RowActions`, `SideNav`, `MobileNav`, `BellLink`, `PrintButton`).
 - **Mensajes del servidor:** `translate()` ahora también reconoce claves con `{marcadores}` como *patrón* sobre textos ya armados en español (errores de validación, avisos y actividad guardados: «Documento «X»: En revisión» → «Document “X”: Under review»). Lo específico va antes que lo general en `i18n-en.ts`. Se aplica con `t(r.error)` en formularios/botones y `t(e.message)` / `t(n.text)` en actividad y avisos. Los textos ya guardados en la base no cambian, solo se traducen al mostrarse.

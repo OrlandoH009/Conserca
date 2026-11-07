@@ -10,7 +10,7 @@ export const users = mysqlTable("users", {
   email: varchar("email", { length: 190 }).notNull().unique(),
   phone: varchar("phone", { length: 40 }),
   passwordHash: varchar("password_hash", { length: 100 }).notNull(),
-  role: varchar("role", { length: 20 }).$type<"admin" | "ingenieria" | "presupuestos" | "supervision" | "usuario">().notNull(),
+  role: varchar("role", { length: 20 }).$type<"admin" | "ingenieria" | "dibujo" | "usuario">().notNull(),
   createdAt: createdAt(),
 });
 
@@ -20,6 +20,9 @@ export const clients = mysqlTable("clients", {
   contact: varchar("contact", { length: 150 }),
   email: varchar("email", { length: 190 }),
   phone: varchar("phone", { length: 40 }),
+  taxId: varchar("tax_id", { length: 40 }), // NIT / NRC para la factura electrónica
+  billingEmail: varchar("billing_email", { length: 190 }), // a dónde se envía la factura
+  authorizer: varchar("authorizer", { length: 150 }), // quién autoriza que se facture
   createdAt: createdAt(),
 });
 
@@ -114,6 +117,20 @@ export const budgetItems = mysqlTable("budget_items", {
   unit: varchar("unit", { length: 30 }).notNull(),
   quantity: double("quantity").notNull(),
   unitPrice: double("unit_price").notNull(),
+});
+
+// Plan de cobros del diseño: anticipo, estimaciones y pago final. Toca facturar cuando el avance llega a `dueProgress`.
+export const payments = mysqlTable("payments", {
+  id: id(),
+  projectId: projectRef(),
+  label: varchar("label", { length: 80 }).notNull(),
+  amount: double("amount").notNull(),
+  dueProgress: int("due_progress").notNull().default(0),
+  status: varchar("status", { length: 20 }).$type<"pendiente" | "facturado" | "cobrado">().notNull().default("pendiente"),
+  invoiceNo: varchar("invoice_no", { length: 60 }),
+  invoicedAt: date("invoiced_at", { mode: "string" }),
+  paidAt: date("paid_at", { mode: "string" }),
+  createdAt: createdAt(),
 });
 
 export const siteVisits = mysqlTable("site_visits", {

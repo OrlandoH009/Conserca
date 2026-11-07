@@ -12,7 +12,7 @@ import { fmtMB } from "@/lib/pdf";
 import { createDocument, removeDocument, setDocumentStatus } from "../../actions";
 
 const STATUS = { en_proceso: ["En proceso", "b"], en_revision: ["En revisión", "a"], entregado: ["Entregado", "g"] } as const;
-const KIND = { memoria: "Memoria de cálculo", especificaciones: "Especificaciones", presupuesto: "Presupuesto" } as const;
+const KIND = { memoria: "Memoria de cálculo", especificaciones: "Especificaciones", presupuesto: "Presupuesto", oferta: "Oferta firmada", orden_compra: "Orden de compra", contrato: "Contrato", fichas: "Fichas técnicas", cuadros: "Cuadros de equipos" } as const;
 const REVIEW = { aprobado: ["Aprobado por el cliente", "g"], cambios: ["El cliente pidió cambios", "r"] } as const;
 
 /** Formulario para registrar un documento. Con el mismo título que uno existente, queda como su siguiente versión. */

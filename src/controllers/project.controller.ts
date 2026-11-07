@@ -7,6 +7,7 @@ import { removeStoredFile } from "@/lib/storage";
 import * as ActivityController from "./activity.controller";
 import * as BudgetController from "./budget.controller";
 import * as CalcController from "./calc.controller";
+import * as PaymentController from "./payment.controller";
 import * as AirElementModel from "@/models/air-element.model";
 import * as ClientModel from "@/models/client.model";
 import * as DocumentModel from "@/models/document.model";
@@ -20,7 +21,7 @@ const text = (label: string) => z.string().trim().min(1, `${label} es obligatori
 const id = z.coerce.number().int().positive();
 const STATUSES = ["en_proceso", "en_revision", "entregado", "atrasado"] as const;
 const dueDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Elige una fecha de entrega").or(z.literal(""));
-const STAFF_ROLES = ["admin", "ingenieria", "presupuestos", "supervision"] as const;
+const STAFF_ROLES = ["admin", "ingenieria", "dibujo"] as const;
 
 export async function list(filters: { estado?: string; q?: string; archivados?: boolean }) {
   await requireAccess("proyectos");
@@ -190,12 +191,13 @@ export async function getMemoria(projectId: number) {
 
 /** Quita una fila de las tablas editables del proyecto; devuelve el proyecto para refrescar su pantalla. */
 export async function removeRow(fd: FormData) {
-  const v = parse(z.object({ table: z.enum(["spaces", "airElements", "ventZones", "budgetItems"]), id, projectId: id }), fd);
+  const v = parse(z.object({ table: z.enum(["spaces", "airElements", "ventZones", "budgetItems", "payments"]), id, projectId: id }), fd);
   const del = {
     spaces: CalcController.removeSpace,
     airElements: CalcController.removeAirElement,
     ventZones: CalcController.removeVentZone,
     budgetItems: BudgetController.removeItem,
+    payments: PaymentController.remove,
   }[v.table];
   await del(v.id, v.projectId);
   return v.projectId;

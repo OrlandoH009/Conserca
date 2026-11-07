@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const DOC_STATUS = { en_proceso: ["En proceso", "b"], en_revision: ["En revisión", "a"], entregado: ["Entregado", "g"] } as const;
-const DOC_KIND: Record<string, string> = { memoria: "Memoria de cálculo", especificaciones: "Especificaciones", presupuesto: "Presupuesto" };
+const DOC_KIND: Record<string, string> = { memoria: "Memoria de cálculo", especificaciones: "Especificaciones", presupuesto: "Presupuesto", oferta: "Oferta firmada", orden_compra: "Orden de compra", contrato: "Contrato", fichas: "Fichas técnicas", cuadros: "Cuadros de equipos" };
 const QUOTE_STATUS = { nueva: ["Recibida", "b"], en_proceso: ["En revisión del equipo", "a"], respondida: ["Respondida", "g"] } as const;
 
 /** Texto de plazo: cuántos días faltan para la entrega o cuánto se pasó. */

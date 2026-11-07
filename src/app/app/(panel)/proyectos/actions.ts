@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import * as BudgetController from "@/controllers/budget.controller";
 import * as CalcController from "@/controllers/calc.controller";
 import * as DocumentController from "@/controllers/document.controller";
+import * as PaymentController from "@/controllers/payment.controller";
 import * as ProjectController from "@/controllers/project.controller";
 import * as SupervisionController from "@/controllers/supervision.controller";
 import { run, type R } from "@/lib/action-utils";
@@ -99,6 +100,20 @@ export async function addBudgetItem(_p: R, fd: FormData): Promise<R> {
 }
 export async function updateBudgetItem(_p: R, fd: FormData): Promise<R> {
   return run(async () => touch(await BudgetController.updateItem(fd)));
+}
+
+// ---- Cobros
+export async function createPaymentPlan(_p: R, fd: FormData): Promise<R> {
+  return run(async () => touch(await PaymentController.createPlan(fd)));
+}
+export async function updatePayment(_p: R, fd: FormData): Promise<R> {
+  return run(async () => touch(await PaymentController.update(fd)));
+}
+export async function setPaymentStatus(fd: FormData): Promise<R> {
+  return run(async () => touch(await PaymentController.setStatus(fd)));
+}
+export async function invoicePayment(_p: R, fd: FormData): Promise<R> {
+  return setPaymentStatus(fd);
 }
 
 // ---- Supervisión

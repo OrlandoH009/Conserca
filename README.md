@@ -47,10 +47,9 @@ Los clientes piden cotizaciones —rápidas sin cuenta, o personalizadas con cue
 
 | Rol | Puede editar | Solo ve |
 |---|---|---|
-| Administración | todo | — |
-| Ingeniería | proyectos, cálculos, catálogo | presupuestos, supervisión |
-| Presupuestos | presupuestos | proyectos, cálculos, clientes, catálogo |
-| Supervisión | supervisión | proyectos, cálculos, catálogo |
+| Gerente de Diseño (admin) | todo, incluido cobros y usuarios | — |
+| Ing. Diseñador | proyectos, documentos, cálculos, supervisión, catálogo | presupuestos (sin cobros ni clientes) |
+| Técnico en Dibujo | documentos (planos, memorias, fichas…) | proyectos, cálculos, catálogo |
 | Usuario (sitio) | — | sin acceso al panel; ve `/mis-proyectos` |
 
 La matriz completa está en `src/lib/permissions.ts` (fija en el código).
@@ -91,7 +90,7 @@ Necesitas **Node.js** y **WampServer** (MySQL encendido; el ícono en verde).
 Cada día basta con encender WampServer y correr `npm run dev`. Para abrir el sitio desde otro equipo de la red local, usa la IP de tu máquina (`http://192.168.x.x:3000`); `next.config.ts` ya permite orígenes `192.168.*.*` en desarrollo.
 
 ### Usuarios de prueba
-Los correos y contraseñas de ejemplo están en `src/db/seed.ts`: `admin@`, `ingenieria@`, `presupuestos@`, `supervision@` y `cliente@conserca.test`. El cliente de prueba ve el proyecto 01 en `/mis-proyectos`. **Cámbialos antes de publicar.**
+Los correos y contraseñas de ejemplo están en `src/db/seed.ts`: `admin@`, `ingenieria@`, `dibujo@` y `cliente@conserca.test` (usuario de prueba). El cliente de prueba ve el proyecto 01 en `/mis-proyectos`. **Cámbialos antes de publicar.**
 
 ## Arquitectura
 

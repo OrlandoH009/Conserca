@@ -36,9 +36,9 @@ async function saveFile(f: FormDataEntryValue | null) {
 
 /** Registra un documento. Si ya hay uno con el mismo título en el proyecto, este es su siguiente versión. */
 export async function create(fd: FormData) {
-  const u = await assertAccess("proyectos", "edit");
+  const u = await assertAccess("documentos", "edit");
   const v = parse(
-    z.object({ projectId: pid, title: z.string().trim().min(1, "El título es obligatorio").max(200), kind: z.enum(["memoria", "especificaciones", "presupuesto"]) }),
+    z.object({ projectId: pid, title: z.string().trim().min(1, "El título es obligatorio").max(200), kind: z.enum(["memoria", "especificaciones", "presupuesto", "oferta", "orden_compra", "contrato", "fichas", "cuadros"]) }),
     fd,
   );
   const file = await saveFile(fd.get("file"));
@@ -54,7 +54,7 @@ export async function create(fd: FormData) {
 }
 
 export async function setStatus(fd: FormData) {
-  const u = await assertAccess("proyectos", "edit");
+  const u = await assertAccess("documentos", "edit");
   const v = parse(z.object({ id: pid, projectId: pid, status: z.enum(["en_proceso", "en_revision", "entregado"]) }), fd);
   const row = await DocumentModel.findWithOwner(v.id);
   if (!row || row.projectId !== v.projectId) throw new UserError("El documento no pertenece a este proyecto");
@@ -72,7 +72,7 @@ export async function setStatus(fd: FormData) {
 
 /** Elimina un documento y su PDF del disco. */
 export async function remove(fd: FormData) {
-  const u = await assertAccess("proyectos", "edit");
+  const u = await assertAccess("documentos", "edit");
   const v = parse(z.object({ id: pid, projectId: pid }), fd);
   const row = await DocumentModel.findWithOwner(v.id);
   if (!row || row.projectId !== v.projectId) throw new UserError("El documento no pertenece a este proyecto");
@@ -93,7 +93,7 @@ export async function review(fd: FormData) {
   await DocumentModel.setReview(v.id, v.decision, v.comment || null);
   const verb = v.decision === "aprobado" ? "aprobó" : "pidió cambios en";
   await ActivityController.record(row.projectId, "revision", `${me.name} ${verb} «${row.doc.title}»${v.comment ? `: ${v.comment}` : ""}`, { actorId: me.id });
-  await ActivityController.notifyStaff("proyectos", `${me.name} ${verb} «${row.doc.title}» (${row.projectName})`, `/app/proyectos/${row.projectId}?tab=documentos`, {
+  await ActivityController.notifyStaff("documentos", `${me.name} ${verb} «${row.doc.title}» (${row.projectName})`, `/app/proyectos/${row.projectId}?tab=documentos`, {
     need: "edit",
     exceptUserId: me.id,
     alsoUserIds: [row.ownerId],

@@ -4,7 +4,9 @@ import * as DashboardController from "@/controllers/dashboard.controller";
 import { CountUp } from "@/components/motion/CountUp";
 import { PageHead, StatusBadge, Badge, Empty, PROJECT_STATUS } from "@/components/app/ui";
 import { currentUser } from "@/lib/auth";
+import { money } from "@/lib/calc";
 import { fmtDate, todayISO } from "@/lib/format";
+import { nearYearEnd } from "@/lib/payments";
 import { can } from "@/lib/permissions";
 import { daysLate } from "@/lib/project";
 
@@ -27,7 +29,12 @@ export default async function Panel({ searchParams }: PageProps<"/app">) {
     [t("Visitas programadas"), s.scheduled, "/app/proyectos"],
     [t("Documentos por revisar"), s.toReview, "/app/proyectos"],
     [t("Proyectos vencidos"), s.overdue.length, "/app/proyectos"],
+    [t("Por facturar"), s.payments ? s.payments.toInvoice.length : null, "#cobros"],
   ];
+  const red = new Set([t("Proyectos vencidos"), t("Por facturar")]);
+  const pay = s.payments;
+  const unbilled = pay ? pay.toInvoice.length + pay.later : 0; // cobros que aún no se facturan
+  const shown = kpis.filter(([, v]) => v !== null);
   const total = s.byStatus.reduce((n, r) => n + r.n, 0);
   const quick: [string, string][] = [
     ["/app/proyectos", t("Ver proyectos")],
@@ -40,11 +47,14 @@ export default async function Panel({ searchParams }: PageProps<"/app">) {
     <>
       <PageHead title={t("Panel general")} sub={t("Resumen del trabajo del equipo")} />
       {sp.sinpermiso && <p role="alert" className="mb-5 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">{t("Tu rol no tiene acceso a esa sección.")}</p>}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        {kpis.filter(([, v]) => v !== null).map(([l, v, href]) => (
+      {pay && unbilled > 0 && nearYearEnd(todayISO()) && (
+        <p className="mb-5 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">{t("Se acerca el cierre de año: hay {n} cobros sin facturar. Revisa que ninguno se quede fuera.", { n: unbilled })}</p>
+      )}
+      <div className={`grid gap-4 sm:grid-cols-2 ${shown.length > 5 ? "xl:grid-cols-6" : "xl:grid-cols-5"}`}>
+        {shown.map(([l, v, href]) => (
           <Link key={l} href={href} className="card transition hover:-translate-y-0.5 hover:shadow-md">
             <p className="text-sm text-mute">{l}</p>
-            <p className={`mt-1 text-4xl font-bold tracking-tight ${l === "Proyectos vencidos" && v ? "text-red-600" : ""}`}><CountUp to={v!} /></p>
+            <p className={`mt-1 text-4xl font-bold tracking-tight ${red.has(l) && v ? "text-red-600" : ""}`}><CountUp to={v!} /></p>
           </Link>
         ))}
       </div>
@@ -99,6 +109,18 @@ export default async function Panel({ searchParams }: PageProps<"/app">) {
               {quick.map(([href, label]) => <Link key={href} href={href} className="btn-ghost btn-line px-3 py-1.5 text-sm">{label}</Link>)}
             </div>
           </section>
+
+          {pay && pay.toInvoice.length + pay.toCollect.length > 0 && (
+            <section id="cobros" className="card">
+              <h2 className="mb-3 font-bold">{t("Cobros por atender")}</h2>
+              {[...pay.toInvoice.map((r) => [r, true] as const), ...pay.toCollect.map((r) => [r, false] as const)].map(([r, invoice]) => (
+                <Link key={r.pay.id} href={`/app/proyectos/${r.projectId}?tab=cobros`} className="flex items-center justify-between gap-3 border-b border-slate-100 py-3 last:border-0">
+                  <div className="min-w-0"><p className="truncate font-semibold">{t(r.pay.label)} · {money(r.pay.amount)}</p><p className="truncate text-sm text-mute">{r.projectName}</p></div>
+                  <Badge tone={invoice ? "r" : "b"}>{invoice ? t("Toca facturar") : t("Falta cobrar")}</Badge>
+                </Link>
+              ))}
+            </section>
+          )}
 
           <section className="card">
             <h2 className="mb-3 font-bold">{t("Próximas visitas")}</h2>

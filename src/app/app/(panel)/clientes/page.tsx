@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 const QS = { nueva: ["Nueva", "b"], en_proceso: ["En proceso", "a"], respondida: ["Respondida", "g"] } as const;
 const LINK = "inline-flex items-center rounded-full border border-line px-3 py-1 text-xs font-semibold text-accent transition hover:bg-soft";
 
-async function ClientFields({ c }: { c?: { name: string; contact: string | null; email: string | null; phone: string | null } }) {
+async function ClientFields({ c }: { c?: { name: string; contact: string | null; email: string | null; phone: string | null; taxId: string | null; billingEmail: string | null; authorizer: string | null } }) {
   const t = await getT();
   return (
     <div className="space-y-3">
@@ -30,6 +30,10 @@ async function ClientFields({ c }: { c?: { name: string; contact: string | null;
       <F label={t("Contacto")} name="contact" required={false} defaultValue={c?.contact ?? ""} />
       <F label={t("Correo")} name="email" type="email" required={false} defaultValue={c?.email ?? ""} />
       <F label={t("Teléfono")} name="phone" required={false} defaultValue={c?.phone ?? ""} />
+      <p className="label pt-2">{t("Para facturar")}</p>
+      <F label={t("NIT / NRC")} name="taxId" required={false} defaultValue={c?.taxId ?? ""} />
+      <F label={t("Correo para enviar la factura")} name="billingEmail" type="email" required={false} defaultValue={c?.billingEmail ?? ""} />
+      <F label={t("Quién autoriza que se facture")} name="authorizer" required={false} defaultValue={c?.authorizer ?? ""} />
     </div>
   );
 }

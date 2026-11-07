@@ -9,8 +9,11 @@ const shape = {
   contact: z.string().trim().max(150).optional(),
   email: z.union([z.literal(""), z.email("Escribe un correo válido")]).optional(),
   phone: z.string().trim().max(40).optional(),
+  taxId: z.string().trim().max(40).optional(),
+  billingEmail: z.union([z.literal(""), z.email("Escribe un correo de facturación válido")]).optional(),
+  authorizer: z.string().trim().max(150).optional(),
 };
-const values = (v: { name: string; contact?: string; email?: string; phone?: string }) => ({ name: v.name, contact: v.contact || null, email: v.email || null, phone: v.phone || null });
+const values = (v: z.infer<z.ZodObject<typeof shape>>) => ({ name: v.name, contact: v.contact || null, email: v.email || null, phone: v.phone || null, taxId: v.taxId || null, billingEmail: v.billingEmail || null, authorizer: v.authorizer || null });
 
 /** Lista de clientes (registros del equipo) para la pantalla "Clientes y cotizaciones". */
 export async function list() {
