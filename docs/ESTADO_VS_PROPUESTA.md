@@ -149,3 +149,10 @@ Hecho: límite de intentos por IP (`lib/rate-limit.ts`, con limpieza para que no
 Límites conocidos: el contador está en memoria (se pierde al reiniciar y exige un solo proceso); la IP viene de `x-forwarded-for`/`cf-connecting-ip`, así que la app debe publicarse solo detrás de Caddy o Cloudflare; sin Content-Security-Policy; la descarga de PDF sigue leyendo el archivo completo en memoria.
 Pendiente de este tema: captcha Turnstile (necesita cuenta de Cloudflare, se hace al desplegar), sesiones que no se cierran al cambiar la contraseña, el registro que revela si un correo existe.
 Cambia respecto a lo prometido: nada; la propuesta ya decía «contraseñas protegidas, acceso por roles».
+
+## Paso 3 — respaldos y aviso de disco (2026-11-08)
+Hecho: `npm run db:backup` genera un solo `.tar.gz` con la base y los PDF, conserva los últimos 14 y, si `RCLONE_REMOTE` está definido, lo copia a Google Drive con rclone. `npm run db:restore` restaura con confirmación (`--yes`) y permite ensayar en otra base (`--db`). `npm run disk:check` avisa en la campana del Gerente si el disco pasa del 80 % (máx. 1 aviso al día). Guía en `docs/RESTAURACION.md` (instalación de rclone, cron, restauración paso a paso). → A11 y A12 **Parcial** (código y guía listos).
+Probado: respaldo con base + PDF; aviso de disco (dispara y crea la notificación; el aviso de prueba se borró); restauración en modo simulación.
+**No probado:** restauración real en una base vacía (hace falta una base de prueba con permisos) y copia a Drive (hace falta la cuenta del cliente). Se prueban en el servidor.
+Cambia respecto a lo prometido: base y PDF se respaldan juntos y a diario (la propuesta decía «copia periódica a Google Drive»; la frecuencia semanal propuesta queda en diario a las 3:00 salvo que el cliente prefiera otra). El aviso de disco es dentro del sistema, no por correo.
+Dato de entorno: el disco de este equipo de desarrollo está al 97 % (12,3 GB libres).

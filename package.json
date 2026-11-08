@@ -9,6 +9,9 @@
     "lint": "eslint",
     "db:push": "drizzle-kit push --force",
     "db:seed": "tsx src/db/seed.ts",
+    "db:backup": "node scripts/backup-db.mjs",
+    "db:restore": "node scripts/restore.mjs",
+    "disk:check": "node scripts/check-disk.mjs",
     "test": "vitest run"
   },
   "dependencies": {
