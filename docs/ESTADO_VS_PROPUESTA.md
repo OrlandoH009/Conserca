@@ -156,3 +156,7 @@ Probado: respaldo con base + PDF; aviso de disco (dispara y crea la notificació
 **No probado:** restauración real en una base vacía (hace falta una base de prueba con permisos) y copia a Drive (hace falta la cuenta del cliente). Se prueban en el servidor.
 Cambia respecto a lo prometido: base y PDF se respaldan juntos y a diario (la propuesta decía «copia periódica a Google Drive»; la frecuencia semanal propuesta queda en diario a las 3:00 salvo que el cliente prefiera otra). El aviso de disco es dentro del sistema, no por correo.
 Dato de entorno: el disco de este equipo de desarrollo está al 97 % (12,3 GB libres).
+
+## Paso 4 — prueba de carga (2026-11-08)
+Hecho: `scripts/load-test.mjs` (`npm run load:test`) y el informe `docs/PRUEBA_DE_CARGA.md`. Con 15 usuarios simultáneos en el servidor de producción: p95 54 ms, 0 errores (criterio: p95 < 1,5 s y 0 errores) → A13 **Parcial**: aprueba en el equipo de desarrollo, falta repetirla en el servidor de DigitalOcean (1 CPU) y no cubre login ni escrituras. Con 60 usuarios: p95 748 ms, 0 errores. Memoria del servidor ~350 MB. `next.config.ts` ahora acepta `NEXT_DIST_DIR` para compilar sin pisar el servidor de desarrollo.
+Cambia respecto a lo prometido: nada; la capacidad de 8 a 15 usuarios se confirma solo cuando se repita en el servidor real.

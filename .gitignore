@@ -3,6 +3,7 @@
 
 # Next.js y compilación
 /.next/
+/.next-*/
 /out/
 /build
 next-env.d.ts

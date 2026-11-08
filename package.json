@@ -12,6 +12,7 @@
     "db:backup": "node scripts/backup-db.mjs",
     "db:restore": "node scripts/restore.mjs",
     "disk:check": "node scripts/check-disk.mjs",
+    "load:test": "node scripts/load-test.mjs",
     "test": "vitest run"
   },
   "dependencies": {

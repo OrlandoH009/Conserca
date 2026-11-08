@@ -11,6 +11,7 @@ const SECURITY_HEADERS = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  distDir: process.env.NEXT_DIST_DIR || ".next", // permite compilar para producción sin pisar el servidor de desarrollo (ver docs/PRUEBA_DE_CARGA.md)
   headers: async () => [{ source: "/:path*", headers: SECURITY_HEADERS }],
   devIndicators: false, // quita el logo de Next en la esquina
   allowedDevOrigins: ["192.168.*.*", "*.trycloudflare.com"], // abrir el sitio desde la red local y desde el túnel de Cloudflare
