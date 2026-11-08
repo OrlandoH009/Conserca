@@ -3,7 +3,7 @@ import * as ProjectController from "@/controllers/project.controller";
 import { Empty } from "@/components/app/ui";
 import { fmtDateTime } from "@/lib/format";
 
-const KIND: Record<string, string> = { estado: "Estado", etapa: "Etapa", avance: "Avance", documento: "Documento", visita: "Visita", revision: "Revisión del cliente", proyecto: "Proyecto", cliente: "Cliente" };
+const KIND: Record<string, string> = { estado: "Estado", etapa: "Etapa", avance: "Avance", documento: "Documento", visita: "Visita", revision: "Revisión del cliente", proyecto: "Proyecto", cliente: "Cliente", cobro: "Cobros" };
 
 /** Línea de tiempo con todo lo que ha pasado en el proyecto; lo marcado "interno" no lo ve el cliente. */
 export async function Actividad({ projectId }: { projectId: number; canEdit: boolean }) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { can, levelOf } from "./permissions";
+import { can, levelOf, ROLE_LABEL } from "./permissions";
 
 describe("permisos por rol", () => {
   it("admin edita todo", () => {
@@ -31,6 +31,12 @@ describe("permisos por rol", () => {
     for (const a of ["proyectos", "documentos", "calculos", "presupuestos", "cobros", "supervision", "clientes", "catalogo", "usuarios"] as const) {
       expect(can("usuario", a)).toBe(false);
     }
+  });
+  it("el rol «usuario» se muestra como Cliente", () => {
+    expect(ROLE_LABEL.usuario).toBe("Cliente");
+  });
+  it("ingeniería y dibujo no entran a cobros, clientes ni usuarios", () => {
+    for (const r of ["ingenieria", "dibujo"] as const) for (const a of ["cobros", "clientes", "usuarios"] as const) expect(can(r, a)).toBe(false);
   });
   it("un rol desconocido no tiene acceso", () => {
     expect(can("invitado" as never, "proyectos")).toBe(false);

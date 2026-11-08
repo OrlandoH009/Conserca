@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { parse, UserError } from "@/lib/action-utils";
 import { assertAccess, requireAccess } from "@/lib/auth";
+import { can } from "@/lib/permissions";
 import { daysLate, STATUS_LABEL } from "@/lib/project";
 import { STAGES } from "@/lib/stages";
 import { removeStoredFile } from "@/lib/storage";
@@ -170,10 +171,11 @@ export async function getDetail(projectId: number) {
   return ProjectModel.findWithClient(projectId);
 }
 
-/** Movimientos del proyecto (más recientes primero) para la pestaña de actividad. */
+/** Movimientos del proyecto (más recientes primero) para la pestaña de actividad; los de cobros solo los ve quien tiene acceso a Cobros. */
 export async function activityOf(projectId: number) {
-  await requireAccess("proyectos");
-  return EventModel.listByProject(projectId);
+  const u = await requireAccess("proyectos");
+  const rows = await EventModel.listByProject(projectId);
+  return can(u.role, "cobros") ? rows : rows.filter((e) => e.type !== "cobro");
 }
 
 /** Todo lo que lleva la memoria de cálculo imprimible. */

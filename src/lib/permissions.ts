@@ -8,7 +8,7 @@ export const ROLE_LABEL: Record<Role, string> = {
   admin: "Gerente de Diseño",
   ingenieria: "Ing. Diseñador",
   dibujo: "Técnico en Dibujo",
-  usuario: "Usuario (sitio)",
+  usuario: "Cliente",
 };
 
 // "cobros" (facturación y pagos) solo lo ve el Gerente, que es quien factura; el Ing. Diseñador hace las visitas de supervisión; "documentos" permite subir planos y memorias sin tocar el estado del proyecto.

@@ -15,6 +15,16 @@ describe("plan de cobros", () => {
     expect(isDue(est1, { progress: 10, status: "entregado" })).toBe(true); // entregado: todo se puede facturar
     expect(isDue({ ...est1, status: "facturado" }, { progress: 100, status: "entregado" })).toBe(false);
   });
+  it("toca facturar: casos límite", () => {
+    const anticipo = { status: "pendiente", dueProgress: 0 };
+    const final = { status: "pendiente", dueProgress: 100 };
+    expect(isDue(anticipo, { progress: 0, status: "en_proceso" })).toBe(true); // el anticipo toca desde el inicio
+    expect(isDue(final, { progress: 99, status: "en_revision" })).toBe(false);
+    expect(isDue(final, { progress: 100, status: "en_proceso" })).toBe(true);
+    expect(isDue(final, { progress: 0, status: "entregado" })).toBe(true); // entregado con avance 0: se cobra todo
+    expect(isDue(final, { progress: 0, status: "atrasado" })).toBe(false); // atrasado no es entregado
+    expect(isDue({ ...final, status: "cobrado" }, { progress: 100, status: "entregado" })).toBe(false);
+  });
   it("cierre de año: noviembre y diciembre", () => {
     expect(nearYearEnd("2026-10-31")).toBe(false);
     expect(nearYearEnd("2026-11-01")).toBe(true);

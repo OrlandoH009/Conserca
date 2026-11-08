@@ -301,7 +301,6 @@ export const EN: Record<string, string> = {
   "Administración": "Administration",
   "Ingeniería": "Engineering",
   "Presupuestos": "Budgets",
-  "Usuario (sitio)": "User (site)",
 
   // Documentos legales
   "Contenido": "Contents",

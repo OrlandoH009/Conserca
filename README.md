@@ -50,7 +50,7 @@ Los clientes piden cotizaciones —rápidas sin cuenta, o personalizadas con cue
 | Gerente de Diseño (admin) | todo, incluido cobros y usuarios | — |
 | Ing. Diseñador | proyectos, documentos, cálculos, supervisión, catálogo | presupuestos (sin cobros ni clientes) |
 | Técnico en Dibujo | documentos (planos, memorias, fichas…) | proyectos, cálculos, catálogo |
-| Usuario (sitio) | — | sin acceso al panel; ve `/mis-proyectos` |
+| Cliente | — | sin acceso al panel; ve `/mis-proyectos` |
 
 La matriz completa está en `src/lib/permissions.ts` (fija en el código).
 

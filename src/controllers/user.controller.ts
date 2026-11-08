@@ -6,7 +6,7 @@ import { ROLES } from "@/lib/permissions";
 import * as ProjectModel from "@/models/project.model";
 import * as UserModel from "@/models/user.model";
 
-const PHONE = /^[+d][ds().-]{6,}$/;
+const PHONE = /^[+\d][\d\s().-]{6,}$/;
 const role = z.enum(ROLES as [string, ...string[]], { error: "Elige un rol" });
 
 export async function list() {
