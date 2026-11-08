@@ -76,7 +76,7 @@ Ordenados por importancia.
 3. **Sin cabeceras de seguridad** (HSTS, X-Frame-Options, CSP, Referrer-Policy, X-Content-Type-Options); `next.config.ts` no define `headers()`.
 4. **Sesiones de 7 días sin revocación**: cambiar la contraseña no cierra sesiones abiertas.
 5. **Registro revela si un correo ya existe**.
-6. **Trampa para bots (honeypot) del registro probablemente ineficaz**: el campo «Sitio web» es visible (`login/RegistroForm.tsx:19`); el de cotizar sí está oculto.
+6. ~~Trampa para bots del registro ineficaz~~ — **error de la auditoría**: el campo sí está oculto fuera de pantalla (`login/RegistroForm.tsx:18`). Sin hallazgo.
 7. **Error en `user.controller.ts:9`**: el patrón de teléfono perdió las barras (`[+d][ds().-]` en lugar de `[+\d][\d\s().-]`); editar el teléfono de un usuario rechaza números normales. Ya venía así en git.
 8. **Descarga de PDF lee el archivo completo en memoria** (`api/documentos/[id]/route.ts`); con muchas descargas simultáneas consume RAM.
 9. **Secretos**: `.env` y `scripts/crear-base.sql` están en `.gitignore` y no están en git (verificado con `git ls-files`). `crear-base.sql` local contiene la contraseña del usuario de la base y da `ALL PRIVILEGES` sobre la base; en producción conviene un usuario con permisos mínimos y contraseña nueva.
@@ -143,3 +143,9 @@ Porcentajes por tamaño, quién mide el avance y qué es «entregado», etapas, 
 Hecho: rol renombrado a «Cliente» (ES/EN, README; el valor interno sigue siendo `usuario`, sin cambios en la base de datos) → A1 **Cumple**. La pestaña Actividad oculta las líneas de cobros a quien no tiene acceso a Cobros (`project.controller.ts`, `activityOf`) y traduce el tipo «cobro». Corregido el patrón de teléfono (`user.controller.ts:9`). Pruebas nuevas: aislamiento entre clientes (`controllers/isolation.test.ts`: PDF de otro cliente, aprobar documento ajeno, lista propia) → A2 **Cumple**; casos límite de «Toca facturar» → A5 **Cumple**; permisos por rol (Cliente, Ing., Técnico) → A3 **Cumple**. 34 pruebas pasan; `tsc` y `eslint` sin errores.
 Límite de las pruebas de aislamiento: usan modelos simulados, no la base real; la consulta `listByClientUser` se verificó solo por lectura.
 Cambia respecto a lo prometido: nada.
+
+## Paso 2 — seguridad contra bots y ataques (2026-11-08)
+Hecho: límite de intentos por IP (`lib/rate-limit.ts`, con limpieza para que no crezca sin límite): login 30 por 10 min (además de los 5 fallos por correo que ya había), registro 5 por hora, cotización rápida 5 por hora, cotización con cuenta 10 por hora. Cabeceras de seguridad en `next.config.ts` (nosniff, X-Frame-Options DENY, Referrer-Policy, Permissions-Policy, HSTS) y se quita `X-Powered-By`. Probado en vivo: con una IP simulada el login se bloquea alrededor del intento 30 y otra IP sigue libre; las cabeceras salen en la respuesta. 36 pruebas pasan.
+Límites conocidos: el contador está en memoria (se pierde al reiniciar y exige un solo proceso); la IP viene de `x-forwarded-for`/`cf-connecting-ip`, así que la app debe publicarse solo detrás de Caddy o Cloudflare; sin Content-Security-Policy; la descarga de PDF sigue leyendo el archivo completo en memoria.
+Pendiente de este tema: captcha Turnstile (necesita cuenta de Cloudflare, se hace al desplegar), sesiones que no se cierran al cambiar la contraseña, el registro que revela si un correo existe.
+Cambia respecto a lo prometido: nada; la propuesta ya decía «contraseñas protegidas, acceso por roles».

@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { currentUser, endSession, startSession } from "@/lib/auth";
+import { limited } from "@/lib/rate-limit";
 import * as UserModel from "@/models/user.model";
 
 // Límite sencillo de intentos fallidos por correo (en memoria; basta para uso local).
@@ -16,12 +17,15 @@ export async function login(fd: FormData): Promise<LoginResult> {
   });
   if (!p.success) return { error: "Escribe tu correo y contraseña", email: String(fd.get("email") ?? "") };
 
+  // Por IP (30 intentos / 10 min: cada intento gasta CPU en bcrypt; una oficina entera comparte IP) y por correo (5 fallos / 10 min).
+  if (await limited("login", 30, 10 * 60_000)) return { error: "Demasiados intentos. Espera unos minutos.", email: p.data.email };
   const f = fails.get(p.data.email);
   if (f && f.n >= 5 && f.until > Date.now()) return { error: "Demasiados intentos. Espera unos minutos.", email: p.data.email };
 
   const u = await UserModel.findByEmail(p.data.email);
   const ok = await bcrypt.compare(p.data.password, u?.passwordHash ?? DUMMY);
   if (!u || !ok) {
+    if (fails.size > 5000) for (const [k, v] of fails) if (v.until <= Date.now()) fails.delete(k); // no crece sin límite con correos inventados
     fails.set(p.data.email, { n: (f && f.until > Date.now() ? f.n : 0) + 1, until: Date.now() + 10 * 60_000 });
     return { error: "Correo o contraseña incorrectos", email: p.data.email };
   }
@@ -35,6 +39,7 @@ export const logout = () => endSession();
 /** Alta pública: siempre crea una cuenta "usuario" (sin acceso al panel); el rol no viene del formulario. */
 export async function register(fd: FormData): Promise<LoginResult> {
   if (fd.get("website")) return { ok: true }; // campo trampa para bots
+  if (await limited("register", 5, 60 * 60_000)) return { error: "Demasiados intentos. Espera unos minutos.", email: String(fd.get("email") ?? "") };
   if (!fd.get("terms")) return { error: "Acepta los Términos y condiciones para crear tu cuenta", email: String(fd.get("email") ?? "") };
   const p = z
     .object({

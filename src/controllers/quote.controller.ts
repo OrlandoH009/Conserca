@@ -2,6 +2,7 @@ import { z } from "zod";
 import { parse, UserError } from "@/lib/action-utils";
 import { assertAccess, currentUser, requireAccess } from "@/lib/auth";
 import { fmtDate } from "@/lib/format";
+import { limited } from "@/lib/rate-limit";
 import { CONTACTS, DETAIL_MAX, PLANS, SIZES, SPACE_TYPES, STAGES as QUOTE_STAGES, TIMES, WHEN } from "@/lib/quote-options";
 import type { QuoteDetails } from "@/lib/quote-details";
 import { SERVICES } from "@/lib/services";
@@ -31,6 +32,7 @@ const QuoteSchema = z.object({
 export async function submitPublic(fd: FormData): Promise<PublicQuoteResult> {
   const me = await currentUser();
   if (!me) return { error: "Inicia sesión o regístrate para cotizar" };
+  if (await limited("quote", 10, 60 * 60_000)) return { error: "Demasiados intentos. Espera unos minutos." };
 
   const parsed = QuoteSchema.safeParse({
     space: fd.get("space") ?? undefined,
@@ -78,6 +80,7 @@ const PHONE = /^[+\d][\d\s().-]{6,}$/;
 export async function submitQuick(fd: FormData): Promise<PublicQuoteResult> {
   if (fd.get("website")) return { ok: true }; // campo trampa para bots
   if (await currentUser()) return { error: "Ya iniciaste sesión: usa la cotización personalizada de tu cuenta." };
+  if (await limited("quick", 5, 60 * 60_000)) return { error: "Demasiados intentos. Espera unos minutos." };
   const p = z
     .object({
       name: z.string().trim().min(2, "Escribe tu nombre").max(120),
