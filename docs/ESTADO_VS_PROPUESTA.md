@@ -160,3 +160,33 @@ Dato de entorno: el disco de este equipo de desarrollo está al 97 % (12,3 GB li
 ## Paso 4 — prueba de carga (2026-11-08)
 Hecho: `scripts/load-test.mjs` (`npm run load:test`) y el informe `docs/PRUEBA_DE_CARGA.md`. Con 15 usuarios simultáneos en el servidor de producción: p95 54 ms, 0 errores (criterio: p95 < 1,5 s y 0 errores) → A13 **Parcial**: aprueba en el equipo de desarrollo, falta repetirla en el servidor de DigitalOcean (1 CPU) y no cubre login ni escrituras. Con 60 usuarios: p95 748 ms, 0 errores. Memoria del servidor ~350 MB. `next.config.ts` ahora acepta `NEXT_DIST_DIR` para compilar sin pisar el servidor de desarrollo.
 Cambia respecto a lo prometido: nada; la capacidad de 8 a 15 usuarios se confirma solo cuando se repita en el servidor real.
+
+---
+
+# Pendientes (pausa del 2026-11-08)
+
+## Decisiones que dependen del cliente
+- Dominio: ¿ya tienen uno? Debe registrarlo y pagarlo la empresa (10 a 15 USD/año). Necesario para HTTPS, para enviar correo con Resend y para Cloudflare/captcha.
+- ¿Sus clientes finales entran al sitio (portal «Mis proyectos») o el sistema es solo para los 3 trabajadores? Si es solo interno: cerrar el registro público y ajustar la propuesta. Opción recomendada: salir primero para los trabajadores con el registro cerrado y activar el portal después.
+- ¿Se mantiene la cotización pública en la página?
+- Copia a Google Drive: cuenta de Google de la empresa que autorice a rclone (una sola vez). Alternativa: otro almacenamiento en la nube. Debe existir una copia fuera del servidor.
+- Porcentajes del plan de cobros por tamaño de proyecto (pequeño 50/50 y grande 20/25/25/20/10 son propuestas sin confirmar), quién actualiza el avance, fecha límite para facturar del año, formatos y tamaño de archivo (propuesta: PDF hasta 25 MB más enlace para archivos grandes), catálogo con o sin precios.
+
+## Por construir (orden propuesto)
+1. Servicio de correo con Resend: resumen semanal al Gerente (desactivable) y recuperación de contraseña (A9, B1).
+2. Excel: importar/exportar proyectos, cobros y presupuesto (B2).
+3. Plantillas de plan de cobros y de documentos por tamaño de proyecto; el plan de cobros editable por porcentaje y no solo por monto (B3, A4).
+4. Seguimiento de ofertas con fecha límite y recordatorio (B4).
+5. Historial de versiones de documentos en pantalla (A8).
+6. Seguridad pendiente: captcha Turnstile, cerrar sesiones al cambiar la contraseña, que el registro no revele si un correo existe, descarga de PDF sin leer el archivo completo en memoria.
+7. Arreglos de rendimiento menores: 3 consultas repetidas (conteo doble de cotizaciones nuevas en el panel, listas de clientes y equipo en cada pestaña del proyecto, Cobros que vuelve a leer el proyecto).
+8. Sección C del archivo de cambios (reportes, solicitud de factura, aprobación de estimaciones, etc.): no se toca sin petición.
+
+## Solo se puede hacer en el servidor de DigitalOcean
+- Repetir la prueba de carga (`npm run load:test`) con el servidor de 1 CPU.
+- Probar la restauración real (`docs/RESTAURACION.md`) y la copia a Drive.
+- HTTPS con Caddy, firewall, cron del respaldo y del aviso de disco, pm2 con una sola instancia.
+- Cambiar las contraseñas de las cuentas de ejemplo (`src/db/seed.ts`) y el `SESSION_SECRET`.
+
+## Para tu documento al cliente
+Cambia respecto a lo prometido: respaldo de base y PDF juntos y diario; aviso de disco y de facturación solo dentro del sistema hasta que exista el correo; presupuesto descargable en CSV (no `.xlsx`) hasta la fase de Excel; la capacidad de 8 a 15 usuarios está medida en el equipo de desarrollo y se confirma en el servidor real.
