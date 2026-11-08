@@ -20,7 +20,13 @@ export default async function Cotizar() {
   return (
     <div className="mx-auto max-w-5xl px-4 pb-16 pt-20 sm:px-6 sm:pb-28 sm:pt-32">
       <BackButton />
-      {u ? (
+      {u && u.role !== "usuario" ? (
+        <>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-5xl">{t("Cuenta del equipo")}</h1>
+          <p className="mb-6 mt-2 text-sm text-mute sm:mb-8 sm:mt-3 sm:text-base">{t("Estás con una cuenta del equipo. Las cotizaciones las piden los clientes; las que lleguen las ves en el panel.")}</p>
+          <Link href="/app" className="btn btn-lg">{t("Abrir el panel")}</Link>
+        </>
+      ) : u ? (
         <>
           <h1 className="text-3xl font-semibold tracking-tight sm:text-5xl">{t("Tu cotización personalizada")}</h1>
           <p className="mb-6 mt-2 text-sm text-mute sm:mb-8 sm:mt-3 sm:text-base">

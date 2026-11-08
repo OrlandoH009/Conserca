@@ -853,4 +853,8 @@ export const EN: Record<string, string> = {
   "Gerente de Diseño": "Design Manager",
   "Ing. Diseñador": "Design Engineer",
   "Técnico en Dibujo": "Drafting Technician",
+  "Las cuentas del equipo no solicitan cotizaciones.": "Team accounts cannot request quotes.",
+  "Cuenta del equipo": "Team account",
+  "Estás con una cuenta del equipo. Las cotizaciones las piden los clientes; las que lleguen las ves en el panel.": "You are signed in with a team account. Quotes are requested by clients; the ones that arrive are in the panel.",
+  "Abrir el panel": "Open the panel",
 };
