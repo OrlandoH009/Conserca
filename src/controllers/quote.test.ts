@@ -8,6 +8,8 @@ vi.mock("@/lib/rate-limit", () => ({ limited: vi.fn().mockResolvedValue(false) }
 vi.mock("@/models/quote.model", () => quotes);
 vi.mock("@/models/client.model", () => ({}));
 vi.mock("@/models/project.model", () => ({}));
+vi.mock("@/models/payment.model", () => ({}));
+vi.mock("@/models/notification.model", () => ({}));
 vi.mock("./activity.controller", () => ({ record: vi.fn(), notifyStaff: vi.fn() }));
 
 const TEAM = "Las cuentas del equipo no solicitan cotizaciones.";

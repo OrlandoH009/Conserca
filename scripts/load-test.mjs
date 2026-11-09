@@ -16,7 +16,6 @@ const LIMIT_MS = 1500;
 const sql = await mysql.createConnection(process.env.DATABASE_URL);
 const [people] = await sql.query("SELECT id, role FROM users WHERE email IN ('admin@conserca.test','ingenieria@conserca.test','dibujo@conserca.test','cliente@conserca.test')");
 const [[proj]] = await sql.query("SELECT id FROM projects WHERE archived_at IS NULL ORDER BY id LIMIT 1");
-const [docs] = await sql.query("SELECT id FROM documents WHERE file_path IS NOT NULL LIMIT 1");
 await sql.end();
 if (!people.length || !proj) { console.error("Faltan usuarios de prueba o proyectos en la base."); process.exit(1); }
 
@@ -24,12 +23,11 @@ const key = new TextEncoder().encode(process.env.SESSION_SECRET);
 const token = (uid) => new SignJWT({ uid }).setProtectedHeader({ alg: "HS256" }).setExpirationTime("1h").sign(key);
 const P = proj.id;
 const PAGES = {
-  admin: ["/app", "/app/proyectos", `/app/proyectos/${P}?tab=cobros`, `/app/proyectos/${P}?tab=documentos`, `/app/proyectos/${P}?tab=cargas`, `/app/proyectos/${P}?tab=actividad`, "/app/clientes", "/app/calculadoras", "/app/avisos"],
-  ingenieria: ["/app", "/app/proyectos", `/app/proyectos/${P}?tab=cargas`, `/app/proyectos/${P}?tab=distribucion`, `/app/proyectos/${P}?tab=supervision`, "/app/catalogo", "/app/calculadoras"],
-  dibujo: ["/app", "/app/proyectos", `/app/proyectos/${P}?tab=documentos`, `/app/proyectos/${P}?tab=cargas`],
+  admin: ["/app", "/app/proyectos", `/app/proyectos/${P}?tab=cobros`, `/app/proyectos/${P}?tab=cargas`, `/app/proyectos/${P}?tab=actividad`, "/app/clientes", "/app/calculadoras", "/app/avisos"],
+  ingenieria: ["/app", "/app/proyectos", `/app/proyectos/${P}?tab=cargas`, `/app/proyectos/${P}?tab=distribucion`, "/app/calculadoras"],
+  dibujo: ["/app", "/app/proyectos", `/app/proyectos/${P}?tab=cargas`],
   usuario: ["/mis-proyectos", "/avisos", "/", "/servicios"],
 };
-if (docs[0]) { PAGES.admin.push(`/api/documentos/${docs[0].id}`); PAGES.usuario.push("/mis-proyectos"); }
 
 const roles = ["admin", "ingenieria", "dibujo", "usuario"];
 const sessions = [];

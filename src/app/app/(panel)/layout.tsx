@@ -2,6 +2,7 @@ import { getT } from "@/lib/i18n-server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BellLink } from "@/components/app/BellLink";
+import { DeadlineAlert } from "@/components/app/DeadlineAlert";
 import { MobileNav } from "@/components/app/MobileNav";
 import * as DashboardController from "@/controllers/dashboard.controller";
 import { SideNav } from "@/components/app/SideNav";
@@ -17,7 +18,6 @@ const ITEMS: Item[] = [
   { href: "/app", label: "Panel general" },
   { href: "/app/proyectos", label: "Proyectos", area: "proyectos" },
   { href: "/app/calculadoras", label: "Calculadoras", area: "calculos" },
-  { href: "/app/catalogo", label: "Catálogo de equipos", area: "catalogo" },
   { href: "/app/clientes", label: "Clientes y cotizaciones", area: "clientes" },
   { href: "/app/usuarios", label: "Usuarios y permisos", area: "usuarios" },
 ];
@@ -27,7 +27,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   const u = await currentUser();
   if (!u) redirect("/app/login");
   if (u.role === "usuario") redirect("/"); // cuentas del sitio: sin panel interno
-  const badges = await DashboardController.badges();
+  const [badges, deadlines] = await Promise.all([DashboardController.badges(), DashboardController.deadlines()]);
   const items: Item[] = ITEMS.filter((i) => !i.area || can(u.role, i.area)).map((i) => (i.href === "/app/clientes" && badges.newQuotes ? { ...i, badge: badges.newQuotes } : i));
   return (
     <div className="min-h-screen lg:flex">
@@ -43,7 +43,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         </div>
       </aside>
       <MobileNav items={items} name={u.name} role={t(ROLE_LABEL[u.role])} unread={badges.unread} logout={logout} />
-      <main id="contenido" tabIndex={-1} className="min-w-0 flex-1 outline-none p-4 pt-[4.5rem] sm:p-6 sm:pt-[4.5rem] lg:p-8 print:p-0">{children}</main>
+      <main id="contenido" tabIndex={-1} className="min-w-0 flex-1 outline-none p-4 pt-[4.5rem] sm:p-6 sm:pt-[4.5rem] lg:p-8 print:p-0">{deadlines.length > 0 && <DeadlineAlert rows={deadlines} />}{children}</main>
     </div>
   );
 }

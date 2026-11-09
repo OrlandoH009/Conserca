@@ -33,7 +33,8 @@ export const quotes = mysqlTable("quotes", {
   email: varchar("email", { length: 200 }),
   phone: varchar("phone", { length: 40 }),
   message: text("message").notNull(),
-  status: varchar("status", { length: 20 }).$type<"nueva" | "en_proceso" | "respondida">().notNull().default("nueva"),
+  status: varchar("status", { length: 20 }).$type<"nueva" | "en_proceso" | "respondida" | "aceptada" | "rechazada">().notNull().default("nueva"),
+  rejectReason: varchar("reject_reason", { length: 500 }), // por qué se rechazó; lo ve quien la envió
   userId: int("user_id").references(() => users.id, { onDelete: "set null" }), // cuenta que la envió (cotización personalizada)
   projectId: int("project_id").references(() => projects.id, { onDelete: "set null" }), // proyecto creado a partir de ella
   details: json("details").$type<QuoteDetails>(), // opciones elegidas, para mostrarlas ordenadas

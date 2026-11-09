@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f4f7fa;
-  --ink: #1c2733;
-  --mute: #5d6b7a;
-  --line: #d9e1e9;
+  --bg: #f3f7fc;
+  --ink: #14233a;
+  --mute: #56687f;
+  --line: #d5e1ef;
   /* --accent: texto, enlaces y bordes de acento. --accent-solid(-2): rellenos con texto blanco (≥ 4.5:1). --field-line: borde de campos (≥ 3:1). */
-  --accent: #0a7099;
-  --accent-solid: #0a7099;
-  --accent-solid-2: #0b7ea8;
-  --field-line: #7f8e9d;
-  --soft: #e3f3f9;
+  --accent: #0b55b3;
+  --accent-solid: #0b55b3;
+  --accent-solid-2: #1262c7;
+  --field-line: #768aa3;
+  --soft: #e4effb;
   --surface: #ffffff;
   /* Acento monocromo (negro/blanco): paneles y cifras minimalistas. En oscuro se invierte. */
   --mono: #0a0a0a;
@@ -21,19 +21,19 @@
 @custom-variant dark (&:where(.dark, .dark *));
 .dark {
   color-scheme: dark;
-  --bg: #0b1118;
-  --surface: #121b25;
-  --ink: #e6edf3;
-  --mute: #9aa9b8;
-  --line: #243242;
-  --accent: #29a9da;
-  --field-line: #5d6e7f;
-  --soft: rgba(41, 169, 218, 0.16);
+  --bg: #081426;
+  --surface: #0f2038;
+  --ink: #e8f0fa;
+  --mute: #a3b6cf;
+  --line: #1f3a5c;
+  --accent: #4db2f5;
+  --field-line: #5f7c9f;
+  --soft: rgba(77, 178, 245, 0.16);
   --mono: #f5f5f5;
   --on-mono: #0a0a0a;
 }
 /* Colores fijos de Tailwind que no salen de las variables: se reasignan solo en oscuro. */
-.dark .input { background-color: #0e1721; }
+.dark .input { background-color: #0b1a30; }
 .dark .bg-slate-50, .dark .hover\:bg-slate-50:hover { background-color: rgba(255, 255, 255, 0.04); }
 .dark .bg-slate-100 { background-color: rgba(255, 255, 255, 0.07); }
 .dark .bg-slate-300 { background-color: #3b4a5a; }
@@ -173,7 +173,7 @@ a.card:active { transform: scale(.98); }
 /* Impresión: siempre en claro aunque el sitio esté en modo oscuro (si no, el texto claro sale casi invisible sobre el papel). */
 @media print {
   @page { margin: 16mm 14mm; }
-  :root, .dark { color-scheme: light; --bg: #fff; --surface: #fff; --ink: #111827; --mute: #374151; --line: #d1d5db; --accent: #0a7099; --soft: #f1f5f9; --field-line: #9ca3af; --mono: #0a0a0a; --on-mono: #fff; }
+  :root, .dark { color-scheme: light; --bg: #fff; --surface: #fff; --ink: #111827; --mute: #374151; --line: #d1d5db; --accent: #0b55b3; --soft: #f1f5f9; --field-line: #9ca3af; --mono: #0a0a0a; --on-mono: #fff; }
   body { background: #fff !important; color: #111827 !important; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .dark .bg-amber-50, .dark .bg-amber-100 { background-color: #fef3c7; }

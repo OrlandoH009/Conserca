@@ -12,12 +12,6 @@ import { daysLate } from "@/lib/project";
 
 const BAR = { en_proceso: "bg-accent-solid", en_revision: "bg-amber-500", entregado: "bg-emerald-500", atrasado: "bg-red-500" } as const;
 
-/** "hoy", "mañana" o "en N días" para una fecha YYYY-MM-DD. */
-function cuando(date: string, t: (es: string, vars?: Record<string, string | number>) => string) {
-  const d = Math.round((new Date(date).getTime() - new Date(todayISO()).getTime()) / 864e5);
-  return d <= 0 ? t("hoy") : d === 1 ? t("mañana") : t("en {n} días", { n: d });
-}
-
 export default async function Panel({ searchParams }: PageProps<"/app">) {
   const t = await getT();
   const sp = await searchParams;
@@ -26,8 +20,6 @@ export default async function Panel({ searchParams }: PageProps<"/app">) {
   const kpis: [string, number | null, string][] = [
     [t("Proyectos activos"), s.active, "/app/proyectos"],
     [t("Cotizaciones por responder"), s.newQuotes, "/app/clientes?estado=nueva"],
-    [t("Visitas programadas"), s.scheduled, "/app/proyectos"],
-    [t("Documentos por revisar"), s.toReview, "/app/proyectos"],
     [t("Proyectos vencidos"), s.overdue.length, "/app/proyectos"],
     [t("Por facturar"), s.payments ? s.payments.toInvoice.length : null, "#cobros"],
   ];
@@ -40,7 +32,6 @@ export default async function Panel({ searchParams }: PageProps<"/app">) {
     ["/app/proyectos", t("Ver proyectos")],
     ...(u && can(u.role, "clientes") ? ([["/app/clientes", s.newQuotes ? t("Cotizaciones ({n} nuevas)", { n: s.newQuotes }) : t("Cotizaciones")]] as [string, string][]) : []),
     ...(u && can(u.role, "calculos") ? ([["/app/calculadoras", t("Calculadoras")]] as [string, string][]) : []),
-    ...(u && can(u.role, "catalogo") ? ([["/app/catalogo", t("Catálogo de equipos")]] as [string, string][]) : []),
   ];
 
   return (
@@ -50,7 +41,7 @@ export default async function Panel({ searchParams }: PageProps<"/app">) {
       {pay && unbilled > 0 && nearYearEnd(todayISO()) && (
         <p className="mb-5 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">{t("Se acerca el cierre de año: hay {n} cobros sin facturar. Revisa que ninguno se quede fuera.", { n: unbilled })}</p>
       )}
-      <div className={`grid gap-4 sm:grid-cols-2 ${shown.length > 5 ? "xl:grid-cols-6" : "xl:grid-cols-5"}`}>
+      <div className={`grid gap-4 sm:grid-cols-2 ${shown.length > 3 ? "xl:grid-cols-4" : "xl:grid-cols-3"}`}>
         {shown.map(([l, v, href]) => (
           <Link key={l} href={href} className="card transition hover:-translate-y-0.5 hover:shadow-md">
             <p className="text-sm text-mute">{l}</p>
@@ -121,16 +112,6 @@ export default async function Panel({ searchParams }: PageProps<"/app">) {
               ))}
             </section>
           )}
-
-          <section className="card">
-            <h2 className="mb-3 font-bold">{t("Próximas visitas")}</h2>
-            {s.upcoming.length === 0 ? <Empty>{t("No hay visitas programadas.")}</Empty> : s.upcoming.map((v) => (
-              <Link key={v.id} href={`/app/proyectos/${v.projectId}?tab=supervision`} className="flex items-center justify-between gap-3 border-b border-slate-100 py-3 last:border-0">
-                <div className="min-w-0"><p className="font-semibold">{fmtDate(v.date)} <span className="text-sm font-normal text-mute">· {cuando(v.date, t)}</span></p><p className="truncate text-sm text-mute">{v.project}</p></div>
-                <Badge tone="b">{t("Supervisión")}</Badge>
-              </Link>
-            ))}
-          </section>
 
           {s.overdue.length > 0 && (
             <section className="card">

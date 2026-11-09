@@ -24,8 +24,12 @@ export async function removeClient(fd: FormData): Promise<R> {
   return run(async () => { await ClientController.remove(fd); touch(); });
 }
 
-export async function setQuoteStatus(fd: FormData): Promise<R> {
-  return run(async () => { await QuoteController.setStatus(fd); touch(); });
+export async function contactQuote(fd: FormData): Promise<R> {
+  return run(async () => { await QuoteController.markContacted(fd); touch(); });
+}
+
+export async function rejectQuote(_p: R, fd: FormData): Promise<R> {
+  return run(async () => { await QuoteController.reject(fd); touch(); });
 }
 
 export async function removeQuote(fd: FormData): Promise<R> {

@@ -25,10 +25,12 @@ const SECTIONS: LegalSection[] = [
         "Cuenta: nombre, correo electrónico, teléfono o WhatsApp y contraseña (esta última se guarda cifrada, nunca en texto legible).",
         "Cotización rápida: nombre, teléfono y el texto que escribas sobre lo que necesitas.",
         "Cotización personalizada: tipo de espacio, servicios, tamaño, etapa y plazo de tu proyecto, y el detalle opcional que agregues.",
-        "Proyecto: el nombre, avance, etapa, fechas, visitas de supervisión y documentos (PDF) que el equipo prepara o gestiona para ti.",
-        "Técnicos: una cookie de sesión para mantenerte conectado y tu preferencia de tema claro u oscuro, guardada en tu navegador.",
+        "Proyecto: el nombre, tipo de espacio, avance, etapa, fechas, honorarios, presupuesto estimado y estado de los cobros que el equipo gestiona para ti, incluidos los de proyectos anteriores que Conserca cargue en el sistema desde sus registros.",
+        "Facturación: nombre de la empresa, persona de contacto, NIT o NRC, correo para enviar la factura y quién autoriza facturar.",
+        "Solicitudes: el estado de cada cotización y, si se rechaza, el motivo que indique el equipo.",
+        "Técnicos: una cookie de sesión para mantenerte conectado, tus preferencias de tema e idioma guardadas en tu navegador y tu dirección IP, que se usa de forma temporal para limitar intentos abusivos.",
       ],
-      "No pedimos datos de pago ni datos personales sensibles (salud, religión, ideología, origen u otros semejantes) y te pedimos que no los incluyas en los textos libres.",
+      "No pedimos datos de tarjetas ni de cuentas bancarias, ni datos personales sensibles (salud, religión, ideología, origen u otros semejantes) y te pedimos que no los incluyas en los textos libres.",
     ],
   },
   {
@@ -37,8 +39,8 @@ const SECTIONS: LegalSection[] = [
       "Usamos tus datos únicamente para lo necesario para atenderte:",
       [
         "crear y administrar tu cuenta y verificar tu identidad al iniciar sesión;",
-        "responder tus solicitudes de cotización y contactarte por el teléfono o correo que nos diste;",
-        "prestar y documentar el servicio contratado, y mostrarte el avance y los documentos de tus proyectos;",
+        "responder tus solicitudes de cotización, avisarte si se aceptan o se rechazan y contactarte por el teléfono, WhatsApp o correo que nos diste;",
+        "prestar y documentar el servicio contratado, emitir la facturación y mostrarte el avance de tus proyectos;",
         "mantener la seguridad del sitio y prevenir abusos o fraudes;",
         "cumplir obligaciones legales y atender requerimientos de autoridad competente.",
       ],
@@ -55,23 +57,24 @@ const SECTIONS: LegalSection[] = [
     title: "Con quién los compartimos",
     body: [
       [
-        "Equipo de Conserca: solo quienes lo necesitan para su trabajo, con permisos distintos según su función (ingeniería, presupuestos, supervisión o administración).",
-        "Proveedores técnicos que nos prestan infraestructura (por ejemplo, alojamiento del sitio y de la base de datos), que solo pueden tratar los datos para ese fin.",
+        "Equipo de Conserca: solo quienes lo necesitan para su trabajo, con permisos distintos según su función (gerencia, ingeniería o dibujo). Solo la gerencia ve los cobros y los datos de facturación.",
+        "Proveedores técnicos que nos prestan infraestructura (alojamiento del sitio y de la base de datos, y almacenamiento de copias de seguridad), que solo pueden tratar los datos para ese fin.",
+        "Servicios de mensajería: si te contactamos por WhatsApp o correo electrónico, esos servicios tratan tu número o dirección y el mensaje según sus propias condiciones.",
         "Autoridades, cuando una ley o una orden válida lo exija.",
       ],
-      `Si algún proveedor trata datos fuera de ${LEGAL.country}, lo haremos con garantías de protección razonablemente equivalentes. Otros clientes no pueden ver tus proyectos ni tus documentos.`,
+      `Si algún proveedor trata datos fuera de ${LEGAL.country}, lo haremos con garantías de protección razonablemente equivalentes. Otros clientes no pueden ver tus proyectos.`,
     ],
   },
   {
     title: "Cuánto tiempo los conservamos",
     body: [
-      "Mientras tengas una cuenta activa o sean necesarios para atender tu solicitud o el servicio contratado. Después los eliminamos o los dejamos sin posibilidad de identificarte, salvo los que una ley o un contrato nos obligue a conservar por más tiempo (por ejemplo, documentación técnica y de facturación del proyecto).",
+      "Mientras tengas una cuenta activa o sean necesarios para atender tu solicitud o el servicio contratado. Después los eliminamos o los dejamos sin posibilidad de identificarte, salvo los que una ley o un contrato nos obligue a conservar por más tiempo (por ejemplo, documentación técnica y de facturación del proyecto). Las copias de seguridad se reemplazan periódicamente, por lo que un dato eliminado puede permanecer en ellas por un tiempo limitado.",
     ],
   },
   {
     title: "Cómo los protegemos",
     body: [
-      "Aplicamos medidas técnicas y organizativas razonables: contraseñas cifradas, sesión protegida con una cookie que los scripts del navegador no pueden leer, permisos por rol para el equipo y descarga de documentos solo para el cliente dueño del proyecto y el equipo autorizado.",
+      "Aplicamos medidas técnicas y organizativas razonables: contraseñas cifradas, sesión protegida con una cookie que los scripts del navegador no pueden leer, permisos por rol para el equipo, acceso a cada proyecto solo para su cliente y el equipo autorizado, y copias de seguridad.",
       "Ningún sistema es infalible. Si ocurriera un incidente que afecte tus datos, te lo informaremos y avisaremos a la autoridad cuando corresponda.",
     ],
   },
@@ -96,6 +99,7 @@ const SECTIONS: LegalSection[] = [
       [
         "Cookie de sesión («session»): necesaria para mantenerte conectado; dura 7 días o hasta que cierres sesión.",
         "Preferencia de tema («theme»): se guarda solo en tu navegador para recordar si prefieres el modo claro u oscuro.",
+        "Preferencia de idioma («lang»): cookie que recuerda si prefieres español o inglés; dura un año.",
       ],
       "No usamos cookies de publicidad ni de seguimiento de terceros.",
     ],

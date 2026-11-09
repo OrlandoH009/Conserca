@@ -8,7 +8,9 @@ import type { QuoteDetails } from "@/lib/quote-details";
 import { SERVICES } from "@/lib/services";
 import { STAGES } from "@/lib/stages";
 import * as ActivityController from "./activity.controller";
+import * as PaymentController from "./payment.controller";
 import * as ClientModel from "@/models/client.model";
+import * as NotificationModel from "@/models/notification.model";
 import * as ProjectModel from "@/models/project.model";
 import * as QuoteModel from "@/models/quote.model";
 
@@ -99,7 +101,8 @@ export async function submitQuick(fd: FormData): Promise<PublicQuoteResult> {
   return { ok: true };
 }
 
-const STATUSES = ["nueva", "en_proceso", "respondida"] as const;
+const STATUSES = ["nueva", "en_proceso", "respondida", "aceptada", "rechazada"] as const;
+const quoteId = z.coerce.number().int().positive();
 
 /** Cotizaciones con filtro por estado, búsqueda y paginación (para el panel). */
 export async function list(filters: { estado?: string; q?: string; page?: number }) {
@@ -113,10 +116,23 @@ export async function mine() {
   return me ? QuoteModel.listByUser(me.id) : [];
 }
 
-export async function setStatus(fd: FormData) {
+/** Al abrir WhatsApp o el correo: una solicitud nueva pasa a "en proceso". */
+export async function markContacted(fd: FormData) {
   await assertAccess("clientes", "edit");
-  const v = parse(z.object({ id: z.coerce.number().int().positive(), status: z.enum(STATUSES) }), fd);
-  await QuoteModel.setStatus(v.id, v.status);
+  const { id } = parse(z.object({ id: quoteId }), fd);
+  const q = await QuoteModel.findById(id);
+  if (q?.status === "nueva") await QuoteModel.setStatus(id, "en_proceso");
+}
+
+/** Rechaza la solicitud con su motivo y, si la envió una cuenta, se lo avisa. */
+export async function reject(fd: FormData) {
+  await assertAccess("clientes", "edit");
+  const v = parse(z.object({ id: quoteId, reason: z.string().trim().min(3, "Escribe el motivo del rechazo").max(500, "El motivo es muy largo") }), fd);
+  const q = await QuoteModel.findById(v.id);
+  if (!q) throw new UserError("Esa cotización ya no existe");
+  if (q.projectId) throw new UserError("Ya se creó un proyecto con esta cotización");
+  await QuoteModel.reject(v.id, v.reason);
+  if (q.userId) await NotificationModel.create({ userId: q.userId, text: `Tu solicitud de cotización fue rechazada. Motivo: ${v.reason}`.slice(0, 300), href: "/mis-proyectos" });
 }
 
 export async function remove(fd: FormData) {
@@ -124,21 +140,33 @@ export async function remove(fd: FormData) {
   await QuoteModel.remove(parse(z.object({ id: z.coerce.number().int().positive() }), fd).id);
 }
 
-/** Crea el proyecto a partir de una cotización: reutiliza o crea el cliente, liga la cuenta si la hay y deja la cotización "en proceso". */
+/** Acepta una cotización: reutiliza o crea el cliente, crea el proyecto ligado a la cuenta si la hay y reparte los honorarios en sus cobros. */
 export async function convertToProject(fd: FormData) {
   const u = await assertAccess("proyectos", "edit");
   await assertAccess("clientes", "view");
-  const v = parse(z.object({ id: z.coerce.number().int().positive(), name: z.string().trim().min(1, "El nombre es obligatorio").max(200), spaceType: z.string().trim().min(1, "El tipo de espacio es obligatorio").max(100) }), fd);
+  await assertAccess("cobros", "edit");
+  const v = parse(
+    z.object({
+      id: quoteId,
+      name: z.string().trim().min(1, "El nombre es obligatorio").max(200),
+      spaceType: z.string().trim().min(1, "El tipo de espacio es obligatorio").max(100),
+      total: z.coerce.number({ error: "El monto debe ser un número" }).positive("El monto debe ser mayor que 0"),
+      dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Elige una fecha de entrega"),
+    }),
+    fd,
+  );
   const q = await QuoteModel.findById(v.id);
   if (!q) throw new UserError("Esa cotización ya no existe");
   if (q.projectId) throw new UserError("Ya se creó un proyecto con esta cotización");
+  if (q.status === "rechazada") throw new UserError("Esta cotización fue rechazada");
 
   const email = q.email?.toLowerCase() ?? null;
   const existing = email ? await ClientModel.findByEmail(email) : null;
   const clientId = existing?.id ?? (await ClientModel.create({ name: q.name, email, phone: q.phone }));
-  const projectId = await ProjectModel.create({ name: v.name, spaceType: v.spaceType, clientId, clientUserId: q.userId, ownerId: u.id, stage: STAGES[0] });
+  const projectId = await ProjectModel.create({ name: v.name, spaceType: v.spaceType, clientId, clientUserId: q.userId, ownerId: u.id, stage: STAGES[0], dueDate: v.dueDate });
   await QuoteModel.setProject(q.id, projectId);
-  await QuoteModel.setStatus(q.id, "en_proceso");
+  await QuoteModel.setStatus(q.id, "aceptada");
+  await PaymentController.addPlan(projectId, v.total);
   await ActivityController.record(projectId, "proyecto", `Proyecto creado a partir de la cotización del ${fmtDate(q.createdAt.toISOString().slice(0, 10))}`, {
     actorId: u.id,
     notifyClient: `Ya empezamos tu proyecto «${v.name}». Aquí podrás ver su avance y sus documentos.`,

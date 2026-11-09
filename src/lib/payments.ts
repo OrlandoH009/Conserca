@@ -1,10 +1,8 @@
 // Plan de cobros por defecto del diseño HVAC: [concepto, % del contrato, avance (%) desde el cual toca facturar].
 // Son valores de partida; el equipo los ajusta por proyecto.
 export const PLAN = [
-  ["Anticipo", 30, 0],
-  ["Estimación 1", 30, 40],
-  ["Estimación 2", 20, 70],
-  ["Pago final", 20, 100],
+  ["Cobro inicial", 50, 0],
+  ["Cobro final", 50, 100],
 ] as const;
 
 export type PaymentStatus = "pendiente" | "facturado" | "cobrado";

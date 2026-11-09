@@ -1,14 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { can, levelOf, ROLE_LABEL } from "./permissions";
 
+const AREAS = ["proyectos", "calculos", "presupuestos", "cobros", "clientes", "usuarios"] as const;
+
 describe("permisos por rol", () => {
   it("admin edita todo", () => {
-    for (const a of ["proyectos", "documentos", "calculos", "presupuestos", "cobros", "supervision", "clientes", "catalogo", "usuarios"] as const) {
-      expect(can("admin", a, "edit")).toBe(true);
-    }
+    for (const a of AREAS) expect(can("admin", a, "edit")).toBe(true);
   });
-  it("ingeniería hace supervisión pero solo ve presupuestos y no ve clientes", () => {
-    expect(can("ingenieria", "supervision", "edit")).toBe(true);
+  it("ingeniería solo ve presupuestos y no ve clientes", () => {
     expect(can("ingenieria", "presupuestos", "edit")).toBe(false);
     expect(can("ingenieria", "clientes")).toBe(false);
   });
@@ -17,8 +16,7 @@ describe("permisos por rol", () => {
     expect(can("ingenieria", "cobros")).toBe(false);
     expect(can("dibujo", "cobros")).toBe(false);
   });
-  it("técnico en dibujo sube documentos pero no cambia proyectos ni ve clientes", () => {
-    expect(can("dibujo", "documentos", "edit")).toBe(true);
+  it("técnico en dibujo consulta proyectos pero no los cambia ni ve clientes", () => {
     expect(can("dibujo", "proyectos", "edit")).toBe(false);
     expect(can("dibujo", "proyectos")).toBe(true);
     expect(can("dibujo", "clientes")).toBe(false);
@@ -28,9 +26,7 @@ describe("permisos por rol", () => {
     expect(levelOf("admin", "usuarios")).toBe("edit");
   });
   it("la cuenta de sitio (usuario) no accede a ninguna área del panel", () => {
-    for (const a of ["proyectos", "documentos", "calculos", "presupuestos", "cobros", "supervision", "clientes", "catalogo", "usuarios"] as const) {
-      expect(can("usuario", a)).toBe(false);
-    }
+    for (const a of AREAS) expect(can("usuario", a)).toBe(false);
   });
   it("el rol «usuario» se muestra como Cliente", () => {
     expect(ROLE_LABEL.usuario).toBe("Cliente");

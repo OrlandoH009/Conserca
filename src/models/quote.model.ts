@@ -21,6 +21,7 @@ export async function list(opts: { status?: QuoteStatus; q?: string; page?: numb
 export const findById = async (id: number) => (await db.select().from(quotes).where(eq(quotes.id, id)))[0] ?? null;
 export const create = async (v: typeof quotes.$inferInsert) => (await db.insert(quotes).values(v).$returningId())[0].id;
 export const setStatus = (id: number, status: QuoteStatus) => db.update(quotes).set({ status }).where(eq(quotes.id, id));
+export const reject = (id: number, rejectReason: string) => db.update(quotes).set({ status: "rechazada", rejectReason }).where(eq(quotes.id, id));
 export const setProject = (id: number, projectId: number) => db.update(quotes).set({ projectId }).where(eq(quotes.id, id));
 export const remove = (id: number) => db.delete(quotes).where(eq(quotes.id, id));
 export const countByStatus = (status: QuoteStatus) => db.$count(quotes, eq(quotes.status, status));

@@ -22,7 +22,7 @@ const SECTIONS: LegalSection[] = [
   {
     title: "Qué ofrece el sitio",
     body: [
-      "El sitio presenta nuestros servicios, recibe solicitudes de cotización y, para quienes tienen cuenta, permite consultar el avance de sus proyectos y descargar los documentos que se les entregan.",
+      "El sitio presenta nuestros servicios, recibe solicitudes de cotización y, para quienes tienen cuenta, permite consultar el avance de sus proyectos y el estado de sus solicitudes.",
       "Nuestros servicios son de cálculo, diseño técnico y supervisión. La ejecución material de obras o instalaciones no forma parte de ellos, salvo que se pacte por escrito.",
     ],
   },
@@ -38,6 +38,7 @@ const SECTIONS: LegalSection[] = [
     title: "Cotizaciones y contratación",
     body: [
       "Enviar una solicitud de cotización no crea ningún contrato ni obligación de contratar para ninguna de las partes. Las cifras y alcances que te demos antes de firmar son estimaciones.",
+      "Conserca puede aceptar o rechazar una solicitud, e indicarte el motivo del rechazo. Aceptar una solicitud en el sitio significa que abrimos un proyecto para darle seguimiento; por sí solo no sustituye la propuesta o el contrato del párrafo siguiente.",
       "El servicio se contrata solo mediante una propuesta o contrato que ambas partes acepten por escrito, donde se fijan alcance, precio, plazos y forma de pago. Si hay diferencia entre estos Términos y ese documento, prevalece el documento firmado en lo que trate del proyecto.",
     ],
   },
@@ -67,16 +68,16 @@ const SECTIONS: LegalSection[] = [
   {
     title: "Uso aceptable",
     body: [
-      "Te comprometes a no usar el sitio para fines ilegales, a no intentar acceder a cuentas, documentos o sistemas que no te correspondan, a no subir archivos con virus o código dañino, y a no interferir con su funcionamiento ni sobrecargarlo.",
+      "Te comprometes a no usar el sitio para fines ilegales, a no intentar acceder a cuentas, documentos o sistemas que no te correspondan, a no enviar código dañino, y a no interferir con su funcionamiento ni sobrecargarlo.",
       "Al subir o enviar contenido (por ejemplo, el texto de una cotización) declaras que es lícito y que no vulnera derechos de terceros.",
     ],
   },
   {
     title: "Datos personales",
     body: [
-      "Tratamos los datos que nos das (nombre, correo, teléfono, contraseña, el contenido de tus cotizaciones y los documentos de tus proyectos) para crear y mantener tu cuenta, responder cotizaciones, prestar y documentar los servicios, mostrarte el avance de tus proyectos y cumplir obligaciones legales.",
-      "No vendemos tus datos. Solo los compartimos con quien sea necesario para prestarte el servicio o cuando una autoridad competente lo exija. Tu contraseña se guarda cifrada y los documentos de tu proyecto solo pueden verlos tú y el equipo de Conserca que trabaja en él.",
-      "Usamos una cookie de sesión, necesaria para que permanezcas conectado, y guardamos en tu navegador tu preferencia de tema claro u oscuro. No usamos cookies de publicidad.",
+      "Tratamos los datos que nos das (nombre, correo, teléfono, contraseña, el contenido de tus cotizaciones y los datos de tus proyectos) para crear y mantener tu cuenta, responder cotizaciones, prestar y documentar los servicios, mostrarte el avance de tus proyectos y cumplir obligaciones legales.",
+      "No vendemos tus datos. Solo los compartimos con quien sea necesario para prestarte el servicio o cuando una autoridad competente lo exija. Tu contraseña se guarda cifrada y el avance de tu proyecto solo pueden verlo tú y el equipo de Conserca.",
+      "Usamos una cookie de sesión, necesaria para que permanezcas conectado, y guardamos en tu navegador tus preferencias de tema claro u oscuro y de idioma. No usamos cookies de publicidad.",
       `Conservamos tus datos mientras tengas cuenta o sean necesarios para el servicio y las obligaciones legales. Puedes pedir acceso, corrección o eliminación de tus datos, u oponerte a su uso, ${contactVia("escribiéndonos")}. Todo el detalle está en nuestro Aviso de privacidad (/privacidad). Algunos datos podrán conservarse si una ley o un contrato lo exige.`,
     ],
   },

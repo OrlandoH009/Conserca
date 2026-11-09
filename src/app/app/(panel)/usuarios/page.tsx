@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT())("Usuarios y permisos") };
 }
 
-const AREAS: [Area, string][] = [["proyectos", "Proyectos"], ["documentos", "Documentos"], ["calculos", "Cálculos"], ["presupuestos", "Presupuestos"], ["cobros", "Cobros"], ["supervision", "Supervisión"], ["clientes", "Clientes"], ["catalogo", "Catálogo"], ["usuarios", "Usuarios"]];
+const AREAS: [Area, string][] = [["proyectos", "Proyectos"], ["calculos", "Cálculos"], ["presupuestos", "Presupuestos"], ["cobros", "Cobros"], ["clientes", "Clientes"], ["usuarios", "Usuarios"]];
 // Texto corto para que la matriz quepa; el nombre largo queda para lectores de pantalla.
 const LV: Record<Level, [string, string, "g" | "b" | "n"]> = { edit: ["Edita", "Puede ver y editar", "g"], view: ["Ve", "Solo puede consultar", "b"], none: ["—", "Sin acceso", "n"] };
 

@@ -29,7 +29,7 @@ export async function Presupuesto({ projectId, canEdit }: { projectId: number; c
       <div className="space-y-5">
         <section className="card overflow-x-auto">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="font-bold">{t("Presupuesto estimado de obra")}</h2>
+            <h2 className="font-bold">{t("Presupuesto estimado de construcción")}</h2>
             {rows.length > 0 && <a href={`/api/proyectos/${projectId}/presupuesto`} download className="btn-ghost px-3 py-1.5 text-xs">{t("Descargar CSV")}</a>}
           </div>
           {rows.length === 0 ? <Empty>{t("Aún no hay partidas.")}</Empty> : (

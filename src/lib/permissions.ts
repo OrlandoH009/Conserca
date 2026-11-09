@@ -1,5 +1,5 @@
 export type Role = "admin" | "ingenieria" | "dibujo" | "usuario";
-export type Area = "proyectos" | "documentos" | "calculos" | "presupuestos" | "cobros" | "supervision" | "clientes" | "catalogo" | "usuarios";
+export type Area = "proyectos" | "calculos" | "presupuestos" | "cobros" | "clientes" | "usuarios";
 export type Level = "none" | "view" | "edit";
 
 export const ROLES: Role[] = ["admin", "ingenieria", "dibujo", "usuario"];
@@ -11,13 +11,13 @@ export const ROLE_LABEL: Record<Role, string> = {
   usuario: "Cliente",
 };
 
-// "cobros" (facturación y pagos) solo lo ve el Gerente, que es quien factura; el Ing. Diseñador hace las visitas de supervisión; "documentos" permite subir planos y memorias sin tocar el estado del proyecto.
+// "cobros" (facturación y pagos) solo lo ve el Gerente, que es quien factura.
 const MATRIX: Record<Role, Record<Area, Level>> = {
-  admin: { proyectos: "edit", documentos: "edit", calculos: "edit", presupuestos: "edit", cobros: "edit", supervision: "edit", clientes: "edit", catalogo: "edit", usuarios: "edit" },
-  ingenieria: { proyectos: "edit", documentos: "edit", calculos: "edit", presupuestos: "view", cobros: "none", supervision: "edit", clientes: "none", catalogo: "edit", usuarios: "none" },
-  dibujo: { proyectos: "view", documentos: "edit", calculos: "view", presupuestos: "none", cobros: "none", supervision: "none", clientes: "none", catalogo: "view", usuarios: "none" },
+  admin: { proyectos: "edit", calculos: "edit", presupuestos: "edit", cobros: "edit", clientes: "edit", usuarios: "edit" },
+  ingenieria: { proyectos: "edit", calculos: "edit", presupuestos: "view", cobros: "none", clientes: "none", usuarios: "none" },
+  dibujo: { proyectos: "view", calculos: "view", presupuestos: "none", cobros: "none", clientes: "none", usuarios: "none" },
   // Cuenta del sitio público: sin acceso al panel interno, solo acciones normales (cotizar, ver el sitio).
-  usuario: { proyectos: "none", documentos: "none", calculos: "none", presupuestos: "none", cobros: "none", supervision: "none", clientes: "none", catalogo: "none", usuarios: "none" },
+  usuario: { proyectos: "none", calculos: "none", presupuestos: "none", cobros: "none", clientes: "none", usuarios: "none" },
 };
 
 export const levelOf = (role: Role, area: Area): Level => MATRIX[role]?.[area] ?? "none";

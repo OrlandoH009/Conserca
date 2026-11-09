@@ -65,9 +65,12 @@ const toId = (s: string | undefined, label: string) => {
 
 export async function create(fd: FormData) {
   const u = await assertAccess("proyectos", "edit");
-  const v = parse(z.object({ name: text("El nombre"), spaceType: text("El tipo de espacio"), clientId: z.string().optional(), dueDate }), fd);
+  const total = z.literal("").or(z.coerce.number({ error: "El monto debe ser un número" }).positive("El monto debe ser mayor que 0")).optional();
+  const v = parse(z.object({ name: text("El nombre"), spaceType: text("El tipo de espacio"), clientId: z.string().optional(), dueDate, total }), fd);
+  if (v.total) await assertAccess("cobros", "edit");
   const projectId = await ProjectModel.create({ name: v.name, spaceType: v.spaceType, clientId: toId(v.clientId, "Cliente"), dueDate: v.dueDate || null, ownerId: u.id, stage: STAGES[0] });
   await ActivityController.record(projectId, "proyecto", "Proyecto creado", { actorId: u.id, visibleToClient: false });
+  if (v.total) await PaymentController.addPlan(projectId, v.total);
 }
 
 /** Cambia los datos básicos del proyecto (nombre, tipo, cliente, responsable y fecha de entrega). */

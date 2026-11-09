@@ -5,22 +5,22 @@ import * as ClientController from "@/controllers/client.controller";
 import * as QuoteController from "@/controllers/quote.controller";
 import { ActionButton } from "@/components/app/ActionButton";
 import { ActionForm, F } from "@/components/app/ActionForm";
-import { AutoSelect } from "@/components/app/AutoSelect";
+import { ContactOptions } from "@/components/app/ContactOptions";
 import { EditDialog } from "@/components/app/EditDialog";
 import { Badge, Empty, PageHead } from "@/components/app/ui";
 import { currentUser } from "@/lib/auth";
 import { fmtDateTime } from "@/lib/format";
+import { CONFIG } from "@/lib/config";
 import { can } from "@/lib/permissions";
 import { detailRows } from "@/lib/quote-details";
 import { whatsappLink } from "@/lib/whatsapp";
-import { addClient, convertQuote, removeClient, removeQuote, setQuoteStatus, updateClient } from "./actions";
+import { addClient, contactQuote, convertQuote, rejectQuote, removeClient, removeQuote, updateClient } from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT())("Clientes y cotizaciones") };
 }
 
-const QS = { nueva: ["Nueva", "b"], en_proceso: ["En proceso", "a"], respondida: ["Respondida", "g"] } as const;
-const LINK = "inline-flex items-center rounded-full border border-line px-3 py-1 text-xs font-semibold text-accent transition hover:bg-soft";
+const QS = { nueva: ["Nueva", "b"], en_proceso: ["En proceso", "a"], respondida: ["Respondida", "g"], aceptada: ["Aceptada", "g"], rechazada: ["Rechazada", "r"] } as const;
 
 async function ClientFields({ c }: { c?: { name: string; contact: string | null; email: string | null; phone: string | null; taxId: string | null; billingEmail: string | null; authorizer: string | null } }) {
   const t = await getT();
@@ -47,7 +47,7 @@ export default async function Clientes({ searchParams }: PageProps<"/app/cliente
 
   const [quotes, clients, u] = await Promise.all([QuoteController.list({ estado, q, page }), ClientController.list(), currentUser()]);
   const canEdit = !!u && can(u.role, "clientes", "edit");
-  const canProject = !!u && can(u.role, "proyectos", "edit");
+  const canAccept = !!u && can(u.role, "proyectos", "edit") && can(u.role, "cobros", "edit");
   const href = (over: Record<string, string>) => `/app/clientes?${new URLSearchParams({ ...(estado ? { estado } : {}), ...(q ? { q } : {}), ...over })}`;
 
   return (
@@ -79,15 +79,9 @@ export default async function Clientes({ searchParams }: PageProps<"/app/cliente
                       {x.name} <span className="text-sm font-normal text-mute">· {fmtDateTime(x.createdAt)}</span>
                       {x.userId && <span className="ml-2 align-middle"><Badge tone="b">{t("Con cuenta")}</Badge></span>}
                     </p>
-                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                      {x.phone && <a href={`tel:${x.phone.replace(/[^\d+]/g, "")}`} className={LINK}>📞 {x.phone}</a>}
-                      {x.phone && <a href={whatsappLink(x.phone, hello)} target="_blank" rel="noopener noreferrer" className={LINK}>{t("WhatsApp")}</a>}
-                      {x.email && <a href={`mailto:${x.email}?subject=${encodeURIComponent(t("Tu cotización en Conserca"))}`} className={LINK}>✉ {x.email}</a>}
-                    </div>
+                    <p className="mt-1 text-sm text-mute">{[x.phone, x.email].filter(Boolean).join(" · ")}</p>
                   </div>
-                  {canEdit ? (
-                    <AutoSelect key={x.status} name="status" value={x.status} options={Object.entries(QS).map(([k, [l]]) => [k, l])} action={setQuoteStatus} fields={{ id: x.id }} label={t("Estado de la cotización de {name}", { name: x.name })} okText={t("Estado de la cotización actualizado")} className="input h-9 w-36 text-xs" />
-                  ) : <Badge tone={tone}>{t(label)}</Badge>}
+                  <Badge tone={tone}>{t(label)}</Badge>
                 </div>
 
                 {x.details ? (
@@ -98,20 +92,39 @@ export default async function Clientes({ searchParams }: PageProps<"/app/cliente
                   </dl>
                 ) : <p className="mt-2 whitespace-pre-line text-sm text-mute">{x.message}</p>}
 
+                {x.status === "rechazada" && x.rejectReason && <p className="mt-2 text-sm"><span className="text-mute">{t("Motivo del rechazo:")}</span> {x.rejectReason}</p>}
+
                 <div className="mt-3 flex flex-wrap items-center gap-4">
+                  {canEdit && x.status !== "rechazada" && (
+                    <EditDialog label={t("Contactar")} title={t("Contactar a {name}", { name: x.name })} className="btn-ghost px-3 py-1.5 text-xs">
+                      <ContactOptions id={x.id} action={contactQuote} whatsapp={x.phone ? whatsappLink(x.phone, hello) : null} email={x.email ? `mailto:${x.email}?subject=${encodeURIComponent(t("Tu cotización en Conserca"))}` : null} />
+                    </EditDialog>
+                  )}
                   {x.projectId ? (
                     <Link href={`/app/proyectos/${x.projectId}`} className="text-sm font-semibold text-accent hover:underline">{t("Ver el proyecto creado →")}</Link>
-                  ) : canProject && (
-                    <EditDialog label={t("Crear proyecto con esta cotización")} title={t("Crear proyecto")} className="btn-ghost px-3 py-1.5 text-xs">
+                  ) : x.status !== "rechazada" && canAccept && (
+                    <EditDialog label={t("Aceptar")} title={t("Aceptar solicitud y crear proyecto")} className="btn px-3 py-1.5 text-xs">
                       <ActionForm action={convertQuote} submit={t("Crear proyecto")} success={t("Proyecto creado")}>
                         <input type="hidden" name="id" value={x.id} />
                         <div className="space-y-3">
                           <F label={t("Nombre del proyecto")} name="name" defaultValue={`${x.details?.space ?? "Proyecto"} · ${x.name}`} />
                           <F label={t("Tipo de espacio")} name="spaceType" defaultValue={x.details?.space ?? ""} placeholder={t("Oficinas, estacionamiento, bodega…")} />
+                          <F label={t("Honorarios del diseño ({currency})", { currency: CONFIG.currency })} name="total" type="number" step="any" />
+                          <F label={t("Fecha límite")} name="dueDate" type="date" />
                         </div>
                         <p className="mt-3 text-xs text-mute">
-                          {x.userId ? t("Se crea el cliente y se liga su cuenta, para que vea el avance en «Mis proyectos». La cotización pasa a «En proceso».") : t("Se crea el cliente. La cotización pasa a «En proceso».")}
+                          {x.userId ? t("Se crea el cliente y se liga su cuenta, para que vea el avance en «Mis proyectos». Los honorarios se reparten en Cobro inicial y Cobro final.") : t("Se crea el cliente. Los honorarios se reparten en Cobro inicial y Cobro final.")}
                         </p>
+                      </ActionForm>
+                    </EditDialog>
+                  )}
+                  {canEdit && !x.projectId && x.status !== "rechazada" && (
+                    <EditDialog label={t("Rechazar")} title={t("Rechazar la solicitud de {name}", { name: x.name })} className="btn-ghost px-3 py-1.5 text-xs">
+                      <ActionForm action={rejectQuote} submit={t("Rechazar")} success={t("Solicitud rechazada")}>
+                        <input type="hidden" name="id" value={x.id} />
+                        <label className="label" htmlFor={`reason-${x.id}`}>{t("Motivo del rechazo")}</label>
+                        <textarea id={`reason-${x.id}`} name="reason" className="input" required minLength={3} maxLength={500} />
+                        <p className="mt-2 text-xs text-mute">{x.userId ? t("La persona verá este motivo en su cuenta.") : t("Esta persona no tiene cuenta: el motivo queda solo aquí. Avísale por WhatsApp.")}</p>
                       </ActionForm>
                     </EditDialog>
                   )}

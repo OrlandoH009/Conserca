@@ -1,5 +1,5 @@
-import { and, count, desc, eq, isNotNull, isNull, lt, ne } from "drizzle-orm";
-import { clients, db, projects, users } from "@/db";
+import { and, count, desc, eq, isNotNull, isNull, lt, lte, ne } from "drizzle-orm";
+import { budgetItems, clients, db, payments, projectEvents, projects, users } from "@/db";
 
 type Project = typeof projects.$inferSelect;
 type ProjectStatus = Project["status"];
@@ -33,7 +33,25 @@ export const remove = (id: number) => db.delete(projects).where(eq(projects.id, 
 export const countActive = () => db.$count(projects, and(ne(projects.status, "entregado"), live));
 /** Proyectos sin entregar cuya fecha de entrega ya pasó (hoy en formato YYYY-MM-DD). */
 export const overdue = (today: string) => db.select().from(projects).where(and(ne(projects.status, "entregado"), live, lt(projects.dueDate, today))).orderBy(projects.dueDate);
+/** Proyectos sin entregar con fecha límite hasta `limit` (YYYY-MM-DD), incluidos los ya vencidos. */
+export const dueSoon = (limit: string) => db.select({ id: projects.id, name: projects.name, dueDate: projects.dueDate }).from(projects).where(and(ne(projects.status, "entregado"), live, lte(projects.dueDate, limit))).orderBy(projects.dueDate);
 export const statusCounts = () => db.select({ status: projects.status, n: count() }).from(projects).where(live).groupBy(projects.status);
+
+export const allNames = async () => (await db.select({ name: projects.name }).from(projects)).map((r) => r.name);
+
+/** Crea un proyecto importado con sus cobros, presupuesto y actividad: o se guarda todo o nada. */
+export const createImported = (
+  v: typeof projects.$inferInsert,
+  pays: Omit<typeof payments.$inferInsert, "projectId">[],
+  budget: number | null,
+  events: Omit<typeof projectEvents.$inferInsert, "projectId">[],
+) =>
+  db.transaction(async (tx) => {
+    const [{ id: projectId }] = await tx.insert(projects).values(v).$returningId();
+    if (pays.length) await tx.insert(payments).values(pays.map((p) => ({ ...p, projectId })));
+    if (budget) await tx.insert(budgetItems).values({ projectId, description: "Presupuesto estimado de construcción", unit: "global", quantity: 1, unitPrice: budget });
+    await tx.insert(projectEvents).values(events.map((e) => ({ ...e, projectId })));
+  });
 
 export const listByClientUser = (userId: number) => db.select().from(projects).where(and(eq(projects.clientUserId, userId), live)).orderBy(desc(projects.createdAt));
 /** Antes de borrar un usuario: sus proyectos se conservan, solo se quita su vínculo (responsable y/o cuenta de cliente). */

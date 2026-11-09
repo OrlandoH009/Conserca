@@ -20,9 +20,7 @@ import { Actividad } from "./tabs/Actividad";
 import { Cargas } from "./tabs/Cargas";
 import { Cobros } from "./tabs/Cobros";
 import { Distribucion } from "./tabs/Distribucion";
-import { Documentos } from "./tabs/Documentos";
 import { Presupuesto } from "./tabs/Presupuesto";
-import { Supervision } from "./tabs/Supervision";
 import { Ventilacion } from "./tabs/Ventilacion";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -33,10 +31,8 @@ const TABS: { key: string; label: string; area: Area; C: (p: { projectId: number
   { key: "cargas", label: "Cargas térmicas", area: "calculos", C: Cargas },
   { key: "distribucion", label: "Distribución de aire", area: "calculos", C: Distribucion },
   { key: "ventilacion", label: "Ventilación mecánica", area: "calculos", C: Ventilacion },
-  { key: "documentos", label: "Documentos", area: "documentos", C: Documentos },
-  { key: "presupuesto", label: "Presupuesto", area: "presupuestos", C: Presupuesto },
+  { key: "presupuesto", label: "Presupuesto estimado de construcción", area: "presupuestos", C: Presupuesto },
   { key: "cobros", label: "Cobros", area: "cobros", C: Cobros },
-  { key: "supervision", label: "Supervisión", area: "supervision", C: Supervision },
   { key: "actividad", label: "Actividad", area: "proyectos", C: Actividad },
 ];
 
@@ -75,7 +71,7 @@ export default async function Proyecto({ params, searchParams }: PageProps<"/app
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="sm:col-span-2"><F label={t("Nombre del proyecto")} name="name" defaultValue={p.name} /></div>
                   <F label={t("Tipo de espacio")} name="spaceType" defaultValue={p.spaceType} />
-                  <F label={t("Fecha de entrega")} name="dueDate" type="date" required={false} defaultValue={p.dueDate ?? ""} />
+                  <F label={t("Fecha límite")} name="dueDate" type="date" required={false} defaultValue={p.dueDate ?? ""} />
                   <F label={t("Cliente")} name="clientId" required={false}>
                     <select key={p.clientId ?? "none"} id="clientId" name="clientId" className="input" defaultValue={p.clientId ?? ""}>
                       <option value="">{t("Sin cliente")}</option>
@@ -95,7 +91,7 @@ export default async function Proyecto({ params, searchParams }: PageProps<"/app
               <>
                 <ActionButton action={restoreProject} fields={{ id: p.id, on: 0 }} okText={t("Proyecto restaurado")} className="btn-ghost">{t("Restaurar")}</ActionButton>
                 {can(u.role, "usuarios", "edit") && (
-                  <ActionButton action={deleteProject} fields={{ id: p.id }} confirm={t("¿Eliminar «{name}» para siempre? Se borran sus cálculos, documentos y PDF. No se puede deshacer.", { name: p.name })} okText={t("Proyecto eliminado")} className="btn-ghost !border-red-300 !text-red-600">{t("Eliminar definitivamente")}</ActionButton>
+                  <ActionButton action={deleteProject} fields={{ id: p.id }} confirm={t("¿Eliminar «{name}» para siempre? Se borra todo lo que contiene. No se puede deshacer.", { name: p.name })} okText={t("Proyecto eliminado")} className="btn-ghost !border-red-300 !text-red-600">{t("Eliminar definitivamente")}</ActionButton>
                 )}
               </>
             ) : (

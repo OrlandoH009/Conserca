@@ -2,7 +2,7 @@
 
 Sitio público y sistema interno de **Conserca**, una empresa que **diseña y supervisa sistemas de aire acondicionado y ventilación mecánica** (no realiza la instalación).
 
-Los clientes piden cotizaciones —rápidas sin cuenta, o personalizadas con cuenta— y con su cuenta siguen el avance de sus proyectos y descargan sus documentos en PDF. El equipo gestiona proyectos, cálculos, presupuestos y supervisión desde un panel con permisos por rol.
+Los clientes piden cotizaciones —rápidas sin cuenta, o personalizadas con cuenta— y con su cuenta siguen el avance de sus proyectos y el estado de sus solicitudes. El equipo gestiona proyectos, cálculos, presupuestos y supervisión desde un panel con permisos por rol.
 
 > **Estado:** uso local. Todos los clientes, proyectos y cifras de la semilla son de ejemplo, y las fórmulas de cálculo son simplificadas: ingeniería debe validarlas antes de usarlas en un proyecto real.
 
@@ -30,26 +30,26 @@ Los clientes piden cotizaciones —rápidas sin cuenta, o personalizadas con cue
 - Ambas llegan al panel en _Clientes y cotizaciones_.
 
 ### Mis proyectos (`/mis-proyectos`)
-- Cada cliente con cuenta ve sus proyectos: estado, etapa, **porcentaje de avance**, fechas con los días que faltan, visitas de supervisión (con conteo de observaciones abiertas y cerradas, sin su texto interno) y los **PDF** de cada documento.
-- El equipo (rol con edición de proyectos) liga la cuenta del cliente al proyecto, actualiza el avance y sube los PDF (máx. 10 MB; el formulario avisa el límite antes de enviar) desde la ficha del proyecto.
-- Los PDF se guardan en `storage/documents/` (fuera de `public/`; no se sube a git) y se descargan por `/api/documentos/[id]`, que solo permite al cliente dueño y al equipo con acceso a proyectos.
+- Cada cliente con cuenta ve sus proyectos: estado, etapa, **porcentaje de avance**, fechas con los días que faltan, la actividad del proyecto y el estado de sus solicitudes (con el motivo si se rechazó).
+- El equipo (rol con edición de proyectos) liga la cuenta del cliente al proyecto y actualiza el avance desde la ficha del proyecto.
 
 ### Páginas legales
 - **Términos y condiciones** (`/terminos`) y **Aviso de privacidad** (`/privacidad`), redactados para El Salvador. Incluyen la reserva de derechos de autor del sitio y de los entregables.
 - Los datos de la empresa están en `src/lib/legal.ts`: **completa `email`** (canal para ejercer derechos sobre datos y avisar infracciones) y cambia `updated` cuando modifiques los textos. Es un borrador: debe revisarlo un abogado antes de publicar.
 
 ### Panel del equipo (`/app`)
-- **Proyectos** con pestañas de cargas térmicas, distribución de aire, ventilación, presupuesto, supervisión y documentos, y memoria imprimible.
+- **Proyectos** con pestañas de cargas térmicas, distribución de aire, ventilación, presupuesto estimado de construcción, cobros (Cobro inicial y Cobro final, 50 % y 50 %) y actividad, y memoria imprimible.
+- **Aviso de fechas límite** arriba de todo el panel: proyectos que vencen en 7 días o menos, o ya vencidos.
+- **Carga de proyectos previos** (`/app/proyectos/importar`, solo Gerente) con la plantilla `public/plantilla-proyectos-previos.xlsx`.
 - **Calculadoras** de carga térmica y flujo de ventilación.
-- **Catálogo** de equipos y materiales (los roles con permiso pueden agregar y quitar).
-- **Clientes y cotizaciones**.
+- **Clientes y cotizaciones**: cada solicitud tiene Contactar (WhatsApp o correo), Aceptar (crea el proyecto) y Rechazar (con motivo).
 - **Usuarios y permisos**: el admin crea, **edita** (datos, rol, contraseña) y **elimina** usuarios. No se puede eliminar ni cambiar el rol de uno mismo, ni quitar al último administrador; los proyectos de un usuario eliminado se conservan.
 
 | Rol | Puede editar | Solo ve |
 |---|---|---|
 | Gerente de Diseño (admin) | todo, incluido cobros y usuarios | — |
-| Ing. Diseñador | proyectos, documentos, cálculos, supervisión, catálogo | presupuestos (sin cobros ni clientes) |
-| Técnico en Dibujo | documentos (planos, memorias, fichas…) | proyectos, cálculos, catálogo |
+| Ing. Diseñador | proyectos, cálculos | presupuestos (sin cobros ni clientes) |
+| Técnico en Dibujo | — | proyectos, cálculos |
 | Cliente | — | sin acceso al panel; ve `/mis-proyectos` |
 
 La matriz completa está en `src/lib/permissions.ts` (fija en el código).

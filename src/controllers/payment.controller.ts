@@ -34,14 +34,20 @@ export async function planOf(projectId: number) {
   return { rows, project: row?.p ?? null, client };
 }
 
-/** Crea los 4 cobros estándar a partir del monto del contrato. Solo si el proyecto aún no tiene plan. */
-export async function createPlan(fd: FormData) {
+/** Reparte los honorarios del diseño en los cobros estándar de un proyecto nuevo. */
+export async function addPlan(projectId: number, total: number) {
   const u = await assertAccess("cobros", "edit");
+  await PaymentModel.createMany(splitPlan(total).map((p) => ({ ...p, projectId })));
+  await ActivityController.record(projectId, "cobro", "Plan de cobros creado", { actorId: u.id, visibleToClient: false });
+}
+
+/** Crea los cobros estándar a partir de los honorarios. Solo si el proyecto aún no tiene plan. */
+export async function createPlan(fd: FormData) {
+  await assertAccess("cobros", "edit");
   const v = parse(z.object({ projectId: id, total: fields.amount }), fd);
   if (!(await ProjectModel.findById(v.projectId))) throw new UserError("Ese proyecto ya no existe");
   if ((await PaymentModel.listByProject(v.projectId)).length > 0) throw new UserError("Este proyecto ya tiene un plan de cobros");
-  await PaymentModel.createMany(splitPlan(v.total).map((p) => ({ ...p, projectId: v.projectId })));
-  await ActivityController.record(v.projectId, "cobro", "Plan de cobros creado", { actorId: u.id, visibleToClient: false });
+  await addPlan(v.projectId, v.total);
   return v.projectId;
 }
 

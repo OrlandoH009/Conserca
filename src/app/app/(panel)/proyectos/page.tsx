@@ -5,6 +5,7 @@ import * as ProjectController from "@/controllers/project.controller";
 import { ActionForm, F } from "@/components/app/ActionForm";
 import { Badge, Empty, PageHead, StatusBadge, PROJECT_STATUS } from "@/components/app/ui";
 import { currentUser } from "@/lib/auth";
+import { CONFIG } from "@/lib/config";
 import { fmtDate } from "@/lib/format";
 import { can } from "@/lib/permissions";
 import { projectCode } from "@/lib/project";
@@ -28,11 +29,13 @@ export default async function Proyectos({ searchParams }: PageProps<"/app/proyec
     currentUser(),
   ]);
   const canEdit = !!me && can(me.role, "proyectos", "edit");
+  const canBill = !!me && can(me.role, "cobros", "edit");
   const keep = (over: Record<string, string>) => `/app/proyectos?${new URLSearchParams({ ...(archivados ? { archivados: "1" } : {}), ...(q ? { q } : {}), ...over })}`;
 
   return (
     <>
-      <PageHead title={archivados ? t("Proyectos archivados") : t("Proyectos")} sub={archivados ? t("No salen en la lista normal ni los ve el cliente") : t("Todos los proyectos de diseño y supervisión")}>
+      <PageHead title={archivados ? t("Proyectos archivados") : t("Proyectos")} sub={archivados ? t("No salen en la lista normal ni los ve el cliente") : t("Todos los proyectos de diseño")}>
+        {canEdit && canBill && !archivados && <Link href="/app/proyectos/importar" className="btn-ghost px-3 py-1.5 text-sm">{t("Cargar proyectos previos")}</Link>}
         {(archivedCount > 0 || archivados) && (
           <Link href={archivados ? "/app/proyectos" : "/app/proyectos?archivados=1"} className="btn-ghost px-3 py-1.5 text-sm">
             {archivados ? t("← Ver proyectos activos") : `${t("Ver archivados")} (${archivedCount})`}
@@ -90,7 +93,8 @@ export default async function Proyectos({ searchParams }: PageProps<"/app/proyec
                   {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </F>
-              <F label={t("Fecha de entrega")} name="dueDate" type="date" required={false} />
+              <F label={t("Fecha límite")} name="dueDate" type="date" required={false} />
+              {canBill && <F label={t("Honorarios del diseño ({currency})", { currency: CONFIG.currency })} name="total" type="number" step="any" required={false} />}
             </div>
           </ActionForm>
         </details>

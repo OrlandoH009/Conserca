@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
   headers: async () => [{ source: "/:path*", headers: SECURITY_HEADERS }],
   devIndicators: false, // quita el logo de Next en la esquina
   allowedDevOrigins: ["192.168.*.*", "*.trycloudflare.com"], // abrir el sitio desde la red local y desde el túnel de Cloudflare
-  experimental: { serverActions: { bodySizeLimit: "12mb" } }, // PDF de hasta 10 MB
+  experimental: { serverActions: { bodySizeLimit: "6mb" } }, // Excel de proyectos previos, de hasta 5 MB
   turbopack: {
     rules: {
       "*.css": {

@@ -1,28 +1,33 @@
 import { currentUser, requireAccess } from "@/lib/auth";
 import { todayISO } from "@/lib/format";
 import { can } from "@/lib/permissions";
-import * as DocumentModel from "@/models/document.model";
+import { addDays, daysUntil } from "@/lib/project";
 import * as PaymentController from "./payment.controller";
 import * as NotificationModel from "@/models/notification.model";
 import * as ProjectModel from "@/models/project.model";
 import * as QuoteModel from "@/models/quote.model";
-import * as VisitModel from "@/models/visit.model";
+
+const WARN_DAYS = 7;
 
 /** Cifras y listas del panel general. Las cotizaciones solo cuentan para quien puede verlas. */
 export async function summary() {
   const u = await requireAccess("proyectos");
-  const [active, toReview, scheduled, newQuotes, recent, upcoming, overdue, byStatus, payments] = await Promise.all([
+  const [active, newQuotes, recent, overdue, byStatus, payments] = await Promise.all([
     ProjectModel.countActive(),
-    DocumentModel.countByStatus("en_revision"),
-    VisitModel.countScheduled(),
     can(u.role, "clientes") ? QuoteModel.countByStatus("nueva") : Promise.resolve(null),
     ProjectModel.listRecent(5),
-    VisitModel.upcoming(5),
     ProjectModel.overdue(todayISO()),
     ProjectModel.statusCounts(),
     can(u.role, "cobros") ? PaymentController.attention() : Promise.resolve(null),
   ]);
-  return { active, toReview, scheduled, newQuotes, recent, upcoming, overdue, byStatus, payments };
+  return { active, newQuotes, recent, overdue, byStatus, payments };
+}
+
+/** Proyectos sin entregar que vencen pronto o ya vencieron: el aviso fijo del panel de los trabajadores. */
+export async function deadlines() {
+  await requireAccess("proyectos");
+  const rows = await ProjectModel.dueSoon(addDays(todayISO(), WARN_DAYS));
+  return rows.map((p) => ({ ...p, days: daysUntil(p.dueDate!) }));
 }
 
 /** Contadores para la barra lateral del panel: cotizaciones nuevas (si puede verlas) y avisos sin leer. */

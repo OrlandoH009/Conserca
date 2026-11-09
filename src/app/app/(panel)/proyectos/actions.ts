@@ -6,25 +6,23 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import * as BudgetController from "@/controllers/budget.controller";
 import * as CalcController from "@/controllers/calc.controller";
-import * as DocumentController from "@/controllers/document.controller";
 import * as PaymentController from "@/controllers/payment.controller";
 import * as ProjectController from "@/controllers/project.controller";
-import * as SupervisionController from "@/controllers/supervision.controller";
+import * as ImportController from "@/controllers/import.controller";
 import { run, type R } from "@/lib/action-utils";
+import type { ImportResult } from "@/lib/project-import";
 
 // Refresca la ficha, la lista, el panel general y la vista del cliente.
 const touch = (projectId: number) => {
   revalidatePath(`/app/proyectos/${projectId}`);
-  revalidatePath("/app/proyectos");
-  revalidatePath("/app");
+  revalidatePath("/app", "layout"); // el aviso de fechas límite vive en el layout del panel
   revalidatePath("/mis-proyectos");
 };
 
 export async function createProject(_p: R, fd: FormData): Promise<R> {
   return run(async () => {
     await ProjectController.create(fd);
-    revalidatePath("/app/proyectos");
-    revalidatePath("/app");
+    revalidatePath("/app", "layout");
   });
 }
 
@@ -66,8 +64,7 @@ export async function restoreProject(fd: FormData): Promise<R> {
 export async function deleteProject(fd: FormData): Promise<R> {
   return run(async () => {
     await ProjectController.remove(fd);
-    revalidatePath("/app/proyectos");
-    revalidatePath("/app");
+    revalidatePath("/app", "layout");
     redirect("/app/proyectos?archivados=1");
   });
 }
@@ -116,27 +113,12 @@ export async function invoicePayment(_p: R, fd: FormData): Promise<R> {
   return setPaymentStatus(fd);
 }
 
-// ---- Supervisión
-export async function addVisit(_p: R, fd: FormData): Promise<R> {
-  return run(async () => touch(await SupervisionController.addVisit(fd)));
-}
-export async function markVisitDone(fd: FormData): Promise<R> {
-  return run(async () => touch(await SupervisionController.markVisitDone(fd)));
-}
-export async function addObservation(_p: R, fd: FormData): Promise<R> {
-  return run(async () => touch(await SupervisionController.addObservation(fd)));
-}
-export async function toggleObservation(fd: FormData): Promise<R> {
-  return run(async () => touch(await SupervisionController.toggleObservation(fd)));
-}
-
-// ---- Documentos
-export async function createDocument(_p: R, fd: FormData): Promise<R> {
-  return run(async () => touch(await DocumentController.create(fd)));
-}
-export async function setDocumentStatus(fd: FormData): Promise<R> {
-  return run(async () => touch(await DocumentController.setStatus(fd)));
-}
-export async function removeDocument(fd: FormData): Promise<R> {
-  return run(async () => touch(await DocumentController.remove(fd)));
+// ---- Carga de proyectos previos
+export async function importProjects(_p: ImportResult, fd: FormData): Promise<ImportResult> {
+  let result: ImportResult = {};
+  const out = await run(async () => {
+    result = await ImportController.importFile(fd);
+    if (result.created) revalidatePath("/app", "layout");
+  });
+  return out.error ? { error: out.error } : result;
 }

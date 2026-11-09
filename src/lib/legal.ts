@@ -7,7 +7,7 @@ export const LEGAL = {
   email: "", // p. ej. "privacidad@tudominio.com"
   // Se nombran sin número de decreto ni de artículo: confirma con tu abogado la versión vigente de cada una.
   laws: "la Ley de Protección al Consumidor, la Ley de Propiedad Intelectual y la Ley para la Protección de Datos Personales",
-  updated: "24 de octubre de 2026", // cambia esta fecha cada vez que cambies los textos legales
+  updated: "9 de noviembre de 2026", // cambia esta fecha cada vez que cambies los textos legales
 };
 
 export const contactVia = (verb: string) =>

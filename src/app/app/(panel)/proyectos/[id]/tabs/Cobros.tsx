@@ -46,7 +46,7 @@ export async function Cobros({ projectId, canEdit }: { projectId: number; canEdi
   const yearEnd = nearYearEnd(todayISO()) && pending.length > 0;
   const missing = client ? [!client.taxId && t("NIT / NRC"), !client.billingEmail && t("Correo para enviar la factura"), !client.authorizer && t("Quién autoriza que se facture")].filter(Boolean) : [];
 
-  const tiles: [string, number][] = [[t("Total del contrato"), total], [t("Facturado"), invoiced], [t("Cobrado"), sum("cobrado")], [t("Falta facturar"), sum("pendiente")]];
+  const tiles: [string, number][] = [[t("Honorarios del diseño"), total], [t("Facturado"), invoiced], [t("Cobrado"), sum("cobrado")], [t("Falta facturar"), sum("pendiente")]];
 
   return (
     <div className="grid gap-5 xl:grid-cols-[2fr_1fr]">
@@ -85,7 +85,7 @@ export async function Cobros({ projectId, canEdit }: { projectId: number; canEdi
                   <p className="text-sm text-mute">
                     {money(r.amount)}{total > 0 && ` · ${Math.round((r.amount / total) * 100)} %`} · {r.dueProgress === 0 ? t("Se factura al iniciar") : t("Se factura al {n} % de avance", { n: r.dueProgress })}
                   </p>
-                  {r.invoicedAt && <p className="text-xs text-mute">{t("Factura")} {r.invoiceNo ?? t("sin número")} · {fmtDate(r.invoicedAt)}{r.paidAt && ` · ${t("Cobrado el")} ${fmtDate(r.paidAt)}`}</p>}
+                  {r.status !== "pendiente" && <p className="text-xs text-mute">{t("Factura")} {r.invoiceNo ?? t("sin número")}{r.invoicedAt && ` · ${fmtDate(r.invoicedAt)}`}{r.paidAt && ` · ${t("Cobrado el")} ${fmtDate(r.paidAt)}`}</p>}
                 </div>
                 {canEdit && (
                   <div className="flex flex-wrap items-center gap-3">
@@ -124,10 +124,10 @@ export async function Cobros({ projectId, canEdit }: { projectId: number; canEdi
         {rows.length === 0 && canEdit && (
           <section className="card">
             <h2 className="mb-1 font-bold">{t("Crear plan de cobros")}</h2>
-            <p className="mb-3 text-sm text-mute">{t("Escribe el monto del contrato y se reparte en {plan}. Después puedes ajustar cada cobro.", { plan: PLAN.map(([l, pct]) => `${t(l)} ${pct} %`).join(", ") })}</p>
+            <p className="mb-3 text-sm text-mute">{t("Escribe los honorarios del diseño y se reparten en {plan}. Después puedes ajustar cada cobro.", { plan: PLAN.map(([l, pct]) => `${t(l)} ${pct} %`).join(", ") })}</p>
             <ActionForm action={createPaymentPlan} submit={t("Crear plan")} success={t("Plan de cobros creado")}>
               <input type="hidden" name="projectId" value={projectId} />
-              <F label={t("Monto del contrato ({currency})", { currency: CONFIG.currency })} name="total" type="number" step="any" />
+              <F label={t("Honorarios del diseño ({currency})", { currency: CONFIG.currency })} name="total" type="number" step="any" />
             </ActionForm>
           </section>
         )}
