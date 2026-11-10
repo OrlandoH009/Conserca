@@ -1,3 +1,4 @@
+import { readSheet } from "read-excel-file/node";
 import { describe, expect, it } from "vitest";
 import { HEADERS, parseDate, parseRows } from "./project-import";
 
@@ -43,6 +44,24 @@ describe("importar proyectos", () => {
     expect(parse(row({ "Avance (%) *": 0 })).errors).toEqual([]);
     expect(parse(row({ "Correo del cliente": "no-es-correo" })).errors[0].col).toBe("Correo del cliente");
     expect(parse(row(), row({ "Nombre del proyecto *": "torre a" })).errors[0]).toMatchObject({ row: 3, msg: "Ese nombre de proyecto está repetido en el archivo" });
+  });
+  it("guarda facturación, responsable y fechas de factura solo si el estado las respalda", () => {
+    const { items, errors } = parse(row({
+      "Correo de facturación": "Pagos@Ejemplo.com", "Quién autoriza la factura": "Ana Pérez", "Responsable (correo del trabajador)": "ing@conserca.com",
+      "Honorarios del diseño (USD)": 9000, "Cobro inicial: estado": "Cobrado", "Cobro inicial: fecha de factura": "01/03/2026", "Cobro inicial: fecha de cobro": "02/03/2026",
+      "Cobro final: fecha de factura": "01/04/2026",
+    }));
+    expect(errors).toEqual([]);
+    expect(items[0]).toMatchObject({ row: 2, billingEmail: "pagos@ejemplo.com", authorizer: "Ana Pérez", ownerEmail: "ing@conserca.com" });
+    expect(items[0].payments.map((p) => [p.invoicedAt, p.paidAt])).toEqual([["2026-03-01", "2026-03-02"], [null, null]]);
+    expect(parse(row({ "Responsable (correo del trabajador)": "x" })).errors[0].col).toBe("Responsable (correo del trabajador)");
+  });
+  it("la plantilla publicada tiene estas columnas y su fila de ejemplo es válida", async () => {
+    const file = "public/plantilla-proyectos-previos.xlsx";
+    expect(parseRows(await readSheet(file, "Proyectos"))).toMatchObject({ headersOk: true, items: [], errors: [] });
+    const ex = parseRows(await readSheet(file, "Ejemplo"));
+    expect(ex.errors).toEqual([]);
+    expect(ex.items).toHaveLength(1);
   });
   it("lee fechas reales, de serie y de texto; rechaza las imposibles", () => {
     expect(parseDate(new Date(Date.UTC(2026, 11, 15)))).toBe("2026-12-15");

@@ -20,6 +20,7 @@ const ITEMS: Item[] = [
   { href: "/app/calculadoras", label: "Calculadoras", area: "calculos" },
   { href: "/app/clientes", label: "Clientes y cotizaciones", area: "clientes" },
   { href: "/app/usuarios", label: "Usuarios y permisos", area: "usuarios" },
+  { href: "/app/avisos", label: "Avisos" },
 ];
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
@@ -28,7 +29,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   if (!u) redirect("/app/login");
   if (u.role === "usuario") redirect("/"); // cuentas del sitio: sin panel interno
   const [badges, deadlines] = await Promise.all([DashboardController.badges(), DashboardController.deadlines()]);
-  const items: Item[] = ITEMS.filter((i) => !i.area || can(u.role, i.area)).map((i) => (i.href === "/app/clientes" && badges.newQuotes ? { ...i, badge: badges.newQuotes } : i));
+  const items: Item[] = ITEMS.filter((i) => !i.area || can(u.role, i.area)).map((i) => ({ ...i, badge: (i.href === "/app/clientes" ? badges.newQuotes : i.href === "/app/avisos" ? badges.unread : 0) || undefined }));
   return (
     <div className="min-h-screen lg:flex">
       <SkipLink />

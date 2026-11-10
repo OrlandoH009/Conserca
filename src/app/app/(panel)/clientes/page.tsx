@@ -13,7 +13,6 @@ import { fmtDateTime } from "@/lib/format";
 import { CONFIG } from "@/lib/config";
 import { can } from "@/lib/permissions";
 import { detailRows } from "@/lib/quote-details";
-import { whatsappLink } from "@/lib/whatsapp";
 import { addClient, contactQuote, convertQuote, rejectQuote, removeClient, removeQuote, updateClient } from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -70,7 +69,6 @@ export default async function Clientes({ searchParams }: PageProps<"/app/cliente
 
           {quotes.rows.length === 0 ? <Empty>{estado || q ? t("No hay cotizaciones con ese filtro.") : t("Aún no llegan solicitudes.")}</Empty> : quotes.rows.map((x) => {
             const [label, tone] = QS[x.status];
-            const hello = t("Hola {name}, te escribimos de Conserca por tu solicitud de cotización.", { name: x.name.split(" ")[0] });
             return (
               <article key={x.id} className="border-b border-slate-100 py-4 last:border-0">
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -97,7 +95,7 @@ export default async function Clientes({ searchParams }: PageProps<"/app/cliente
                 <div className="mt-3 flex flex-wrap items-center gap-4">
                   {canEdit && x.status !== "rechazada" && (
                     <EditDialog label={t("Contactar")} title={t("Contactar a {name}", { name: x.name })} className="btn-ghost px-3 py-1.5 text-xs">
-                      <ContactOptions id={x.id} action={contactQuote} whatsapp={x.phone ? whatsappLink(x.phone, hello) : null} email={x.email ? `mailto:${x.email}?subject=${encodeURIComponent(t("Tu cotización en Conserca"))}` : null} />
+                      <ContactOptions id={x.id} action={contactQuote} phone={x.phone} email={x.email} />
                     </EditDialog>
                   )}
                   {x.projectId ? (

@@ -14,6 +14,9 @@ export const HEADERS = [
   "Correo del cliente",
   "Teléfono / WhatsApp",
   "NIT / NRC",
+  "Correo de facturación",
+  "Quién autoriza la factura",
+  "Responsable (correo del trabajador)",
   "Tipo de espacio *",
   "Etapa actual *",
   "Estado *",
@@ -22,7 +25,7 @@ export const HEADERS = [
   "Fecha límite",
   "Honorarios del diseño (USD)",
   "Presupuesto estimado de construcción (USD)",
-  ...COBROS.flatMap((c) => [`${c}: monto (USD)`, `${c}: estado`, `${c}: N.º de factura`, `${c}: fecha de cobro`]),
+  ...COBROS.flatMap((c) => [`${c}: monto (USD)`, `${c}: estado`, `${c}: N.º de factura`, `${c}: fecha de factura`, `${c}: fecha de cobro`]),
   "Notas",
 ];
 
@@ -32,12 +35,16 @@ const NOTES_MAX = 280; // deja lugar al prefijo dentro de los 300 caracteres de 
 
 export type ImportError = { row: number; msg: string; col?: string };
 export type ImportRow = {
+  row: number;
   name: string;
   client: string;
   contact: string | null;
   email: string | null;
   phone: string | null;
   taxId: string | null;
+  billingEmail: string | null;
+  authorizer: string | null;
+  ownerEmail: string | null;
   spaceType: string;
   stage: string;
   status: (typeof STATUS)[keyof typeof STATUS];
@@ -45,7 +52,7 @@ export type ImportRow = {
   startDate: string | null;
   dueDate: string | null;
   budget: number | null;
-  payments: { label: string; amount: number; dueProgress: number; status: PaymentStatus; invoiceNo: string | null; paidAt: string | null }[];
+  payments: { label: string; amount: number; dueProgress: number; status: PaymentStatus; invoiceNo: string | null; invoicedAt: string | null; paidAt: string | null }[];
   notes: string | null;
 };
 export type ImportResult = {
@@ -89,80 +96,93 @@ export function parseRows(rows: unknown[][]): { headersOk: boolean; items: Impor
     const row = index + 2;
     const before = errors.length;
     const fail = (msg: string, col?: string) => { errors.push({ row, msg, col }); };
-    const raw = (i: number) => cells[i] ?? null;
-    const text = (i: number, max: number) => {
-      const s = raw(i) === null ? "" : String(raw(i)).trim();
-      if (s.length > max) fail("«{col}» es demasiado largo", HEADERS[i]);
+    const raw = (h: string) => {
+      const at = HEADERS.indexOf(h);
+      if (at < 0) throw new Error(`Columna desconocida: ${h}`); // error de programación, no del archivo
+      return cells[at] ?? null;
+    };
+    const empty = (h: string) => raw(h) === null || String(raw(h)).trim() === "";
+    const text = (h: string, max: number) => {
+      const s = empty(h) ? "" : String(raw(h)).trim();
+      if (s.length > max) fail("«{col}» es demasiado largo", h);
       return s;
     };
-    const need = (i: number, max: number) => {
-      const s = text(i, max);
-      if (!s) fail("Falta «{col}»", HEADERS[i]);
+    const need = (h: string, max: number) => {
+      const s = text(h, max);
+      if (!s) fail("Falta «{col}»", h);
       return s;
     };
-    const pick = <T extends string>(i: number, options: readonly T[]) => {
-      const s = need(i, 100);
-      if (s && !options.includes(s as T)) fail("«{col}» no es válido", HEADERS[i]);
+    const pick = <T extends string>(h: string, options: readonly T[]) => {
+      const s = need(h, 100);
+      if (s && !options.includes(s as T)) fail("«{col}» no es válido", h);
       return s as T;
     };
-    const date = (i: number) => {
-      if (raw(i) === null || raw(i) === "") return null;
-      const d = parseDate(raw(i));
-      if (!d) fail("«{col}» no es válido", HEADERS[i]);
+    const mail = (h: string) => {
+      const s = text(h, 190).toLowerCase();
+      if (s && !z.email().safeParse(s).success) fail("«{col}» no es válido", h);
+      return s || null;
+    };
+    const date = (h: string) => {
+      if (empty(h)) return null;
+      const d = parseDate(raw(h));
+      if (!d) fail("«{col}» no es válido", h);
       return d;
     };
-    const amount = (i: number) => {
-      if (raw(i) === null || raw(i) === "") return null;
-      const n = parseAmount(raw(i));
-      if (n === null) fail("«{col}» no es válido", HEADERS[i]);
+    const amount = (h: string) => {
+      if (empty(h)) return null;
+      const n = parseAmount(raw(h));
+      if (n === null) fail("«{col}» no es válido", h);
       return n;
     };
 
-    const name = need(0, 200);
-    const client = need(1, 150);
-    const contact = text(2, 150);
-    const email = text(3, 190).toLowerCase();
-    if (email && !z.email().safeParse(email).success) fail("«{col}» no es válido", HEADERS[3]);
-    const phone = text(4, 40);
-    const taxId = text(5, 40);
-    const spaceType = pick(6, SPACE_TYPES);
-    const stage = pick(7, STAGES);
-    const statusLabel = pick(8, Object.keys(STATUS) as (keyof typeof STATUS)[]);
-    const progress = amount(9);
-    if (progress === null) { if (raw(9) === null || raw(9) === "") fail("Falta «{col}»", HEADERS[9]); }
-    else if (!Number.isInteger(progress) || progress > 100) fail("«{col}» no es válido", HEADERS[9]);
-    const startDate = date(10);
-    const dueDate = date(11);
-    const fee = amount(12);
-    const budget = amount(13);
+    const name = need("Nombre del proyecto *", 200);
+    const client = need("Cliente *", 150);
+    const contact = text("Persona de contacto", 150);
+    const email = mail("Correo del cliente");
+    const phone = text("Teléfono / WhatsApp", 40);
+    const taxId = text("NIT / NRC", 40);
+    const billingEmail = mail("Correo de facturación");
+    const authorizer = text("Quién autoriza la factura", 150);
+    const ownerEmail = mail("Responsable (correo del trabajador)");
+    const spaceType = pick("Tipo de espacio *", SPACE_TYPES);
+    const stage = pick("Etapa actual *", STAGES);
+    const statusLabel = pick("Estado *", Object.keys(STATUS) as (keyof typeof STATUS)[]);
+    const P = "Avance (%) *";
+    const progress = amount(P);
+    if (progress === null) { if (empty(P)) fail("Falta «{col}»", P); }
+    else if (!Number.isInteger(progress) || progress > 100) fail("«{col}» no es válido", P);
+    const startDate = date("Fecha de inicio");
+    const dueDate = date("Fecha límite");
+    const fee = amount("Honorarios del diseño (USD)");
+    const budget = amount("Presupuesto estimado de construcción (USD)");
 
-    const given = COBROS.map((_, c) => {
-      const at = 14 + c * 4;
-      const amt = amount(at);
-      const label = text(at + 1, 20);
-      if (label && !(label in PAY_STATUS)) fail("«{col}» no es válido", HEADERS[at + 1]);
-      return { amt, label, invoice: text(at + 2, 60), paid: date(at + 3), at };
+    const given = COBROS.map((c) => {
+      const h = `${c}: monto (USD)`;
+      const label = text(`${c}: estado`, 20);
+      if (label && !(label in PAY_STATUS)) fail("«{col}» no es válido", `${c}: estado`);
+      return { h, amt: amount(h), label, invoice: text(`${c}: N.º de factura`, 60), invoiced: date(`${c}: fecha de factura`), paid: date(`${c}: fecha de cobro`) };
     });
     const anyAmount = given.some((g) => g.amt);
     const split = fee && !anyAmount ? splitPlan(fee) : null;
     const payments = given.flatMap((g, c) => {
       const amt = split ? split[c].amount : g.amt;
       if (!amt) {
-        if (g.label || g.invoice || g.paid) fail("«{col}» tiene datos pero falta el monto", HEADERS[g.at]);
+        if (g.label || g.invoice || g.invoiced || g.paid) fail("«{col}» tiene datos pero falta el monto", g.h);
         return [];
       }
       const status = PAY_STATUS[g.label] ?? "pendiente";
-      return [{ label: COBROS[c], amount: amt, dueProgress: PLAN[c][2], status, invoiceNo: g.invoice || null, paidAt: status === "cobrado" ? g.paid : null }];
+      // Las fechas solo cuentan si el estado las respalda: un cobro pendiente no tiene factura ni pago.
+      return [{ label: COBROS[c], amount: amt, dueProgress: PLAN[c][2], status, invoiceNo: g.invoice || null, invoicedAt: status === "pendiente" ? null : g.invoiced, paidAt: status === "cobrado" ? g.paid : null }];
     });
     if (fee && anyAmount && payments.reduce((n, p) => n + cents(p.amount), 0) !== cents(fee)) fail("Los cobros no suman los honorarios");
 
-    const notes = text(HEADERS.length - 1, NOTES_MAX);
+    const notes = text("Notas", NOTES_MAX);
     const key = name.toLowerCase();
     if (key && seen.has(key)) fail("Ese nombre de proyecto está repetido en el archivo");
     seen.add(key);
 
     if (errors.length === before)
-      items.push({ name, client, contact: contact || null, email: email || null, phone: phone || null, taxId: taxId || null, spaceType, stage, status: STATUS[statusLabel], progress: progress!, startDate, dueDate, budget: budget || null, payments, notes: notes || null });
+      items.push({ row, name, client, contact: contact || null, email, phone: phone || null, taxId: taxId || null, billingEmail, authorizer: authorizer || null, ownerEmail, spaceType, stage, status: STATUS[statusLabel], progress: progress!, startDate, dueDate, budget: budget || null, payments, notes: notes || null });
   });
   return { headersOk, items, errors };
 }
