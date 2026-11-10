@@ -221,6 +221,7 @@ export const EN: Record<string, string> = {
   "Hace falta para cambiar el teléfono o la contraseña.": "Needed to change the phone or the password.",
   "Perfil actualizado": "Profile updated",
   "Cancelar": "Cancel",
+  "Confirmar": "Confirm",
   "Guardar cambios": "Save changes",
   "Guardando…": "Saving…",
   "Cambios sin guardar": "Unsaved changes",

@@ -14,7 +14,7 @@ export function ProjectTabs({ projectId, tabs, active }: { projectId: number; ta
       <div className="mb-6 flex gap-1 overflow-x-auto overflow-y-hidden border-b border-line">
         {tabs.map((tab, i) => (
           <motion.div key={tab.key} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.05, ease }} className="relative">
-            <Link href={`/app/proyectos/${projectId}?tab=${tab.key}`} scroll={false} className={`block whitespace-nowrap px-4 py-2.5 text-sm transition-colors ${tab.key === active ? "font-semibold text-accent" : "text-mute hover:text-ink"}`}>
+            <Link href={`/app/proyectos/${projectId}?tab=${tab.key}`} scroll={false} replace className={`block whitespace-nowrap px-4 py-2.5 text-sm transition-colors ${tab.key === active ? "font-semibold text-accent" : "text-mute hover:text-ink"}`}>
               {t(tab.label)}
             </Link>
             {tab.key === active && <motion.span layoutId="project-tab-line" className="absolute inset-x-0 -bottom-px h-[3px] rounded-full bg-accent" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}

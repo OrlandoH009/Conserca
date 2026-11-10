@@ -6,6 +6,7 @@ import * as UserController from "@/controllers/user.controller";
 import { ActionForm, F } from "@/components/app/ActionForm";
 import { ConfirmButton } from "@/components/app/ConfirmButton";
 import { PageHead } from "@/components/app/ui";
+import { BackButton } from "@/components/site/BackButton";
 import { currentUser } from "@/lib/auth";
 import { ROLE_LABEL, ROLES } from "@/lib/permissions";
 import { removeUser, updateUser } from "../actions";
@@ -25,6 +26,7 @@ export default async function EditarUsuario({ params }: PageProps<"/app/usuarios
 
   return (
     <>
+      <BackButton fallback="/app/usuarios" />
       <p className="text-sm text-mute"><Link href="/app/usuarios" className="hover:text-accent">{t("Usuarios y permisos")}</Link> / {u.name}</p>
       <PageHead title={t("Editar usuario")} sub={isMe ? t("Esta es tu cuenta: no puedes cambiar tu propio rol ni eliminarla.") : t("Cambia sus datos, su rol o su contraseña.")} />
 

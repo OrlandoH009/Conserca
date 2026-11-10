@@ -134,30 +134,6 @@ export const payments = mysqlTable("payments", {
   createdAt: createdAt(),
 });
 
-export const siteVisits = mysqlTable("site_visits", {
-  id: id(),
-  projectId: projectRef(),
-  visitDate: date("visit_date", { mode: "string" }).notNull(),
-  notes: varchar("notes", { length: 300 }).notNull(),
-  status: varchar("status", { length: 20 }).$type<"programada" | "realizada">().notNull().default("programada"),
-});
-
-export const observations = mysqlTable("observations", {
-  id: id(),
-  visitId: int("visit_id").notNull().references(() => siteVisits.id, { onDelete: "cascade" }),
-  text: varchar("text", { length: 500 }).notNull(),
-  status: varchar("status", { length: 20 }).$type<"abierta" | "cerrada">().notNull().default("abierta"),
-});
-
-export const equipment = mysqlTable("equipment", {
-  id: id(),
-  name: varchar("name", { length: 200 }).notNull(),
-  category: varchar("category", { length: 100 }).notNull(),
-  capacity: varchar("capacity", { length: 100 }).notNull(),
-  brand: varchar("brand", { length: 100 }).notNull().default("Genérico"),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
 // Registro de lo que pasa en un proyecto; `visibleToClient` decide si el cliente lo ve en su línea de tiempo.
 export const projectEvents = mysqlTable("project_events", {
   id: id(),

@@ -9,6 +9,7 @@ import { AutoSelect } from "@/components/app/AutoSelect";
 import { EditDialog } from "@/components/app/EditDialog";
 import { ProgressControl } from "@/components/app/ProgressControl";
 import { Badge, PageHead, ProgressBar, StatusBadge, PROJECT_STATUS } from "@/components/app/ui";
+import { BackButton } from "@/components/site/BackButton";
 import { requireAccess } from "@/lib/auth";
 import { fmtDate } from "@/lib/format";
 import { can, ROLE_LABEL, type Area } from "@/lib/permissions";
@@ -61,6 +62,7 @@ export default async function Proyecto({ params, searchParams }: PageProps<"/app
 
   return (
     <>
+      <BackButton fallback="/app/proyectos" />
       <p className="text-sm text-mute"><Link href="/app/proyectos" className="hover:text-accent">{t("Proyectos")}</Link> / {p.name}</p>
       <PageHead title={p.name} sub={`${projectCode(p.id, p.createdAt)} · ${client ?? account ?? t("Sin cliente")} · ${t(p.spaceType)} · ${t("Entrega")} ${fmtDate(p.dueDate)}`}>
         {canEditProject && (

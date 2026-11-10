@@ -5,6 +5,7 @@ import { useT } from "@/components/site/LocaleProvider";
 import type { R } from "@/lib/action-utils";
 import { Spinner } from "./SubmitButton";
 import { toast } from "./Toaster";
+import { useConfirm } from "./ConfirmButton";
 
 /**
  * Botón que ejecuta una acción del servidor sin recargar: pide confirmación si se le indica, muestra un indicador
@@ -22,8 +23,9 @@ export function ActionButton({
 }) {
   const t = useT();
   const [pending, start] = useTransition();
-  const click = () => {
-    if (confirm && !window.confirm(confirm)) return;
+  const { ask, dialog } = useConfirm();
+  const click = async () => {
+    if (confirm && !(await ask(confirm))) return;
     start(async () => {
       const fd = new FormData();
       for (const [k, v] of Object.entries(fields)) fd.set(k, String(v));
@@ -36,9 +38,12 @@ export function ActionButton({
     });
   };
   return (
-    <button type="button" onClick={click} disabled={pending} aria-busy={pending} className={`inline-flex items-center gap-1.5 disabled:opacity-60 ${className}`}>
-      {pending && <Spinner className="h-3.5 w-3.5" />}
-      {children}
-    </button>
+    <>
+      <button type="button" onClick={click} disabled={pending} aria-busy={pending} className={`inline-flex items-center gap-1.5 disabled:opacity-60 ${className}`}>
+        {pending && <Spinner className="h-3.5 w-3.5" />}
+        {children}
+      </button>
+      {dialog}
+    </>
   );
 }
