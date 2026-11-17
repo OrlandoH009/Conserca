@@ -15,7 +15,7 @@ const LINKS = (user: NavUser) => [
   { href: "/servicios", label: "Servicios", hide: true }, // en móvil se llega desde el botón de la portada
   ...(user
     ? []
-    : [{ href: "/app/login", label: "Iniciar sesión", hide: true }, { href: "/registro", label: "Registro", hide: true }]),
+    : [{ href: "/app/login", label: "Iniciar sesión", hide: true }, { href: "/registro", label: "Crear cuenta", hide: true }]),
 ];
 
 // Enlaces de la barra superior: el de la página actual se marca con color y una línea que se desliza entre secciones.
@@ -26,7 +26,7 @@ export function NavLinks({ user, unread }: { user: NavUser; unread: number }) {
   return (
     <nav className="flex items-center gap-2 text-sm font-medium text-mute sm:gap-7">
       {LINKS(user).map((l) => (
-        <Link key={l.href} href={l.href} aria-current={here(l.href) ? "page" : undefined} className={`relative whitespace-nowrap py-1 transition-colors hover:text-ink ${l.hide ? "hidden sm:block" : ""} ${here(l.href) ? "font-semibold text-accent" : ""}`}>
+        <Link key={l.href} href={l.href} aria-current={here(l.href) ? "page" : undefined} className={`relative whitespace-nowrap py-1 transition-colors hover:text-ink ${l.hide ? "hidden lg:block" : ""} ${here(l.href) ? "font-semibold text-accent" : ""}`}>
           {t(l.label)}
           {/* Línea que crece al entrar. (Antes se deslizaba con layoutId, pero la barra es fija y al cambiar de página con scroll rebotaba desde abajo.) */}
           {here(l.href) && <span className="absolute inset-x-0 -bottom-1 h-0.5 origin-center animate-[bar-grow_.3s_ease-out] rounded-full bg-accent motion-reduce:animate-none" />}
@@ -34,7 +34,7 @@ export function NavLinks({ user, unread }: { user: NavUser; unread: number }) {
       ))}
       {/* Celular: el enlace de texto se cambia por un ícono para que quepa la barra */}
       {!user && (
-        <Link href="/app/login" aria-label={t("Iniciar sesión")} className="flex h-9 w-9 items-center justify-center rounded-full text-mute transition-colors hover:bg-soft hover:text-accent active:scale-90 sm:hidden">
+        <Link href="/app/login" aria-label={t("Iniciar sesión")} className="flex h-9 w-9 items-center justify-center rounded-full text-mute transition-colors hover:bg-soft hover:text-accent active:scale-90 lg:hidden">
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" /></svg>
         </Link>
       )}

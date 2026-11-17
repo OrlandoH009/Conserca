@@ -34,9 +34,13 @@ export default async function Home() {
 
       <section className="bg-surface py-16 sm:py-28">
         <div className="mx-auto max-w-4xl px-6 text-center">
-          <Reveal><h2 className="text-3xl font-semibold leading-tight tracking-tight sm:text-6xl">{t("Calculamos.")}</h2></Reveal>
-          <Reveal delay={0.12}><h2 className="text-3xl font-semibold leading-tight tracking-tight sm:text-6xl">{t("Diseñamos.")}</h2></Reveal>
-          <Reveal delay={0.24}><h2 className="text-3xl font-semibold leading-tight tracking-tight text-accent sm:text-6xl">{t("Supervisamos.")}</h2></Reveal>
+          <Reveal>
+            <h2 className="text-3xl font-semibold leading-tight tracking-tight sm:text-6xl">
+              <span className="block">{t("Calculamos.")}</span>
+              <span className="block">{t("Diseñamos.")}</span>
+              <span className="block text-accent">{t("Supervisamos.")}</span>
+            </h2>
+          </Reveal>
           <Reveal delay={0.36}>
             <p className="mx-auto mt-6 max-w-2xl text-base text-mute sm:mt-8 sm:text-lg">{t("Nos enfocamos en lo que importa: que el sistema esté bien calculado, bien especificado y bien supervisado.")}</p>
           </Reveal>

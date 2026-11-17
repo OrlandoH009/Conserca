@@ -98,7 +98,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-inter),
   .btn-line { border-color: var(--line); color: var(--ink); }
   .btn-line:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
   .card { @apply rounded-2xl border border-line bg-surface p-5; }
-  .input { @apply h-11 w-full rounded-xl border border-field bg-surface px-3 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20; }
+  .input { @apply h-11 w-full rounded-xl border border-field bg-surface px-3 text-base text-ink sm:text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20; }
   textarea.input { @apply h-auto min-h-24 py-2.5; }
   .label { @apply mb-1.5 block text-[13px] font-semibold text-ink/80; }
   .badge { @apply inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold; }

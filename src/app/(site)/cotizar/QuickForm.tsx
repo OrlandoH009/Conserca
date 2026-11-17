@@ -1,13 +1,17 @@
 "use client";
 
-import { useActionState } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 import { useT } from "@/components/site/LocaleProvider";
+import { DETAIL_MAX } from "@/lib/quote-options";
 import { submitQuick, type QuoteState } from "./actions";
 
 /** Cotización básica sin cuenta: nombre, teléfono y una descripción en prosa. */
 export function QuickForm() {
   const t = useT();
   const [state, action, pending] = useActionState<QuoteState, FormData>(submitQuick, {});
+  const [len, setLen] = useState(0);
+  const err = useRef<HTMLParagraphElement>(null);
+  useEffect(() => { if (state.error) err.current?.scrollIntoView({ block: "center" }); }, [state]);
 
   if (state.ok)
     return (
@@ -19,7 +23,8 @@ export function QuickForm() {
     );
 
   return (
-    <form action={action} className="rounded-3xl border border-line bg-surface p-5 sm:p-8 md:p-10">
+    // onSubmit en vez de action={...}: así React no vacía el formulario cuando el servidor devuelve un error.
+    <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); startTransition(() => action(fd)); }} className="rounded-3xl border border-line bg-surface p-5 sm:p-8 md:p-10">
       <h2 className="text-xl font-semibold tracking-tight">{t("Cotización rápida")}</h2>
       <p className="mb-6 mt-1 text-sm text-mute">{t("Sin cuenta: cuéntanos qué necesitas y te contactamos.")}</p>
       <div className="grid gap-4 md:grid-cols-2">
@@ -33,12 +38,13 @@ export function QuickForm() {
         </div>
         <div className="md:col-span-2">
           <label className="label" htmlFor="q-message">{t("¿Qué necesitas?")}</label>
-          <textarea id="q-message" name="message" className="input" required minLength={10} maxLength={1500} placeholder={t("Tipo de espacio, tamaño aproximado, qué servicio buscas y para cuándo…")} />
+          <textarea id="q-message" name="message" className="input" required minLength={10} maxLength={DETAIL_MAX} aria-describedby="q-count" onChange={(e) => setLen(e.target.value.length)} placeholder={t("Tipo de espacio, tamaño aproximado, qué servicio buscas y para cuándo…")} />
+          <p id="q-count" className="mt-1 text-right text-xs text-mute">{len}/{DETAIL_MAX}</p>
         </div>
       </div>
       {/* Campo trampa: las personas no lo ven; los bots lo llenan. */}
       <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="absolute left-[-9999px]" />
-      {state.error && <p role="alert" className="mt-6 rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-700">{t(state.error)}</p>}
+      {state.error && <p ref={err} role="alert" className="mt-6 rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-700">{t(state.error)}</p>}
       <button className="btn btn-lg mt-6 w-full md:w-auto md:px-14" disabled={pending}>{pending ? t("Enviando…") : t("Enviar solicitud")}</button>
       <p className="mt-4 text-xs text-mute">{t("Al enviar aceptas que usemos estos datos para contactarte sobre tu cotización, según nuestros")} <a href="/terminos" target="_blank" className="font-semibold text-accent hover:underline">{t("Términos y condiciones")}</a> {t("y")} <a href="/privacidad" target="_blank" className="font-semibold text-accent hover:underline">{t("Aviso de privacidad")}</a>.</p>
     </form>

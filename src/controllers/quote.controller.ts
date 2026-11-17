@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { parse, UserError } from "@/lib/action-utils";
 import { assertAccess, currentUser, requireAccess } from "@/lib/auth";
-import { fmtDate } from "@/lib/format";
+import { fmtDate, PHONE_MSG, PHONE_RE } from "@/lib/format";
 import { limited } from "@/lib/rate-limit";
 import { CONTACTS, DETAIL_MAX, PLANS, SIZES, SPACE_TYPES, STAGES as QUOTE_STAGES, TIMES, WHEN } from "@/lib/quote-options";
 import type { QuoteDetails } from "@/lib/quote-details";
@@ -38,7 +38,6 @@ export async function submitPublic(fd: FormData): Promise<PublicQuoteResult> {
   const me = await currentUser();
   if (!me) return { error: "Inicia sesión o regístrate para cotizar" };
   if (me.role !== "usuario") return { error: TEAM_ERROR };
-  if (await limited("quote", 10, 60 * 60_000)) return { error: "Demasiados intentos. Espera unos minutos." };
 
   const parsed = QuoteSchema.safeParse({
     space: fd.get("space") ?? undefined,
@@ -53,6 +52,7 @@ export async function submitPublic(fd: FormData): Promise<PublicQuoteResult> {
     detail: String(fd.get("detail") ?? ""),
   });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
+  if (await limited("quote", 10, 60 * 60_000)) return { error: "Demasiados intentos. Espera unos minutos." }; // solo cuenta el envío válido
 
   const v = parsed.data;
   const details: QuoteDetails = { ...v, location: v.location || undefined, detail: v.detail || undefined };
@@ -80,22 +80,20 @@ export async function submitPublic(fd: FormData): Promise<PublicQuoteResult> {
   return { ok: true };
 }
 
-const PHONE = /^[+\d][\d\s().-]{6,}$/;
-
 /** Cotización básica sin cuenta: nombre, teléfono y texto libre. Sin sesión, así que solo valida y guarda. */
 export async function submitQuick(fd: FormData): Promise<PublicQuoteResult> {
   if (fd.get("website")) return { ok: true }; // campo trampa para bots
   const me = await currentUser();
   if (me) return { error: me.role === "usuario" ? "Ya iniciaste sesión: usa la cotización personalizada de tu cuenta." : TEAM_ERROR };
-  if (await limited("quick", 5, 60 * 60_000)) return { error: "Demasiados intentos. Espera unos minutos." };
   const p = z
     .object({
       name: z.string().trim().min(2, "Escribe tu nombre").max(120),
-      phone: z.string().trim().regex(PHONE, "Escribe un teléfono o WhatsApp válido").max(40),
+      phone: z.string().trim().regex(PHONE_RE, PHONE_MSG).max(40),
       message: z.string().trim().min(10, "Cuéntanos un poco más de lo que necesitas").max(DETAIL_MAX, "El texto es muy largo"),
     })
     .safeParse({ name: String(fd.get("name") ?? ""), phone: String(fd.get("phone") ?? ""), message: String(fd.get("message") ?? "") });
   if (!p.success) return { error: p.error.issues[0].message };
+  if (await limited("quick", 5, 60 * 60_000)) return { error: "Demasiados intentos. Espera unos minutos." };
   await QuoteModel.create({ ...p.data, contactMethod: "telefono" });
   await ActivityController.notifyStaff("clientes", `Nueva cotización rápida de ${p.data.name}`, "/app/clientes");
   return { ok: true };

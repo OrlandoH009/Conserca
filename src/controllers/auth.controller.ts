@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { currentUser, endSession, startSession } from "@/lib/auth";
+import { PHONE_MSG, PHONE_RE } from "@/lib/format";
 import { limited } from "@/lib/rate-limit";
 import * as UserModel from "@/models/user.model";
 
@@ -39,19 +40,19 @@ export const logout = () => endSession();
 /** Alta pública: siempre crea una cuenta "usuario" (sin acceso al panel); el rol no viene del formulario. */
 export async function register(fd: FormData): Promise<LoginResult> {
   if (fd.get("website")) return { ok: true }; // campo trampa para bots
-  if (await limited("register", 5, 60 * 60_000)) return { error: "Demasiados intentos. Espera unos minutos.", email: String(fd.get("email") ?? "") };
-  if (!fd.get("terms")) return { error: "Acepta los Términos y condiciones para crear tu cuenta", email: String(fd.get("email") ?? "") };
   const p = z
     .object({
       name: z.string().trim().min(2, "Escribe tu nombre").max(120),
       email: z.email("Escribe un correo válido").transform((s) => s.toLowerCase().trim()),
-      phone: z.string().trim().regex(/^[+\d][\d\s().-]{6,}$/, "Escribe un teléfono o WhatsApp válido").max(40),
+      phone: z.string().trim().regex(PHONE_RE, PHONE_MSG).max(40),
       password: z.string().min(10, "La contraseña debe tener al menos 10 caracteres").max(100),
       confirm: z.string(),
     })
     .refine((v) => v.password === v.confirm, { path: ["confirm"], message: "Las contraseñas no coinciden" })
     .safeParse(Object.fromEntries(["name", "email", "phone", "password", "confirm"].map((k) => [k, String(fd.get(k) ?? "")])));
   if (!p.success) return { error: p.error.issues[0].message, email: String(fd.get("email") ?? "") };
+  if (!fd.get("terms")) return { error: "Acepta los Términos y condiciones para crear tu cuenta", email: p.data.email };
+  if (await limited("register", 5, 60 * 60_000)) return { error: "Demasiados intentos. Espera unos minutos.", email: p.data.email }; // solo cuenta el envío válido
   if (await UserModel.findByEmail(p.data.email)) return { error: "Ya existe una cuenta con ese correo", email: p.data.email };
 
   await UserModel.create({ name: p.data.name, email: p.data.email, phone: p.data.phone, role: "usuario", passwordHash: await bcrypt.hash(p.data.password, 10) });
@@ -59,8 +60,6 @@ export async function register(fd: FormData): Promise<LoginResult> {
   await startSession(u!.id);
   return { ok: true, role: "usuario" };
 }
-
-const PHONE = /^[+\d][\d\s().-]{6,}$/;
 
 /** Edita el perfil propio. El correo no se toca; cambiar teléfono o contraseña exige la contraseña actual. */
 export async function updateProfile(fd: FormData): Promise<LoginResult> {
@@ -72,7 +71,7 @@ export async function updateProfile(fd: FormData): Promise<LoginResult> {
   const p = z
     .object({
       name: z.string().trim().min(2, "Escribe tu nombre").max(120),
-      phone: z.string().trim().max(40).refine((v) => v === "" || PHONE.test(v), "Escribe un teléfono o WhatsApp válido"),
+      phone: z.string().trim().max(40).refine((v) => v === "" || PHONE_RE.test(v), PHONE_MSG),
       newPassword: z.string().max(100),
       confirm: z.string(),
       current: z.string(),

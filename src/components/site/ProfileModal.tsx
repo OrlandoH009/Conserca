@@ -137,7 +137,7 @@ export function ProfileModal({ user, onClose }: { user: U; onClose: () => void }
                     <p className="mt-1 text-sm text-mute">{t("¿Quieres guardarlos antes de salir?")}</p>
                     <div className="mt-5 flex flex-col gap-2">
                       <button className="btn py-2.5" onClick={() => { setAsk(false); form.current?.requestSubmit(); }}>{t("Guardar cambios")}</button>
-                      <button className="btn-ghost py-2.5 !border-red-300 !text-red-600 hover:!bg-red-50" onClick={() => { setAsk(false); close(); }}>{t("Descartar")}</button>
+                      <button className="btn-ghost py-2.5 !border-red-300 !text-red-600 hover:!bg-red-50 dark:hover:!bg-red-950/40" onClick={() => { setAsk(false); close(); }}>{t("Descartar")}</button>
                       <button className="btn-ghost py-2.5" onClick={() => setAsk(false)}>{t("Seguir editando")}</button>
                     </div>
                   </motion.div>

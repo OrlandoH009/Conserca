@@ -45,7 +45,7 @@ export function MobileMenu({ user, unread }: { user: U | null; unread: number })
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="sm:hidden print:hidden">
+      <div className="lg:hidden print:hidden">
         <button onClick={() => setOpen(!open)} aria-label={open ? t("Cerrar menú") : t("Abrir menú")} aria-expanded={open} className="fixed right-3 top-3 z-[60] flex h-11 w-11 cursor-pointer flex-col items-center justify-center gap-[5px] rounded-full border border-line bg-surface/85 shadow-lg backdrop-blur-xl transition active:scale-90">
           <motion.span className="block h-0.5 w-5 rounded-full bg-ink" animate={open ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }} transition={{ duration: 0.3, ease }} />
           <motion.span className="block h-0.5 w-5 rounded-full bg-ink" animate={open ? { opacity: 0, x: 8 } : { opacity: 1, x: 0 }} transition={{ duration: 0.2 }} />

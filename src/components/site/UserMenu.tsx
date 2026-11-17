@@ -61,7 +61,7 @@ export function UserMenu({ user }: { user: U }) {
                 {user.staff && <Link role="menuitem" href="/app" onClick={() => setOpen(false)} className={item}>{t("Mi panel")}</Link>}
                 {!user.staff && <Link role="menuitem" href="/mis-proyectos" onClick={() => setOpen(false)} className={item}>{t("Mis proyectos")}</Link>}
                 <button role="menuitem" onClick={() => { setOpen(false); setEditing(true); }} className={item}>{t("Editar perfil")}</button>
-                <form action={logoutSite}><button role="menuitem" className={`${item} hover:!text-red-600`}>{t("Cerrar sesión")}</button></form>
+                <form action={logoutSite}><button role="menuitem" className={`${item} hover:!text-red-600 dark:hover:!text-red-400`}>{t("Cerrar sesión")}</button></form>
               </div>
             </motion.div>
           )}

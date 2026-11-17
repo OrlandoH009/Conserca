@@ -18,9 +18,9 @@ export async function Nav() {
   const nu = u ? { name: u.name, email: u.email, phone: u.phone, staff: u.role !== "usuario", roleLabel: t(ROLE_LABEL[u.role]) } : null;
   return (
     <>
-      {/* Celular: botón flotante con menú; desde sm, la barra de siempre. */}
+      {/* Celular y tableta: botón flotante con menú; desde lg, la barra de siempre. */}
       <MobileMenu user={nu} unread={unread} />
-      <header className="fixed inset-x-0 top-0 z-50 hidden border-b border-black/5 bg-surface/70 backdrop-blur-xl backdrop-saturate-150 sm:block">
+      <header className="fixed inset-x-0 top-0 z-50 hidden border-b border-black/5 bg-surface/70 backdrop-blur-xl backdrop-saturate-150 lg:block">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link href="/" aria-label={t("Conserca, inicio")}><Logo className="h-11" /></Link>
           <NavLinks unread={unread} user={nu} />
@@ -52,8 +52,8 @@ export async function Footer() {
           {footerLinks(u?.role ?? null).map(([title, links]) => (
             <div key={title}>
               <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink">{t(title)}</p>
-              <ul className="space-y-2">
-                {links.map(([href, label]) => <li key={href}><Link href={href} className="transition-colors hover:text-accent">{t(label)}</Link></li>)}
+              <ul className="md:space-y-2">
+                {links.map(([href, label]) => <li key={href}><Link href={href} className="inline-block py-3 transition-colors hover:text-accent md:py-0">{t(label)}</Link></li>)}
               </ul>
             </div>
           ))}

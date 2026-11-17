@@ -14,8 +14,8 @@ export function LangToggle({ className = "" }: { className?: string }) {
     router.refresh();
   };
   return (
-    <button onClick={change} lang={next} aria-label={next === "en" ? "Switch to English" : "Cambiar a español"} title={next === "en" ? "English" : "Español"} className={`flex h-9 shrink-0 cursor-pointer items-center justify-center rounded-full px-2.5 text-xs font-bold tracking-wide text-mute transition duration-300 hover:bg-soft hover:text-accent active:scale-90 ${className}`}>
-      {next.toUpperCase()}
+    <button onClick={change} aria-label={locale === "es" ? "Cambiar a inglés" : "Switch to Spanish"} title={next === "en" ? "English" : "Español"} className={`flex h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center rounded-full px-2.5 sm:h-9 sm:min-w-0 text-xs font-bold tracking-wide text-mute transition duration-300 hover:bg-soft hover:text-accent active:scale-90 ${className}`}>
+      <span lang={next}>{next.toUpperCase()}</span>
     </button>
   );
 }

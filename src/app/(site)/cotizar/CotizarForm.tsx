@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
-import { useActionState, useState } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 import { CONTACTS, DETAIL_MAX, PLANS, SIZES, SPACE_TYPES, STAGES, TIMES, WHEN } from "@/lib/quote-options";
 import { useT } from "@/components/site/LocaleProvider";
 import { SERVICES } from "@/lib/services";
@@ -11,12 +11,12 @@ import { EASE as ease } from "@/lib/motion";
 type User = { name: string; email: string; phone: string | null };
 
 /** Opción tipo botón: es un radio o un checkbox de verdad, solo que con aspecto de etiqueta. */
-function Chip({ type, name, value, defaultChecked }: { type: "radio" | "checkbox"; name: string; value: string; defaultChecked?: boolean }) {
+function Chip({ type, name, value, defaultChecked, disabled }: { type: "radio" | "checkbox"; name: string; value: string; defaultChecked?: boolean; disabled?: boolean }) {
   const t = useT();
   return (
-    <label className="cursor-pointer">
-      <input type={type} name={name} value={value} defaultChecked={defaultChecked} className="peer sr-only" />
-      <span className="block rounded-xl border-[1.5px] border-field px-4 py-2.5 text-sm font-medium transition duration-200 hover:-translate-y-0.5 hover:border-accent/60 peer-checked:animate-[pop_.35s_cubic-bezier(.34,1.56,.64,1)] peer-checked:border-accent peer-checked:bg-soft peer-checked:font-semibold peer-checked:text-accent peer-focus-visible:ring-2 peer-focus-visible:ring-accent/40">{t(value)}</span>
+    <label className={disabled ? "cursor-not-allowed" : "cursor-pointer"}>
+      <input type={type} name={name} value={value} defaultChecked={defaultChecked} disabled={disabled} className="peer sr-only" />
+      <span className="block rounded-xl peer-disabled:opacity-50 peer-disabled:hover:translate-y-0 peer-disabled:hover:border-field border-[1.5px] border-field px-4 py-2.5 text-sm font-medium transition duration-200 hover:-translate-y-0.5 hover:border-accent/60 peer-checked:animate-[pop_.35s_cubic-bezier(.34,1.56,.64,1)] peer-checked:border-accent peer-checked:bg-soft peer-checked:font-semibold peer-checked:text-accent peer-focus-visible:ring-2 peer-focus-visible:ring-accent/40">{t(value)}</span>
     </label>
   );
 }
@@ -49,6 +49,9 @@ export function CotizarForm({ user }: { user: User }) {
   const t = useT();
   const [state, action, pending] = useActionState<QuoteState, FormData>(submitQuote, {});
   const [more, setMore] = useState(false);
+  const [len, setLen] = useState(0);
+  const err = useRef<HTMLParagraphElement>(null);
+  useEffect(() => { if (state.error) err.current?.scrollIntoView({ block: "center" }); }, [state]);
 
   if (state.ok)
     return (
@@ -61,7 +64,8 @@ export function CotizarForm({ user }: { user: User }) {
 
   return (
     <MotionConfig reducedMotion="user">
-      <form action={action} className="rounded-3xl border border-line bg-surface p-5 sm:p-8 md:p-10">
+      {/* onSubmit en vez de action={...}: así React no vacía el formulario cuando el servidor devuelve un error. */}
+      <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); startTransition(() => action(fd)); }} className="rounded-3xl border border-line bg-surface p-5 sm:p-8 md:p-10">
         <div className="mb-10 rounded-xl bg-soft px-4 py-3 text-sm">
           <p className="font-semibold text-accent">{user.name}</p>
           <p className="text-mute">{[user.phone, user.email].filter(Boolean).join(" · ")}</p>
@@ -86,26 +90,28 @@ export function CotizarForm({ user }: { user: User }) {
 
           <Group title="Cómo te contactamos">
             <Step n={8} title="¿Cómo prefieres que te contactemos?">
-              {CONTACTS.map((v, i) => (user.phone || i > 0) && <Chip key={v} type="radio" name="contact" value={v} defaultChecked={user.phone ? i === 0 : i === 1} />)}
+              {CONTACTS.map((v, i) => <Chip key={v} type="radio" name="contact" value={v} disabled={!user.phone && i === 0} defaultChecked={user.phone ? i === 0 : i === 1} />)}
+              {!user.phone && <p className="basis-full text-xs text-mute">{t("Agrega tu teléfono en Editar perfil para elegir esta opción")}</p>}
             </Step>
             <Step n={9} title="¿En qué horario?">{TIMES.map((v) => <Chip key={v} type="radio" name="time" value={v} />)}</Step>
           </Group>
 
           <div>
-            <button type="button" onClick={() => setMore(!more)} aria-expanded={more} className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-accent transition hover:underline">
+            <button type="button" onClick={() => { setMore(!more); setLen(0); }} aria-expanded={more} className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-accent transition hover:underline">
               <span className={`inline-block transition-transform duration-300 ${more ? "rotate-45" : ""}`}>+</span> {t("Agregar más detalle")} <span className="font-normal text-mute">{t("(opcional)")}</span>
             </button>
             <AnimatePresence initial={false}>
               {more && (
                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease }} className="overflow-hidden">
-                  <textarea name="detail" maxLength={DETAIL_MAX} className="input mt-3" placeholder={t("Medidas, equipos que ya tienes, cualquier dato que ayude…")} />
+                  <textarea name="detail" maxLength={DETAIL_MAX} aria-describedby="detail-count" onChange={(e) => setLen(e.target.value.length)} className="input mt-3" placeholder={t("Medidas, equipos que ya tienes, cualquier dato que ayude…")} />
+                  <p id="detail-count" className="mt-1 text-right text-xs text-mute">{len}/{DETAIL_MAX}</p>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
         </div>
 
-        {state.error && <p role="alert" className="mt-8 rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-700">{t(state.error)}</p>}
+        {state.error && <p ref={err} role="alert" className="mt-8 rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-700">{t(state.error)}</p>}
         <button className="btn btn-lg mt-8 w-full md:w-auto md:px-14" disabled={pending}>{pending ? t("Enviando…") : t("Enviar solicitud")}</button>
       </form>
     </MotionConfig>

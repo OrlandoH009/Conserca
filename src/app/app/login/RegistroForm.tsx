@@ -1,7 +1,7 @@
 "use client";
 
 import { MotionConfig, motion } from "motion/react";
-import { useActionState } from "react";
+import { startTransition, useActionState } from "react";
 import { useT } from "@/components/site/LocaleProvider";
 import { CONFIG } from "@/lib/config";
 import { register, type LoginState } from "./actions";
@@ -14,7 +14,8 @@ export function RegistroForm() {
   const [state, action, pending] = useActionState<LoginState, FormData>(register, {});
   return (
     <MotionConfig reducedMotion="user">
-      <motion.form action={action} className="space-y-3 md:space-y-4" initial="hidden" animate="show" transition={{ staggerChildren: 0.07 }}>
+      {/* onSubmit en vez de action={...}: así React no vacía el formulario cuando el servidor devuelve un error. */}
+      <motion.form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); startTransition(() => action(fd)); }} className="space-y-3 md:space-y-4" initial="hidden" animate="show" transition={{ staggerChildren: 0.07 }}>
         <div className="absolute left-[-9999px]" aria-hidden>
           <label>{t("Sitio web")}<input name="website" tabIndex={-1} autoComplete="off" /></label>
         </div>

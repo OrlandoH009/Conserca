@@ -33,7 +33,7 @@ export function ScrollDown() {
       onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: "smooth" })}
       aria-label={t("Seguir bajando")}
       tabIndex={show ? 0 : -1}
-      className={`fixed bottom-4 left-1/2 z-40 -translate-x-1/2 cursor-pointer text-accent transition-opacity duration-500 ${show ? "opacity-60 hover:opacity-100" : "pointer-events-none opacity-0"}`}
+      className={`hidden sm:block fixed bottom-4 left-1/2 z-40 -translate-x-1/2 cursor-pointer text-accent transition-opacity duration-500 ${show ? "opacity-60 hover:opacity-100" : "pointer-events-none opacity-0"}`}
     >
       <svg viewBox="0 0 24 24" className="h-7 w-7 motion-safe:animate-bounce" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d="M6 9l6 6 6-6" />

@@ -16,3 +16,7 @@ export const isoDay = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: CON
 
 /** Hoy (YYYY-MM-DD) en la zona de El Salvador. */
 export const todayISO = () => isoDay(new Date());
+
+/** Teléfono: empieza con dígito, "+" o "(", solo lleva dígitos y separadores, y al menos 8 dígitos reales. */
+export const PHONE_RE = /^(?=(?:\D*\d){8})[+(\d][\d\s().-]*$/;
+export const PHONE_MSG = "Escribe un teléfono válido, por ejemplo 7777-7777 o +503 7777 7777";
