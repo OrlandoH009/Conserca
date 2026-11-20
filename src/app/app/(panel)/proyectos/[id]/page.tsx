@@ -13,8 +13,8 @@ import { BackButton } from "@/components/site/BackButton";
 import { requireAccess } from "@/lib/auth";
 import { fmtDate } from "@/lib/format";
 import { can, ROLE_LABEL, type Area } from "@/lib/permissions";
-import { daysLate, projectCode } from "@/lib/project";
-import { STAGES, suggestedProgress } from "@/lib/stages";
+import { daysLate, effectiveStatus, projectCode } from "@/lib/project";
+import { DELIVERY_STAGE, STAGES } from "@/lib/stages";
 import { archiveProject, deleteProject, restoreProject, setProjectClientUser, setProjectProgress, setProjectStage, setProjectStatus, updateProject } from "../actions";
 import { ProjectTabs, TabPane } from "./ProjectTabs";
 import { Actividad } from "./tabs/Actividad";
@@ -59,6 +59,7 @@ export default async function Proyecto({ params, searchParams }: PageProps<"/app
   const archived = !!p.archivedAt;
   // Si la etapa guardada no está en la lista actual (datos antiguos), se muestra igual como primera opción.
   const stageOptions: [string, string][] = [...(STAGES.includes(p.stage as (typeof STAGES)[number]) ? [] : [[p.stage, p.stage] as [string, string]]), ...STAGES.map((s) => [s, s] as [string, string])];
+  const deliverMsg = t("¿Marcar «{name}» como entregado? Pasa a la etapa «{stage}», el avance queda en 100 % y se avisa al cliente.", { name: p.name, stage: t(DELIVERY_STAGE) });
 
   return (
     <>
@@ -113,19 +114,19 @@ export default async function Proyecto({ params, searchParams }: PageProps<"/app
         <div>
           <p className="label">{t("Estado")}</p>
           {canEditProject ? (
-            <AutoSelect key={p.status} name="status" value={p.status} options={Object.entries(PROJECT_STATUS).map(([k, [l]]) => [k, l])} action={setProjectStatus} fields={{ id: p.id }} label={t("Estado del proyecto")} okText={t("Estado actualizado")} className="input w-full" />
-          ) : <StatusBadge status={p.status} />}
+            <AutoSelect key={p.status} name="status" value={p.status} options={Object.entries(PROJECT_STATUS).filter(([k]) => k !== "atrasado").map(([k, [l]]) => [k, l])} action={setProjectStatus} fields={{ id: p.id }} label={t("Estado del proyecto")} okText={t("Estado actualizado")} className="input w-full" confirm={{ entregado: deliverMsg }} />
+          ) : <StatusBadge status={effectiveStatus(p.dueDate, p.status)} />}
         </div>
         <div>
           <p className="label">{t("Etapa actual")}</p>
           {canEditProject ? (
-            <AutoSelect key={p.stage} name="stage" value={p.stage} options={stageOptions} action={setProjectStage} fields={{ id: p.id }} label={t("Etapa del proyecto")} okText={t("Etapa actualizada")} className="input w-full" />
+            <AutoSelect key={p.stage} name="stage" value={p.stage} options={stageOptions} action={setProjectStage} fields={{ id: p.id }} label={t("Etapa del proyecto")} okText={t("Etapa actualizada")} className="input w-full" confirm={{ [DELIVERY_STAGE]: deliverMsg }} />
           ) : <p className="font-semibold">{t(p.stage)}</p>}
         </div>
         <div>
           <p className="label">{t("Avance que ve el cliente")}</p>
           <ProgressBar value={p.progress} />
-          {canEditProject && <div className="mt-3"><ProgressControl key={p.progress} projectId={p.id} value={p.progress} suggested={suggestedProgress(p.stage)} action={setProjectProgress} /></div>}
+          {canEditProject && <div className="mt-3"><ProgressControl key={p.progress} projectId={p.id} value={p.progress} action={setProjectProgress} /></div>}
         </div>
         <div>
           <p className="label">{t("Cuenta del cliente en el sitio")}</p>

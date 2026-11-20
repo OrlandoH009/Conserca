@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { PLAN, splitPlan, type PaymentStatus } from "./payments";
 import { SPACE_TYPES } from "./quote-options";
-import { STAGES } from "./stages";
+import { DELIVERY_STAGE, STAGES } from "./stages";
 
 export const MAX_ROWS = 500;
 
@@ -29,7 +29,11 @@ export const HEADERS = [
   "Notas",
 ];
 
-const STATUS = { "En proceso": "en_proceso", "En revisión": "en_revision", Entregado: "entregado", Atrasado: "atrasado" } as const;
+// «En revisión» y «Atrasado» se aceptan por archivos viejos: hoy son «En proceso» (atrasado lo calcula la fecha).
+const STATUS = { "En proceso": "en_proceso", Entregado: "entregado", "En revisión": "en_proceso", Atrasado: "en_proceso" } as const;
+/** Etapa y estado conectados: «Entregado» o la última etapa marcan ambos como entregado. */
+const linked = (stage: string, status: string) =>
+  status === "entregado" || stage === DELIVERY_STAGE ? { stage: DELIVERY_STAGE, status: "entregado" as const } : { stage, status: "en_proceso" as const };
 const PAY_STATUS: Record<string, PaymentStatus> = { Pendiente: "pendiente", Facturado: "facturado", Cobrado: "cobrado" };
 const NOTES_MAX = 280; // deja lugar al prefijo dentro de los 300 caracteres de la actividad
 
@@ -182,7 +186,7 @@ export function parseRows(rows: unknown[][]): { headersOk: boolean; items: Impor
     seen.add(key);
 
     if (errors.length === before)
-      items.push({ row, name, client, contact: contact || null, email, phone: phone || null, taxId: taxId || null, billingEmail, authorizer: authorizer || null, ownerEmail, spaceType, stage, status: STATUS[statusLabel], progress: progress!, startDate, dueDate, budget: budget || null, payments, notes: notes || null });
+      items.push({ row, name, client, contact: contact || null, email, phone: phone || null, taxId: taxId || null, billingEmail, authorizer: authorizer || null, ownerEmail, spaceType, ...linked(stage, STATUS[statusLabel]), progress: progress!, startDate, dueDate, budget: budget || null, payments, notes: notes || null });
   });
   return { headersOk, items, errors };
 }

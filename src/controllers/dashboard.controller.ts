@@ -1,7 +1,7 @@
 import { currentUser, requireAccess } from "@/lib/auth";
 import { todayISO } from "@/lib/format";
 import { can } from "@/lib/permissions";
-import { addDays, daysUntil } from "@/lib/project";
+import { addDays, daysUntil, effectiveStatus } from "@/lib/project";
 import * as PaymentController from "./payment.controller";
 import * as NotificationModel from "@/models/notification.model";
 import * as ProjectModel from "@/models/project.model";
@@ -20,7 +20,14 @@ export async function summary() {
     ProjectModel.statusCounts(),
     can(u.role, "cobros") ? PaymentController.attention() : Promise.resolve(null),
   ]);
-  return { active, newQuotes, recent, overdue, byStatus, payments };
+  // «Atrasado» se calcula por fecha: los vencidos se cuentan ahí y no en su estado guardado.
+  const counts = Object.fromEntries(byStatus.map((r) => [r.status, r.n])) as Record<string, number>;
+  for (const p of overdue) if (p.status !== "atrasado") { counts[p.status]--; counts.atrasado = (counts.atrasado ?? 0) + 1; }
+  return {
+    active, newQuotes, overdue, payments,
+    recent: recent.map((p) => ({ ...p, status: effectiveStatus(p.dueDate, p.status) })),
+    byStatus: Object.entries(counts).map(([status, n]) => ({ status, n })),
+  };
 }
 
 /** Proyectos sin entregar que vencen pronto o ya vencieron: el aviso fijo del panel de los trabajadores. */

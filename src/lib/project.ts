@@ -1,6 +1,7 @@
 import { isoDay, todayISO } from "./format";
 
-export const STATUS_LABEL = { en_proceso: "En proceso", en_revision: "En revisión", entregado: "Entregado", atrasado: "Atrasado" } as const;
+// Solo «en_proceso» y «entregado» se guardan (los pone la etapa); «atrasado» se calcula por la fecha.
+export const STATUS_LABEL = { en_proceso: "En proceso", entregado: "Entregado", atrasado: "Atrasado" } as const;
 
 /** Código corto para hablar de un proyecto con el cliente, p. ej. CON-2026-007. */
 export const projectCode = (id: number, createdAt: Date) => `CON-${isoDay(createdAt).slice(0, 4)}-${String(id).padStart(3, "0")}`;
@@ -17,3 +18,7 @@ export function daysLate(dueDate: string | null, status: string) {
   const d = Math.round((new Date(todayISO()).getTime() - new Date(dueDate).getTime()) / 864e5);
   return d > 0 ? d : 0;
 }
+
+/** Estado que se muestra: «atrasado» sale solo cuando pasa la fecha de entrega; no se elige a mano. */
+export const effectiveStatus = <S extends keyof typeof STATUS_LABEL>(dueDate: string | null, status: S) =>
+  daysLate(dueDate, status) > 0 ? "atrasado" : status;

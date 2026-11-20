@@ -6,7 +6,7 @@ const base: Record<string, unknown> = {
   "Nombre del proyecto *": "Torre A",
   "Cliente *": "Inversiones S.A.",
   "Tipo de espacio *": "Oficinas",
-  "Etapa actual *": "Entrega",
+  "Etapa actual *": "Cobro de anticipo",
   "Estado *": "En proceso",
   "Avance (%) *": 70,
 };
@@ -18,6 +18,11 @@ describe("importar proyectos", () => {
     const { items, errors } = parse(row());
     expect(errors).toEqual([]);
     expect(items[0]).toMatchObject({ name: "Torre A", status: "en_proceso", progress: 70, payments: [] });
+  });
+  it("conecta etapa y estado: la última etapa o «Entregado» marcan ambos", () => {
+    expect(parse(row({ "Etapa actual *": "Facturación final" })).items[0]).toMatchObject({ stage: "Facturación final", status: "entregado" });
+    expect(parse(row({ "Estado *": "Entregado" })).items[0]).toMatchObject({ stage: "Facturación final", status: "entregado" });
+    expect(parse(row({ "Estado *": "En revisión" })).items[0]).toMatchObject({ stage: "Cobro de anticipo", status: "en_proceso" });
   });
   it("rechaza un archivo con otras columnas", () => {
     expect(parseRows([["Nombre"], ["x"]]).headersOk).toBe(false);

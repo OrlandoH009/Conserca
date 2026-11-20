@@ -16,7 +16,6 @@ export function Badge({ tone = "n", children }: { tone?: keyof typeof TONES; chi
 
 export const PROJECT_STATUS = {
   en_proceso: ["En proceso", "b"],
-  en_revision: ["En revisión", "a"],
   entregado: ["Entregado", "g"],
   atrasado: ["Atrasado", "r"],
 } as const;

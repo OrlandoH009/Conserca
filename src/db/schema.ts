@@ -51,7 +51,7 @@ export const projects = mysqlTable("projects", {
   archivedAt: timestamp("archived_at"), // archivado: no sale en la lista normal
   spaceType: varchar("space_type", { length: 100 }).notNull(),
   stage: varchar("stage", { length: 100 }).notNull().default("Cargas térmicas"),
-  status: varchar("status", { length: 20 }).$type<"en_proceso" | "en_revision" | "entregado" | "atrasado">().notNull().default("en_proceso"),
+  status: varchar("status", { length: 20 }).$type<"en_proceso" | "entregado" | "atrasado">().notNull().default("en_proceso"),
   ownerId: int("owner_id").references(() => users.id),
   dueDate: date("due_date", { mode: "string" }),
   createdAt: createdAt(),

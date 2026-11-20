@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { EASE } from "@/lib/motion";
 
 type Item = { id: number; kind: "ok" | "error"; text: string };
@@ -25,8 +25,19 @@ export const toast = { ok: (text: string) => push("ok", text), error: (text: str
 /** Avisos breves en la esquina: éxito en azul, error en rojo. Se anuncian a lectores de pantalla. */
 export function Toaster() {
   const list = useSyncExternalStore((cb) => { subs.add(cb); return () => { subs.delete(cb); }; }, () => items, () => EMPTY);
+  const ref = useRef<HTMLDivElement>(null);
+  // Un <dialog> modal vive en la capa superior del navegador y su fondo borroso taparía el aviso sin importar el z-index.
+  // Como popover, el aviso entra a esa misma capa; volver a mostrarlo lo deja encima del último diálogo abierto.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el?.showPopover) return; // navegadores sin popover: se queda como capa fija normal
+    try {
+      if (el.matches(":popover-open")) el.hidePopover();
+      el.showPopover();
+    } catch { /* ya estaba cambiando de estado */ }
+  }, [list]);
   return (
-    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-4 z-[130] flex flex-col items-center gap-2 px-4 sm:items-end sm:px-6">
+    <div ref={ref} popover="manual" aria-live="polite" className="pointer-events-none fixed inset-x-0 top-auto bottom-4 z-[130] m-0 flex w-full flex-col items-center gap-2 overflow-visible border-0 bg-transparent px-4 py-0 sm:items-end sm:px-6">
       <AnimatePresence initial={false}>
         {list.map((t) => (
           <motion.div

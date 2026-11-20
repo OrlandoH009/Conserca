@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useT } from "@/components/site/LocaleProvider";
 import type { R } from "@/lib/action-utils";
+import { useConfirm } from "./ConfirmButton";
 import { Spinner } from "./SubmitButton";
 import { toast } from "./Toaster";
 
@@ -12,7 +13,7 @@ import { toast } from "./Toaster";
  * El padre debe pasar `key={value}` para que se actualice cuando cambian los datos del servidor.
  */
 export function AutoSelect({
-  name, value, options, action, fields = {}, label, okText, className = "input h-9 text-xs",
+  name, value, options, action, fields = {}, label, okText, className = "input h-9 text-xs", confirm = {},
 }: {
   name: string;
   value: string;
@@ -22,12 +23,15 @@ export function AutoSelect({
   label: string;
   okText?: string;
   className?: string;
+  confirm?: Record<string, string>; // valor → pregunta que se hace antes de guardarlo
 }) {
   const t = useT();
   const [current, setCurrent] = useState(value);
   const [pending, start] = useTransition();
+  const { ask, dialog } = useConfirm();
 
-  const change = (next: string) => {
+  const change = async (next: string) => {
+    if (confirm[next] && !(await ask(confirm[next]))) return; // canceló: el select sigue en el valor de antes
     setCurrent(next);
     start(async () => {
       const fd = new FormData();
@@ -49,6 +53,7 @@ export function AutoSelect({
         {options.map(([v, text]) => <option key={v} value={v}>{t(text)}</option>)}
       </select>
       {pending && <Spinner className="h-4 w-4 text-accent" />}
+      {dialog}
     </span>
   );
 }

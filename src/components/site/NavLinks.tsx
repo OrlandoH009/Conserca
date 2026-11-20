@@ -13,10 +13,10 @@ type NavUser = { name: string; email: string; phone: string | null; staff: boole
 const LINKS = (user: NavUser) => [
   { href: "/", label: "Inicio", hide: true },
   { href: "/servicios", label: "Servicios", hide: true }, // en móvil se llega desde el botón de la portada
-  ...(user
-    ? []
-    : [{ href: "/app/login", label: "Iniciar sesión", hide: true }, { href: "/registro", label: "Crear cuenta", hide: true }]),
+  ...(user ? [] : [{ href: "/registro", label: "Crear cuenta", hide: true }]),
 ];
+
+const LOCK = <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>;
 
 // Enlaces de la barra superior: el de la página actual se marca con color y una línea que se desliza entre secciones.
 export function NavLinks({ user, unread }: { user: NavUser; unread: number }) {
@@ -32,10 +32,10 @@ export function NavLinks({ user, unread }: { user: NavUser; unread: number }) {
           {here(l.href) && <span className="absolute inset-x-0 -bottom-1 h-0.5 origin-center animate-[bar-grow_.3s_ease-out] rounded-full bg-accent motion-reduce:animate-none" />}
         </Link>
       ))}
-      {/* Celular: el enlace de texto se cambia por un ícono para que quepa la barra */}
+      {/* Entrada al portal (equipo y clientes). En celular queda solo el candado para que quepa la barra. */}
       {!user && (
-        <Link href="/app/login" aria-label={t("Iniciar sesión")} className="flex h-9 w-9 items-center justify-center rounded-full text-mute transition-colors hover:bg-soft hover:text-accent active:scale-90 lg:hidden">
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" /></svg>
+        <Link href="/app/login" title={t("Iniciar sesión")} aria-label={t("Portal de proyectos · Iniciar sesión")} className="flex h-9 w-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-full text-mute ring-1 ring-line transition-colors hover:bg-soft hover:text-accent active:scale-90 lg:h-auto lg:w-auto lg:px-3.5 lg:py-1.5">
+          {LOCK}<span className="hidden lg:inline">{t("Portal de proyectos")}</span>
         </Link>
       )}
       <Link

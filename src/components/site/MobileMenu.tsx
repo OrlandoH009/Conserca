@@ -39,7 +39,7 @@ export function MobileMenu({ user, unread }: { user: U | null; unread: number })
     ["/cotizar", "Solicitar cotización"],
     ...(user
       ? [user.staff ? ["/app", "Mi panel"] : ["/mis-proyectos", "Mis proyectos"], [user.staff ? "/app/avisos" : "/avisos", unread ? `${t("Avisos")} (${unread})` : t("Avisos")]]
-      : [["/app/login", "Iniciar sesión"], ["/registro", "Crear cuenta"]]) as [string, string][],
+      : [["/app/login", "Portal de proyectos · Iniciar sesión"],["/registro", "Crear cuenta"]]) as [string, string][],
   ];
   const row = "flex w-full cursor-pointer items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors active:bg-soft";
 

@@ -2,8 +2,8 @@ import { z } from "zod";
 import { parse, UserError } from "@/lib/action-utils";
 import { assertAccess, requireAccess } from "@/lib/auth";
 import { can } from "@/lib/permissions";
-import { daysLate, STATUS_LABEL } from "@/lib/project";
-import { STAGES } from "@/lib/stages";
+import { daysLate, effectiveStatus, STATUS_LABEL } from "@/lib/project";
+import { DELIVERY_STAGE, STAGES, statusForStage, suggestedProgress, type Stage } from "@/lib/stages";
 import { removeStoredFile } from "@/lib/storage";
 import * as ActivityController from "./activity.controller";
 import * as BudgetController from "./budget.controller";
@@ -20,7 +20,8 @@ import * as VentZoneModel from "@/models/vent-zone.model";
 
 const text = (label: string) => z.string().trim().min(1, `${label} es obligatorio`).max(300);
 const id = z.coerce.number().int().positive();
-const STATUSES = ["en_proceso", "en_revision", "entregado", "atrasado"] as const;
+const STATUSES = ["en_proceso", "entregado", "atrasado"] as const;
+const MANUAL_STATUSES = ["en_proceso", "entregado"] as const; // «atrasado» lo pone la fecha
 const dueDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Elige una fecha de entrega").or(z.literal(""));
 const STAFF_ROLES = ["admin", "ingenieria", "dibujo"] as const;
 
@@ -30,8 +31,8 @@ export async function list(filters: { estado?: string; q?: string; archivados?: 
   const estado = STATUSES.find((s) => s === filters.estado);
   const rows = await ProjectModel.list(!!filters.archivados);
   return rows
-    .filter((r) => (!estado || r.p.status === estado) && (!q || `${r.p.name} ${r.client ?? ""} ${r.account ?? ""}`.toLowerCase().includes(q)))
-    .map((r) => ({ ...r, late: daysLate(r.p.dueDate, r.p.status) }));
+    .map((r) => ({ ...r, p: { ...r.p, status: effectiveStatus(r.p.dueDate, r.p.status) }, late: daysLate(r.p.dueDate, r.p.status) }))
+    .filter((r) => (!estado || r.p.status === estado) && (!q || `${r.p.name} ${r.client ?? ""} ${r.account ?? ""}`.toLowerCase().includes(q)));
 }
 
 export async function archivedCount() {
@@ -95,23 +96,37 @@ async function mustExist(projectId: number) {
   return p;
 }
 
+/**
+ * Lleva el proyecto a una etapa: el estado y el avance la siguen (las primeras 5 son «En proceso», la última es «Entregado»).
+ * Etapa y estado se cambian siempre por aquí para que nunca se contradigan.
+ */
+async function moveToStage(p: Awaited<ReturnType<typeof mustExist>>, stage: Stage, actorId: number) {
+  const status = statusForStage(stage);
+  const progress = suggestedProgress(stage)!;
+  if (p.stage === stage && p.status === status && p.progress === progress) return;
+  await ProjectModel.update(p.id, { stage, status, progress });
+  const delivered = status === "entregado" && p.status !== "entregado";
+  await ActivityController.record(p.id, "etapa", `Etapa: ${stage} · avance ${progress} %`, {
+    actorId,
+    notifyClient: delivered ? `Tu proyecto «${p.name}» ahora está «${STATUS_LABEL.entregado}».` : `Tu proyecto «${p.name}» pasó a la etapa «${stage}» (avance ${progress} %).`,
+  });
+  if (status !== p.status) await ActivityController.record(p.id, "estado", `Estado: ${STATUS_LABEL[status]}`, { actorId, visibleToClient: false });
+}
+
 export async function setStatus(fd: FormData) {
   const u = await assertAccess("proyectos", "edit");
-  const v = parse(z.object({ id, status: z.enum(STATUSES) }), fd);
+  const v = parse(z.object({ id, status: z.enum(MANUAL_STATUSES) }), fd);
   const p = await mustExist(v.id);
   if (p.status === v.status) return v.id;
-  await ProjectModel.setStatus(v.id, v.status);
-  await ActivityController.record(v.id, "estado", `Estado: ${STATUS_LABEL[v.status]}`, { actorId: u.id, notifyClient: `Tu proyecto «${p.name}» ahora está «${STATUS_LABEL[v.status]}».` });
+  // Entregar = última etapa. Volver a «En proceso» regresa a la etapa anterior a la entrega.
+  await moveToStage(p, v.status === "entregado" ? DELIVERY_STAGE : STAGES[STAGES.length - 2], u.id);
   return v.id;
 }
 
 export async function setStage(fd: FormData) {
   const u = await assertAccess("proyectos", "edit");
   const v = parse(z.object({ id, stage: z.enum(STAGES, { error: "Elige una etapa de la lista" }) }), fd);
-  const p = await mustExist(v.id);
-  if (p.stage === v.stage) return v.id;
-  await ProjectModel.setStage(v.id, v.stage);
-  await ActivityController.record(v.id, "etapa", `Etapa: ${v.stage}`, { actorId: u.id, notifyClient: `Tu proyecto «${p.name}» pasó a la etapa «${v.stage}».` });
+  await moveToStage(await mustExist(v.id), v.stage, u.id);
   return v.id;
 }
 

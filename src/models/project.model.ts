@@ -1,8 +1,6 @@
 import { and, count, desc, eq, isNotNull, isNull, lt, lte, ne } from "drizzle-orm";
 import { budgetItems, clients, db, payments, projectEvents, projects, users } from "@/db";
 
-type Project = typeof projects.$inferSelect;
-type ProjectStatus = Project["status"];
 export type ProjectChanges = Partial<Omit<typeof projects.$inferInsert, "id" | "createdAt">>;
 
 // `client` = registro de cliente del equipo; `account` = cuenta con la que el cliente entra al sitio.
@@ -23,8 +21,6 @@ export const listRecent = (n: number) => db.select().from(projects).where(live).
 export const options = () => db.select({ id: projects.id, name: projects.name }).from(projects).where(live).orderBy(projects.name);
 export const create = async (v: typeof projects.$inferInsert) => (await db.insert(projects).values(v).$returningId())[0].id;
 export const update = (id: number, v: ProjectChanges) => db.update(projects).set(v).where(eq(projects.id, id));
-export const setStatus = (id: number, status: ProjectStatus) => update(id, { status });
-export const setStage = (id: number, stage: string) => update(id, { stage });
 export const setProgress = (id: number, progress: number) => update(id, { progress });
 export const setClientUser = (id: number, clientUserId: number | null) => update(id, { clientUserId });
 export const archive = (id: number, on: boolean) => update(id, { archivedAt: on ? new Date() : null });

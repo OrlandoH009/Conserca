@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import * as ProjectController from "@/controllers/project.controller";
 import { ActionForm, F } from "@/components/app/ActionForm";
-import { Badge, Empty, PageHead, StatusBadge, PROJECT_STATUS } from "@/components/app/ui";
+import { Empty, PageHead, StatusBadge, PROJECT_STATUS } from "@/components/app/ui";
 import { currentUser } from "@/lib/auth";
 import { CONFIG } from "@/lib/config";
 import { fmtDate } from "@/lib/format";
@@ -72,7 +72,7 @@ export default async function Proyectos({ searchParams }: PageProps<"/app/proyec
                       <span className="text-xs tabular-nums text-mute">{p.progress}%</span>
                     </div>
                   </td>
-                  <td>{fmtDate(p.dueDate)}{late > 0 && <span className="ml-1.5 align-middle"><Badge tone="r">{t("Vencido")}</Badge></span>}</td>
+                  <td className={late > 0 ? "font-medium text-red-600" : undefined} title={late > 0 ? `${t("Vencido hace")} ${late} ${late === 1 ? t("día") : t("días")}` : undefined}>{fmtDate(p.dueDate)}</td>
                   <td><StatusBadge status={p.status} /></td>
                 </tr>
               ))}

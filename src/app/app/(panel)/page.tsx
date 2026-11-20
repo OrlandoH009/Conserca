@@ -10,7 +10,7 @@ import { nearYearEnd } from "@/lib/payments";
 import { can } from "@/lib/permissions";
 import { daysLate } from "@/lib/project";
 
-const BAR = { en_proceso: "bg-accent-solid", en_revision: "bg-amber-500", entregado: "bg-emerald-500", atrasado: "bg-red-500" } as const;
+const BAR = { en_proceso: "bg-accent-solid", entregado: "bg-emerald-500", atrasado: "bg-red-500" } as const;
 
 export default async function Panel({ searchParams }: PageProps<"/app">) {
   const t = await getT();
@@ -58,17 +58,14 @@ export default async function Panel({ searchParams }: PageProps<"/app">) {
               <table className="tbl">
                 <thead><tr><th>{t("Proyecto")}</th><th>{t("Etapa")}</th><th>{t("Entrega")}</th><th>{t("Estado")}</th></tr></thead>
                 <tbody>
-                  {s.recent.map((p) => {
-                    const late = daysLate(p.dueDate, p.status);
-                    return (
-                      <tr key={p.id}>
-                        <td><Link href={`/app/proyectos/${p.id}`} className="font-medium hover:text-accent">{p.name}</Link></td>
-                        <td>{t(p.stage)}</td>
-                        <td>{fmtDate(p.dueDate)}{late > 0 && <span className="ml-1.5 align-middle"><Badge tone="r">{t("Vencido")}</Badge></span>}</td>
-                        <td><StatusBadge status={p.status} /></td>
-                      </tr>
-                    );
-                  })}
+                  {s.recent.map((p) => (
+                    <tr key={p.id}>
+                      <td><Link href={`/app/proyectos/${p.id}`} className="font-medium hover:text-accent">{p.name}</Link></td>
+                      <td>{t(p.stage)}</td>
+                      <td>{fmtDate(p.dueDate)}</td>
+                      <td><StatusBadge status={p.status} /></td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             )}

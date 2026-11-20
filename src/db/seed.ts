@@ -32,17 +32,17 @@ async function main() {
   const cl = await db.select().from(t.clients).orderBy(t.clients.id);
 
   const PR = [
-    ["Proyecto ejemplo 01 · Edificio de oficinas", "Oficinas", "Distribución de aire", "en_proceso", "2026-11-15"],
-    ["Proyecto ejemplo 02 · Estacionamiento", "Estacionamiento", "Ventilación mecánica", "en_revision", "2026-11-22"],
+    ["Proyecto ejemplo 01 · Edificio de oficinas", "Oficinas", "Cobro de anticipo", "en_proceso", "2026-11-15"],
+    ["Proyecto ejemplo 02 · Estacionamiento", "Estacionamiento", "Cobro de estimaciones por avances", "en_proceso", "2026-11-22"],
   ] as const;
-  await db.insert(t.projects).values(PR.map((p, i) => ({ name: p[0], spaceType: p[1], stage: p[2], status: p[3], dueDate: p[4], clientId: cl[i % cl.length].id, ownerId: eng.id, progress: [40, 70][i], clientUserId: i === 0 ? cli.id : null })));
+  await db.insert(t.projects).values(PR.map((p, i) => ({ name: p[0], spaceType: p[1], stage: p[2], status: p[3], dueDate: p[4], clientId: cl[i % cl.length].id, ownerId: eng.id, progress: [40, 60][i], clientUserId: i === 0 ? cli.id : null })));
   const ps = await db.select().from(t.projects).orderBy(t.projects.id);
   const p1 = ps[0], p2 = ps[1];
 
   await db.insert(t.projectEvents).values([
     { projectId: p1.id, type: "proyecto", message: "Proyecto creado a partir de tu cotización", createdBy: eng.id },
-    { projectId: p1.id, type: "etapa", message: "Etapa: Cargas térmicas", createdBy: eng.id },
-    { projectId: p1.id, type: "etapa", message: "Etapa: Distribución de aire", createdBy: eng.id },
+    { projectId: p1.id, type: "etapa", message: "Etapa: Elaboración de documentación · avance 20 %", createdBy: eng.id },
+    { projectId: p1.id, type: "etapa", message: "Etapa: Cobro de anticipo · avance 40 %", createdBy: eng.id },
     { projectId: p1.id, type: "avance", message: "Avance: 0 % → 40 %", createdBy: eng.id },
     { projectId: p1.id, type: "interno", message: "Revisar caudales del ramal A con ingeniería", visibleToClient: false, createdBy: eng.id },
   ]);

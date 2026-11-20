@@ -9,7 +9,7 @@ import { StageStepper } from "@/components/site/StageStepper";
 import { currentUser } from "@/lib/auth";
 import { getLocale, getT } from "@/lib/i18n-server";
 import { fmtDate, fmtDateTime, isoDay, todayISO } from "@/lib/format";
-import { projectCode } from "@/lib/project";
+import { effectiveStatus, projectCode } from "@/lib/project";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT())("Mis proyectos") };
@@ -67,7 +67,7 @@ export default async function MisProyectos() {
                     <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">{p.name}</h2>
                     <p className="mt-1 text-sm text-mute">{t(p.spaceType)} · {t("Última actualización:")} {fmtDateTime(last, loc)}</p>
                   </div>
-                  <StatusBadge status={p.status} />
+                  <StatusBadge status={effectiveStatus(p.dueDate, p.status)} />
                 </div>
 
                 <div className="mt-6">

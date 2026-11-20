@@ -19,7 +19,7 @@ describe("plan de cobros", () => {
     const anticipo = { status: "pendiente", dueProgress: 0 };
     const final = { status: "pendiente", dueProgress: 100 };
     expect(isDue(anticipo, { progress: 0, status: "en_proceso" })).toBe(true); // el anticipo toca desde el inicio
-    expect(isDue(final, { progress: 99, status: "en_revision" })).toBe(false);
+    expect(isDue(final, { progress: 99, status: "en_proceso" })).toBe(false);
     expect(isDue(final, { progress: 100, status: "en_proceso" })).toBe(true);
     expect(isDue(final, { progress: 0, status: "entregado" })).toBe(true); // entregado con avance 0: se cobra todo
     expect(isDue(final, { progress: 0, status: "atrasado" })).toBe(false); // atrasado no es entregado

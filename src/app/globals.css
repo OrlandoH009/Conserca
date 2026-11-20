@@ -125,6 +125,37 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-inter),
   .card:nth-child(n+5), .tbl tbody tr:nth-child(n+5) { animation-delay: .24s; }
 }
 
+/* Desplegables con diseño propio (Chrome/Edge 135+). shortcut: Firefox/Safari aún muestran la lista nativa; se verán igual cuando soporten base-select. */
+@supports (appearance: base-select) {
+  select.input, select.input::picker(select) { appearance: base-select; }
+  select.input { display: flex; align-items: center; justify-content: space-between; gap: .5rem; cursor: pointer; }
+  select.input::picker-icon { color: var(--mute); transition: rotate .25s cubic-bezier(.22, 1, .36, 1); }
+  select.input:open { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+  select.input:open::picker-icon { rotate: 180deg; color: var(--accent); }
+
+  select.input::picker(select) {
+    margin-block: .4rem; padding: .35rem; max-height: 18rem; overflow-y: auto;
+    border: 1px solid var(--line); border-radius: .9rem; background: var(--surface); color: var(--ink);
+    box-shadow: 0 20px 44px -18px rgba(11, 40, 80, .38), 0 2px 6px -2px rgba(11, 40, 80, .08);
+    opacity: 0; translate: 0 -6px; scale: .98;
+    transition: opacity .18s ease-out, translate .22s cubic-bezier(.22, 1, .36, 1), scale .22s cubic-bezier(.22, 1, .36, 1), overlay .22s allow-discrete, display .22s allow-discrete;
+  }
+  select.input:open::picker(select) { opacity: 1; translate: 0 0; scale: 1; }
+  @starting-style { select.input:open::picker(select) { opacity: 0; translate: 0 -6px; scale: .98; } }
+
+  select.input option {
+    display: flex; align-items: center; gap: .6rem; min-height: 2.5rem; padding: .5rem .75rem;
+    border-radius: .6rem; font-size: .875rem; color: var(--ink); cursor: pointer; transition: background-color .15s, color .15s;
+  }
+  select.input option:hover, select.input option:focus-visible { background: var(--soft); color: var(--accent); outline: none; }
+  select.input option:checked { font-weight: 600; color: var(--accent); }
+  select.input option::checkmark { order: 1; margin-inline-start: auto; color: var(--accent); }
+  select.input option:disabled { opacity: .45; cursor: not-allowed; }
+  .dark select.input::picker(select) { background: #0b1a30; box-shadow: 0 20px 44px -18px rgba(0, 0, 0, .7); }
+
+  @media (prefers-reduced-motion: reduce) { select.input::picker(select), select.input::picker-icon { transition: none; } }
+}
+
 /* Celular y tablet: las tarjetas con tablas se desplazan de lado dentro de la tarjeta, sin ensanchar la página. */
 @media (max-width: 1023px) {
   .card { overflow-x: auto; min-width: 0; }
