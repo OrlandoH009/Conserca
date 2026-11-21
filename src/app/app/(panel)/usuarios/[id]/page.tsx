@@ -8,7 +8,7 @@ import { ConfirmButton } from "@/components/app/ConfirmButton";
 import { PageHead } from "@/components/app/ui";
 import { BackButton } from "@/components/site/BackButton";
 import { currentUser } from "@/lib/auth";
-import { ROLE_LABEL, ROLES } from "@/lib/permissions";
+import { can, ROLE_LABEL, ROLES } from "@/lib/permissions";
 import { removeUser, updateUser } from "../actions";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -23,6 +23,27 @@ export default async function EditarUsuario({ params }: PageProps<"/app/usuarios
   const [u, me] = await Promise.all([UserController.get(n), currentUser()]);
   if (!u) notFound();
   const isMe = me?.id === u.id;
+  const canEdit = !!me && can(me.role, "usuarios", "edit");
+
+  // Sin permiso de edición: solo se ven sus datos.
+  if (!canEdit) {
+    const rows: [string, string][] = [[t("Nombre"), u.name], [t("Correo"), u.email], [t("Teléfono / WhatsApp"), u.phone || "—"], [t("Rol"), t(ROLE_LABEL[u.role])]];
+    return (
+      <>
+        <BackButton fallback="/app/usuarios" />
+        <p className="text-sm text-mute"><Link href="/app/usuarios" className="hover:text-accent">{t("Usuarios y permisos")}</Link> / {u.name}</p>
+        <PageHead title={u.name} sub={t("Tu rol solo permite consultar estos datos.")} />
+        <dl className="card max-w-xl divide-y divide-line">
+          {rows.map(([k, v]) => (
+            <div key={k} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
+              <dt className="text-sm text-mute">{k}</dt>
+              <dd className="min-w-0 truncate text-right font-medium">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </>
+    );
+  }
 
   return (
     <>

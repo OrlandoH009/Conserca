@@ -99,7 +99,7 @@ export async function submitQuick(fd: FormData): Promise<PublicQuoteResult> {
   return { ok: true };
 }
 
-const STATUSES = ["nueva", "en_proceso", "respondida", "aceptada", "rechazada"] as const;
+const STATUSES = ["nueva", "en_proceso", "aceptada", "rechazada"] as const;
 const quoteId = z.coerce.number().int().positive();
 
 /** Cotizaciones con filtro por estado, búsqueda y paginación (para el panel). */
@@ -114,7 +114,7 @@ export async function mine() {
   return me ? QuoteModel.listByUser(me.id) : [];
 }
 
-/** Al abrir WhatsApp o el correo: una solicitud nueva pasa a "en proceso". */
+/** Al abrir WhatsApp o el correo: una solicitud nueva pasa a "En contacto" (clave en_proceso). */
 export async function markContacted(fd: FormData) {
   await assertAccess("clientes", "edit");
   const { id } = parse(z.object({ id: quoteId }), fd);

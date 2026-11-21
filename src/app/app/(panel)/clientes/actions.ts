@@ -24,6 +24,11 @@ export async function removeClient(fd: FormData): Promise<R> {
   return run(async () => { await ClientController.remove(fd); touch(); });
 }
 
+/** Eliminar desde la página del cliente: al terminar vuelve a la lista. */
+export async function removeClientAndBack(fd: FormData): Promise<R> {
+  return run(async () => { await ClientController.remove(fd); touch(); redirect("/app/clientes"); });
+}
+
 export async function contactQuote(fd: FormData): Promise<R> {
   return run(async () => { await QuoteController.markContacted(fd); touch(); });
 }

@@ -21,6 +21,12 @@ export async function list() {
   return ClientModel.list();
 }
 
+/** Un cliente, para su página de detalle. */
+export async function get(id: number) {
+  await requireAccess("clientes");
+  return ClientModel.findById(id);
+}
+
 export async function add(fd: FormData) {
   await assertAccess("clientes", "edit");
   await ClientModel.create(values(parse(z.object(shape), fd)));

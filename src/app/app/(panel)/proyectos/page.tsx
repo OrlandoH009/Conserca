@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import * as ProjectController from "@/controllers/project.controller";
 import { ActionForm, F } from "@/components/app/ActionForm";
+import { EditDialog } from "@/components/app/EditDialog";
+import { FilterMenu } from "@/components/app/FilterMenu";
 import { Empty, PageHead, StatusBadge, PROJECT_STATUS } from "@/components/app/ui";
 import { currentUser } from "@/lib/auth";
 import { CONFIG } from "@/lib/config";
@@ -42,21 +44,25 @@ export default async function Proyectos({ searchParams }: PageProps<"/app/proyec
           </Link>
         )}
       </PageHead>
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <form className="flex w-full gap-2 sm:w-auto">
-          <input name="q" defaultValue={q} placeholder={t("Buscar por nombre o cliente")} className="input w-full sm:w-72" aria-label={t("Buscar proyectos")} />
+      {/* Igual que en Clientes: búsqueda con lupa dentro de la barra y filtro desplegable a la derecha. */}
+      <div className="mb-4 flex gap-2">
+        <form role="search" className="relative min-w-0 flex-1">
+          <input name="q" defaultValue={q} placeholder={t("Buscar por nombre o cliente")} className="input w-full !pr-12" aria-label={t("Buscar proyectos")} />
           {estado && <input type="hidden" name="estado" value={estado} />}
           {archivados && <input type="hidden" name="archivados" value="1" />}
-          <button className="btn-ghost">{t("Buscar")}</button>
+          <button aria-label={t("Buscar")} className="absolute inset-y-1 right-1 flex w-10 cursor-pointer items-center justify-center rounded-lg text-mute transition-colors hover:bg-soft hover:text-accent active:scale-95">
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+          </button>
         </form>
-        <Link href={keep({})} className={`badge px-3 py-1.5 ${!estado ? "bg-soft text-accent" : "bg-surface text-mute ring-1 ring-line"}`}>{t("Todos")}</Link>
-        {Object.entries(PROJECT_STATUS).map(([k, [label]]) => (
-          <Link key={k} href={keep({ estado: k })} className={`badge px-3 py-1.5 ${estado === k ? "bg-soft text-accent" : "bg-surface text-mute ring-1 ring-line"}`}>{t(label)}</Link>
-        ))}
+        <FilterMenu
+          label={t("Filtrar por estado")}
+          current={estado ?? ""}
+          options={[{ key: "", label: "Todos", href: keep({}) }, ...Object.entries(PROJECT_STATUS).map(([k, [label]]) => ({ key: k, label, href: keep({ estado: k }) }))]}
+        />
       </div>
       <div className="card overflow-x-auto">
-        {list.length === 0 ? <Empty>{t("No hay proyectos con ese filtro.")}</Empty> : (
-          <table className="tbl">
+        {list.length === 0 ? <Empty className="py-16 text-base">{t("No hay proyectos con ese filtro.")}</Empty> : (
+          <table className="tbl tbl-stack">
             <thead><tr><th>{t("Proyecto")}</th><th>{t("Cliente")}</th><th>{t("Tipo de espacio")}</th><th>{t("Etapa")}</th><th>{t("Avance")}</th><th>{t("Entrega")}</th><th>{t("Estado")}</th></tr></thead>
             <tbody>
               {list.map(({ p, client, account, late }) => (
@@ -65,15 +71,15 @@ export default async function Proyectos({ searchParams }: PageProps<"/app/proyec
                     <Link href={`/app/proyectos/${p.id}`} className="font-medium hover:text-accent">{p.name}</Link>
                     <div className="text-xs text-mute">{projectCode(p.id, p.createdAt)}</div>
                   </td>
-                  <td>{client ?? account ?? "—"}</td><td>{p.spaceType}</td><td>{t(p.stage)}</td>
-                  <td>
+                  <td data-label={t("Cliente")}>{client ?? account ?? "—"}</td><td data-label={t("Tipo de espacio")}>{p.spaceType}</td><td data-label={t("Etapa")}>{t(p.stage)}</td>
+                  <td data-label={t("Avance")}>
                     <div className="flex items-center gap-2" title={`${p.progress} %`}>
                       <span className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100"><span className="block h-full rounded-full bg-accent-solid" style={{ width: `${p.progress}%` }} /></span>
                       <span className="text-xs tabular-nums text-mute">{p.progress}%</span>
                     </div>
                   </td>
-                  <td className={late > 0 ? "font-medium text-red-600" : undefined} title={late > 0 ? `${t("Vencido hace")} ${late} ${late === 1 ? t("día") : t("días")}` : undefined}>{fmtDate(p.dueDate)}</td>
-                  <td><StatusBadge status={p.status} /></td>
+                  <td data-label={t("Entrega")} className={late > 0 ? "font-medium text-red-600" : undefined} title={late > 0 ? `${t("Vencido hace")} ${late} ${late === 1 ? t("día") : t("días")}` : undefined}>{fmtDate(p.dueDate)}</td>
+                  <td data-label={t("Estado")}><StatusBadge status={p.status} /></td>
                 </tr>
               ))}
             </tbody>
@@ -81,9 +87,10 @@ export default async function Proyectos({ searchParams }: PageProps<"/app/proyec
         )}
       </div>
       {canEdit && !archivados && (
-        <details className="card mt-6">
-          <summary className="cursor-pointer font-bold">{t("+ Nuevo proyecto")}</summary>
-          <ActionForm action={createProject} submit={t("Crear proyecto")} success={t("Proyecto creado")} className="mt-4">
+        // Mismo patrón que "+ Agregar cliente" e "+ Invitar usuario": botón del ancho de la tarjeta que abre un modal grande.
+        <div className="mt-6">
+        <EditDialog size="lg" label={t("+ Nuevo proyecto")} title={t("Nuevo proyecto")} className="card block w-full cursor-pointer text-left font-bold transition-colors hover:text-accent">
+          <ActionForm action={createProject} submit={t("Crear proyecto")} success={t("Proyecto creado")}>
             <div className="grid gap-4 md:grid-cols-2">
               <F label={t("Nombre del proyecto")} name="name" placeholder={t("Edificio de oficinas · Cliente")} />
               <F label={t("Tipo de espacio")} name="spaceType" placeholder={t("Oficinas, estacionamiento, bodega…")} />
@@ -97,7 +104,8 @@ export default async function Proyectos({ searchParams }: PageProps<"/app/proyec
               {canBill && <F label={t("Honorarios del diseño ({currency})", { currency: CONFIG.currency })} name="total" type="number" step="any" required={false} />}
             </div>
           </ActionForm>
-        </details>
+        </EditDialog>
+        </div>
       )}
     </>
   );

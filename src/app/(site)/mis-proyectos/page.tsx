@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT())("Mis proyectos") };
 }
 
-const QUOTE_STATUS = { nueva: ["Recibida", "b"], en_proceso: ["En revisión del equipo", "a"], respondida: ["Respondida", "g"], aceptada: ["Aceptada", "g"], rechazada: ["Rechazada", "r"] } as const;
+const QUOTE_STATUS = { nueva: ["Recibida", "b"], en_proceso: ["En revisión del equipo", "a"], aceptada: ["Aceptada", "g"], rechazada: ["Rechazada", "r"] } as const;
 
 /** Texto de plazo: cuántos días faltan para la entrega o cuánto se pasó. */
 function plazo(due: string | null, delivered: boolean, t: (es: string, vars?: Record<string, string | number>) => string) {

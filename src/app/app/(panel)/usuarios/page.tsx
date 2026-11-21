@@ -4,8 +4,9 @@ import Link from "next/link";
 import * as UserController from "@/controllers/user.controller";
 import { ActionForm, F } from "@/components/app/ActionForm";
 import { ConfirmButton } from "@/components/app/ConfirmButton";
+import { EditDialog } from "@/components/app/EditDialog";
 import { Badge, PageHead } from "@/components/app/ui";
-import { levelOf, ROLE_LABEL, ROLES, type Area, type Level } from "@/lib/permissions";
+import { can, levelOf, ROLE_LABEL, ROLES, type Area, type Level } from "@/lib/permissions";
 import { createUser, removeUser, setRole } from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -20,28 +21,33 @@ export default async function Usuarios() {
   const t = await getT();
   const { me, users: list } = await UserController.list();
   const admins = list.filter((x) => x.role === "admin").length; // el último administrador no se puede borrar
+  const canEdit = can(me.role, "usuarios", "edit");
   return (
     <>
       <PageHead title={t("Usuarios y permisos")} sub={t("Quién tiene cuenta y qué puede hacer cada rol")} />
 
       <section className="card overflow-x-auto">
-        <table className="tbl">
+        <table className="tbl tbl-stack">
           <thead><tr><th>{t("Usuario")}</th><th>{t("Rol")}</th><th>{t("Acciones")}</th></tr></thead>
           <tbody>
             {list.map((x) => (
               <tr key={x.id}>
                 <td><p className="font-medium">{x.name}</p><p className="text-xs text-mute">{x.email}</p></td>
-                <td>
-                  <form action={setRole} className="flex items-center gap-2">
+                <td data-label={t("Rol")}>
+                  {/* Celular: solo el nombre del rol; se cambia desde la página del usuario. */}
+                  <span className="text-sm sm:hidden">{t(ROLE_LABEL[x.role])}</span>
+                  <form action={setRole} className="hidden min-w-0 items-center gap-2 sm:flex">
                     <input type="hidden" name="id" value={x.id} />
-                    <select key={x.role} name="role" defaultValue={x.role} className="input h-9 w-44 text-xs" aria-label={t("Rol de {name}", { name: x.name })} disabled={x.id === me.id}>
+                    <select key={x.role} name="role" defaultValue={x.role} className="input h-9 w-40 min-w-0 text-xs sm:w-44" aria-label={t("Rol de {name}", { name: x.name })} disabled={x.id === me.id}>
                       {ROLES.map((r) => <option key={r} value={r}>{t(ROLE_LABEL[r])}</option>)}
                     </select>
                     {x.id !== me.id && <button className="btn-ghost px-3 py-1.5">{t("Guardar")}</button>}
                   </form>
                 </td>
                 <td>
-                  <div className="flex items-center gap-4 whitespace-nowrap text-sm">
+                  {/* Celular: un solo botón a la página del usuario (editar si tiene permiso, si no solo ver). */}
+                  <Link href={`/app/usuarios/${x.id}`} className="btn-ghost btn-line mt-1 w-full py-2 text-sm sm:hidden">{canEdit ? t("Ver y editar") : t("Ver detalles")}</Link>
+                  <div className="hidden items-center gap-4 whitespace-nowrap text-sm sm:flex">
                     <Link href={`/app/usuarios/${x.id}`} className="font-semibold text-accent hover:underline">{t("Editar")}</Link>
                     {x.id !== me.id && !(x.role === "admin" && admins <= 1) && (
                       <form action={removeUser}>
@@ -61,15 +67,15 @@ export default async function Usuarios() {
         <h2 className="font-bold">{t("Qué puede hacer cada rol")}</h2>
         <p className="mb-3 mt-1 text-sm text-mute"><b className="text-ink">{t("Edita")}</b>{t(": ver y cambiar ·")} <b className="text-ink">{t("Ve")}</b>{t(": solo consultar ·")} <b className="text-ink">—</b>{t(": sin acceso. Estos permisos están definidos en el código (")}<code>src/lib/permissions.ts</code>).</p>
         <div className="overflow-x-auto">
-          <table className="tbl">
+          <table className="tbl tbl-stack tbl-compact">
             <thead><tr><th scope="col">{t("Rol")}</th>{AREAS.map(([, l]) => <th key={l} scope="col">{t(l)}</th>)}</tr></thead>
             <tbody>
               {ROLES.map((r) => (
                 <tr key={r}>
-                  <th scope="row" className="px-3 py-3 text-left text-sm font-semibold normal-case tracking-normal text-ink">{t(ROLE_LABEL[r])}</th>
-                  {AREAS.map(([a]) => {
+                  <th scope="row" className="px-3 py-2 text-left text-sm font-semibold normal-case tracking-normal text-ink">{t(ROLE_LABEL[r])}</th>
+                  {AREAS.map(([a, l]) => {
                     const [short, long, tone] = LV[levelOf(r, a)];
-                    return <td key={a}><Badge tone={tone}><span aria-hidden>{t(short)}</span><span className="sr-only">{t(long)}</span></Badge></td>;
+                    return <td key={a} data-label={t(l)}><Badge tone={tone}><span aria-hidden>{t(short)}</span><span className="sr-only">{t(long)}</span></Badge></td>;
                   })}
                 </tr>
               ))}
@@ -78,8 +84,9 @@ export default async function Usuarios() {
         </div>
       </section>
 
-      <section className="card mt-6 max-w-xl">
-        <h2 className="mb-3 font-bold">{t("Invitar usuario")}</h2>
+      {/* Como "+ Nuevo proyecto": botón del ancho de la tarjeta que abre el formulario en un modal grande. */}
+      <div className="mt-6">
+      <EditDialog size="lg" label={t("+ Invitar usuario")} title={t("Invitar usuario")} className="card block w-full cursor-pointer text-left font-bold transition-colors hover:text-accent">
         <ActionForm action={createUser} submit={t("Crear usuario")}>
           <div className="grid gap-3 md:grid-cols-2">
             <F label={t("Nombre")} name="name" />
@@ -93,7 +100,8 @@ export default async function Usuarios() {
             <F label={t("Contraseña inicial (mín. 10)")} name="password" type="password" />
           </div>
         </ActionForm>
-      </section>
+      </EditDialog>
+      </div>
     </>
   );
 }

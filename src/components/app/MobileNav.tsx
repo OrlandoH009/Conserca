@@ -12,7 +12,7 @@ import { SideNav } from "./SideNav";
 import { EASE as ease } from "@/lib/motion";
 
 
-/** Panel en celular: barra superior fija y menú que se desliza desde la izquierda. */
+/** Panel en celular: barra superior fija y menú que se desliza desde la derecha (del lado del botón). */
 export function MobileNav({ items, name, role, unread, logout }: { items: { href: string; label: string; badge?: number }[]; name: string; role: string; unread: number; logout: () => Promise<void> }) {
   const t = useT();
   const path = usePathname();
@@ -48,15 +48,15 @@ export function MobileNav({ items, name, role, unread, logout }: { items: { href
         {open && (
           <div className="fixed inset-0 z-50 lg:hidden print:hidden">
             <motion.button aria-label={t("Cerrar menú")} className="absolute inset-0 cursor-default bg-black/50 backdrop-blur-sm" onClick={() => setOpen(false)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} />
-            <motion.aside initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ duration: 0.4, ease }} className="absolute inset-y-0 left-0 flex w-[82%] max-w-xs flex-col overflow-y-auto border-r border-line bg-surface p-4 shadow-2xl">
+            <motion.aside initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.4, ease }} className="absolute inset-y-0 right-0 flex w-[72%] max-w-[17rem] flex-col overflow-y-auto border-l border-line bg-surface p-4 shadow-2xl">
               <div className="flex items-center justify-between px-2 pb-6 pt-1">
                 <Logo />
                 <button onClick={() => setOpen(false)} aria-label={t("Cerrar menú")} className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-mute active:bg-soft">✕</button>
               </div>
-              <SideNav items={items} onNavigate={() => setOpen(false)} />
+              <SideNav items={items} onNavigate={() => setOpen(false)} from={14} />
               <div className="mt-auto border-t border-line pt-4">
-                <p className="truncate px-2 text-sm font-semibold">{name}</p>
-                <p className="px-2 pb-3 text-xs text-mute">{role}</p>
+                <p className="truncate px-2 text-base font-semibold">{name}</p>
+                <p className="px-2 pb-3 text-sm text-mute">{role}</p>
                 <Link href="/" className="btn mb-2 w-full py-2.5">{t("← Ir al sitio")}</Link>
                 <form action={logout}><button className="btn-ghost w-full py-2.5">{t("Cerrar sesión")}</button></form>
               </div>

@@ -37,6 +37,9 @@ const TABS: { key: string; label: string; area: Area; C: (p: { projectId: number
   { key: "actividad", label: "Actividad", area: "proyectos", C: Actividad },
 ];
 
+// Botones del encabezado más compactos en celular.
+const SMALL = "max-sm:px-3 max-sm:py-1.5 max-sm:text-xs";
+
 export default async function Proyecto({ params, searchParams }: PageProps<"/app/proyectos/[id]">) {
   const t = await getT();
   const u = await requireAccess("proyectos");
@@ -68,7 +71,7 @@ export default async function Proyecto({ params, searchParams }: PageProps<"/app
       <PageHead title={p.name} sub={`${projectCode(p.id, p.createdAt)} · ${client ?? account ?? t("Sin cliente")} · ${t(p.spaceType)} · ${t("Entrega")} ${fmtDate(p.dueDate)}`}>
         {canEditProject && (
           <div className="flex flex-wrap items-center gap-3">
-            <EditDialog label={t("Editar datos")} title={t("Editar datos del proyecto")} className="btn-ghost">
+            <EditDialog label={t("Editar datos")} title={t("Editar datos del proyecto")} className={`btn-ghost ${SMALL}`}>
               <ActionForm action={updateProject} submit={t("Guardar cambios")} success={t("Proyecto actualizado")}>
                 <input type="hidden" name="id" value={p.id} />
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -92,13 +95,13 @@ export default async function Proyecto({ params, searchParams }: PageProps<"/app
             </EditDialog>
             {archived ? (
               <>
-                <ActionButton action={restoreProject} fields={{ id: p.id, on: 0 }} okText={t("Proyecto restaurado")} className="btn-ghost">{t("Restaurar")}</ActionButton>
+                <ActionButton action={restoreProject} fields={{ id: p.id, on: 0 }} okText={t("Proyecto restaurado")} className={`btn-ghost ${SMALL}`}>{t("Restaurar")}</ActionButton>
                 {can(u.role, "usuarios", "edit") && (
-                  <ActionButton action={deleteProject} fields={{ id: p.id }} confirm={t("¿Eliminar «{name}» para siempre? Se borra todo lo que contiene. No se puede deshacer.", { name: p.name })} okText={t("Proyecto eliminado")} className="btn-ghost !border-red-300 !text-red-600">{t("Eliminar definitivamente")}</ActionButton>
+                  <ActionButton action={deleteProject} fields={{ id: p.id }} confirm={t("¿Eliminar «{name}» para siempre? Se borra todo lo que contiene. No se puede deshacer.", { name: p.name })} okText={t("Proyecto eliminado")} className={`btn-ghost !border-red-300 !text-red-600 ${SMALL}`}>{t("Eliminar definitivamente")}</ActionButton>
                 )}
               </>
             ) : (
-              <ActionButton action={archiveProject} fields={{ id: p.id, on: 1 }} confirm={t("¿Archivar «{name}»? Deja de salir en la lista y el cliente ya no lo ve; se puede restaurar.", { name: p.name })} okText={t("Proyecto archivado")} className="btn-ghost">{t("Archivar")}</ActionButton>
+              <ActionButton action={archiveProject} fields={{ id: p.id, on: 1 }} confirm={t("¿Archivar «{name}»? Deja de salir en la lista y el cliente ya no lo ve; se puede restaurar.", { name: p.name })} okText={t("Proyecto archivado")} className={`btn-ghost ${SMALL}`}>{t("Archivar")}</ActionButton>
             )}
           </div>
         )}
@@ -110,7 +113,7 @@ export default async function Proyecto({ params, searchParams }: PageProps<"/app
         </p>
       )}
 
-      <section className="card mb-5 grid gap-5 md:grid-cols-2 xl:grid-cols-[0.8fr_1fr_1.3fr_1.3fr]" aria-label={t("Estado, etapa y avance")}>
+      <section className="card mb-5 grid grid-cols-2 gap-4 sm:gap-5 xl:grid-cols-[0.8fr_1fr_1.3fr_1.3fr]" aria-label={t("Estado, etapa y avance")}>
         <div>
           <p className="label">{t("Estado")}</p>
           {canEditProject ? (
@@ -123,12 +126,12 @@ export default async function Proyecto({ params, searchParams }: PageProps<"/app
             <AutoSelect key={p.stage} name="stage" value={p.stage} options={stageOptions} action={setProjectStage} fields={{ id: p.id }} label={t("Etapa del proyecto")} okText={t("Etapa actualizada")} className="input w-full" confirm={{ [DELIVERY_STAGE]: deliverMsg }} />
           ) : <p className="font-semibold">{t(p.stage)}</p>}
         </div>
-        <div>
+        <div className="col-span-2 md:col-span-1">
           <p className="label">{t("Avance que ve el cliente")}</p>
           <ProgressBar value={p.progress} />
           {canEditProject && <div className="mt-3"><ProgressControl key={p.progress} projectId={p.id} value={p.progress} action={setProjectProgress} /></div>}
         </div>
-        <div>
+        <div className="col-span-2 md:col-span-1">
           <p className="label">{t("Cuenta del cliente en el sitio")}</p>
           {canEditProject ? (
             <AutoSelect

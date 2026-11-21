@@ -3,11 +3,9 @@ import Link from "next/link";
 import * as DashboardController from "@/controllers/dashboard.controller";
 import { CountUp } from "@/components/motion/CountUp";
 import { PageHead, StatusBadge, Badge, Empty, PROJECT_STATUS } from "@/components/app/ui";
-import { currentUser } from "@/lib/auth";
 import { money } from "@/lib/calc";
 import { fmtDate, todayISO } from "@/lib/format";
 import { nearYearEnd } from "@/lib/payments";
-import { can } from "@/lib/permissions";
 import { daysLate } from "@/lib/project";
 
 const BAR = { en_proceso: "bg-accent-solid", entregado: "bg-emerald-500", atrasado: "bg-red-500" } as const;
@@ -15,7 +13,7 @@ const BAR = { en_proceso: "bg-accent-solid", entregado: "bg-emerald-500", atrasa
 export default async function Panel({ searchParams }: PageProps<"/app">) {
   const t = await getT();
   const sp = await searchParams;
-  const [s, u] = await Promise.all([DashboardController.summary(), currentUser()]);
+  const s = await DashboardController.summary();
 
   const kpis: [string, number | null, string][] = [
     [t("Proyectos activos"), s.active, "/app/proyectos"],
@@ -28,11 +26,6 @@ export default async function Panel({ searchParams }: PageProps<"/app">) {
   const unbilled = pay ? pay.toInvoice.length + pay.later : 0; // cobros que aún no se facturan
   const shown = kpis.filter(([, v]) => v !== null);
   const total = s.byStatus.reduce((n, r) => n + r.n, 0);
-  const quick: [string, string][] = [
-    ["/app/proyectos", t("Ver proyectos")],
-    ...(u && can(u.role, "clientes") ? ([["/app/clientes", s.newQuotes ? t("Cotizaciones ({n} nuevas)", { n: s.newQuotes }) : t("Cotizaciones")]] as [string, string][]) : []),
-    ...(u && can(u.role, "calculos") ? ([["/app/calculadoras", t("Calculadoras")]] as [string, string][]) : []),
-  ];
 
   return (
     <>
@@ -41,11 +34,12 @@ export default async function Panel({ searchParams }: PageProps<"/app">) {
       {pay && unbilled > 0 && nearYearEnd(todayISO()) && (
         <p className="mb-5 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">{t("Se acerca el cierre de año: hay {n} cobros sin facturar. Revisa que ninguno se quede fuera.", { n: unbilled })}</p>
       )}
-      <div className={`grid gap-4 sm:grid-cols-2 ${shown.length > 3 ? "xl:grid-cols-4" : "xl:grid-cols-3"}`}>
+      {/* Un solo recuadro dividido en celdas (2×2 en celular, en fila en PC); las líneas son el fondo asomando por el gap de 1px. */}
+      <div className={`grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line ${shown.length > 3 ? "xl:grid-cols-4" : "xl:grid-cols-3"}`}>
         {shown.map(([l, v, href]) => (
-          <Link key={l} href={href} className="card transition hover:-translate-y-0.5 hover:shadow-md">
-            <p className="text-sm text-mute">{l}</p>
-            <p className={`mt-1 text-4xl font-bold tracking-tight ${red.has(l) && v ? "text-red-600" : ""}`}><CountUp to={v!} /></p>
+          <Link key={l} href={href} className="bg-surface p-4 transition-colors hover:bg-soft active:bg-soft odd:last:col-span-2 sm:p-5 xl:odd:last:col-span-1">
+            <p className="text-xs leading-snug text-mute sm:text-sm">{l}</p>
+            <p className={`mt-1 text-3xl font-bold tracking-tight sm:text-4xl ${red.has(l) && v ? "text-red-600" : ""}`}><CountUp to={v!} /></p>
           </Link>
         ))}
       </div>
@@ -55,15 +49,15 @@ export default async function Panel({ searchParams }: PageProps<"/app">) {
           <section className="card">
             <h2 className="mb-3 font-bold">{t("Proyectos recientes")}</h2>
             {s.recent.length === 0 ? <Empty>{t("Aún no hay proyectos.")}</Empty> : (
-              <table className="tbl">
+              <table className="tbl tbl-stack">
                 <thead><tr><th>{t("Proyecto")}</th><th>{t("Etapa")}</th><th>{t("Entrega")}</th><th>{t("Estado")}</th></tr></thead>
                 <tbody>
                   {s.recent.map((p) => (
                     <tr key={p.id}>
                       <td><Link href={`/app/proyectos/${p.id}`} className="font-medium hover:text-accent">{p.name}</Link></td>
-                      <td>{t(p.stage)}</td>
-                      <td>{fmtDate(p.dueDate)}</td>
-                      <td><StatusBadge status={p.status} /></td>
+                      <td data-label={t("Etapa")}>{t(p.stage)}</td>
+                      <td data-label={t("Entrega")}>{fmtDate(p.dueDate)}</td>
+                      <td data-label={t("Estado")}><StatusBadge status={p.status} /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -91,13 +85,6 @@ export default async function Panel({ searchParams }: PageProps<"/app">) {
         </div>
 
         <div className="space-y-5">
-          <section className="card">
-            <h2 className="mb-3 font-bold">{t("Acciones rápidas")}</h2>
-            <div className="flex flex-wrap gap-2">
-              {quick.map(([href, label]) => <Link key={href} href={href} className="btn-ghost btn-line px-3 py-1.5 text-sm">{label}</Link>)}
-            </div>
-          </section>
-
           {pay && pay.toInvoice.length + pay.toCollect.length > 0 && (
             <section id="cobros" className="card">
               <h2 className="mb-3 font-bold">{t("Cobros por atender")}</h2>

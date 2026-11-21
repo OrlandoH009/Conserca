@@ -31,7 +31,7 @@ export function ActionButton({
       for (const [k, v] of Object.entries(fields)) fd.set(k, String(v));
       try {
         const r = await action(fd);
-        if (r.error) toast.error(t(r.error)); else toast.ok(okText ?? t("Listo"));
+        if (r?.error) toast.error(t(r.error)); else toast.ok(okText ?? t("Listo")); // r puede venir vacío si la acción redirige
       } catch {
         toast.error(t("No se pudo completar. Intenta de nuevo."));
       }

@@ -1,4 +1,5 @@
 import { getT } from "@/lib/i18n-server";
+import { FilterMenu } from "@/components/app/FilterMenu";
 import type { Metadata } from "next";
 import Link from "next/link";
 import * as ClientController from "@/controllers/client.controller";
@@ -13,29 +14,14 @@ import { fmtDateTime } from "@/lib/format";
 import { CONFIG } from "@/lib/config";
 import { can } from "@/lib/permissions";
 import { detailRows } from "@/lib/quote-details";
+import { ClientFields } from "./ClientFields";
 import { addClient, contactQuote, convertQuote, rejectQuote, removeClient, removeQuote, updateClient } from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT())("Clientes y cotizaciones") };
 }
 
-const QS = { nueva: ["Nueva", "b"], en_proceso: ["En proceso", "a"], respondida: ["Respondida", "g"], aceptada: ["Aceptada", "g"], rechazada: ["Rechazada", "r"] } as const;
-
-async function ClientFields({ c }: { c?: { name: string; contact: string | null; email: string | null; phone: string | null; taxId: string | null; billingEmail: string | null; authorizer: string | null } }) {
-  const t = await getT();
-  return (
-    <div className="space-y-3">
-      <F label={t("Nombre")} name="name" defaultValue={c?.name} />
-      <F label={t("Contacto")} name="contact" required={false} defaultValue={c?.contact ?? ""} />
-      <F label={t("Correo")} name="email" type="email" required={false} defaultValue={c?.email ?? ""} />
-      <F label={t("Teléfono")} name="phone" required={false} defaultValue={c?.phone ?? ""} />
-      <p className="label pt-2">{t("Para facturar")}</p>
-      <F label={t("NIT / NRC")} name="taxId" required={false} defaultValue={c?.taxId ?? ""} />
-      <F label={t("Correo para enviar la factura")} name="billingEmail" type="email" required={false} defaultValue={c?.billingEmail ?? ""} />
-      <F label={t("Quién autoriza que se facture")} name="authorizer" required={false} defaultValue={c?.authorizer ?? ""} />
-    </div>
-  );
-}
+const QS = { nueva: ["Nueva", "b"], en_proceso: ["En contacto", "a"], aceptada: ["Aceptada", "g"], rechazada: ["Rechazada", "r"] } as const;
 
 export default async function Clientes({ searchParams }: PageProps<"/app/clientes">) {
   const t = await getT();
@@ -53,21 +39,27 @@ export default async function Clientes({ searchParams }: PageProps<"/app/cliente
     <>
       <PageHead title={t("Clientes y cotizaciones")} sub={t("Las solicitudes llegan desde el sitio, con o sin cuenta")} />
       <div className="grid gap-5 xl:grid-cols-[1.6fr_1fr]">
-        <section className="card">
+        {/* Altura mínima para que la lista de filtros desplegada quepa dentro del recuadro (con aire abajo) aunque no haya resultados. */}
+        <section className="card flex min-h-[26rem] flex-col">
           <h2 className="mb-3 font-bold">{t("Cotizaciones recibidas")} <span className="text-sm font-normal text-mute">({quotes.total})</span></h2>
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <form className="flex flex-1 gap-2 sm:flex-none">
-              <input name="q" defaultValue={q} placeholder={t("Buscar nombre, teléfono o texto")} className="input w-full sm:w-64" aria-label={t("Buscar cotizaciones")} />
+          <div className="mb-4 flex gap-2">
+            {/* Búsqueda con la lupa como botón dentro de la barra. */}
+            <form role="search" className="relative min-w-0 flex-1">
+              <input name="q" defaultValue={q} placeholder={t("Buscar nombre, teléfono o texto")} className="input w-full !pr-12" aria-label={t("Buscar cotizaciones")} />
               {estado && <input type="hidden" name="estado" value={estado} />}
-              <button className="btn-ghost">{t("Buscar")}</button>
+              <button aria-label={t("Buscar")} className="absolute inset-y-1 right-1 flex w-10 cursor-pointer items-center justify-center rounded-lg text-mute transition-colors hover:bg-soft hover:text-accent active:scale-95">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+              </button>
             </form>
-            <Link href={`/app/clientes${q ? `?q=${encodeURIComponent(q)}` : ""}`} className={`badge px-3 py-1.5 ${!estado ? "bg-soft text-accent" : "bg-surface text-mute ring-1 ring-line"}`}>{t("Todas")}</Link>
-            {Object.entries(QS).map(([k, [l]]) => (
-              <Link key={k} href={`/app/clientes?${new URLSearchParams({ estado: k, ...(q ? { q } : {}) })}`} className={`badge px-3 py-1.5 ${estado === k ? "bg-soft text-accent" : "bg-surface text-mute ring-1 ring-line"}`}>{t(l)}</Link>
-            ))}
+            {/* Filtro por estado: se despliega, se elige uno y se cierra. */}
+            <FilterMenu
+              label={t("Filtrar por estado")}
+              current={estado ?? ""}
+              options={([["", "Todas"], ...Object.entries(QS).map(([k, [l]]) => [k, l])] as [string, string][]).map(([k, l]) => ({ key: k, label: l, href: `/app/clientes?${new URLSearchParams({ ...(k ? { estado: k } : {}), ...(q ? { q } : {}) })}` }))}
+            />
           </div>
 
-          {quotes.rows.length === 0 ? <Empty>{estado || q ? t("No hay cotizaciones con ese filtro.") : t("Aún no llegan solicitudes.")}</Empty> : quotes.rows.map((x) => {
+          {quotes.rows.length === 0 ? <Empty className="flex flex-1 items-center justify-center text-base">{estado || q ? t("No hay cotizaciones con ese filtro.") : t("Aún no llegan solicitudes.")}</Empty> : quotes.rows.map((x) => {
             const [label, tone] = QS[x.status];
             return (
               <article key={x.id} className="border-b border-slate-100 py-4 last:border-0">
@@ -152,8 +144,10 @@ export default async function Clientes({ searchParams }: PageProps<"/app/cliente
                   <p className="font-semibold">{c.name}</p>
                   <p className="text-sm text-mute">{[c.contact, c.email, c.phone].filter(Boolean).join(" · ") || t("Sin datos de contacto")}</p>
                 </div>
+                {/* Celular: un botón pequeño a la página del cliente (editar si tiene permiso, si no solo ver). */}
+                <Link href={`/app/clientes/${c.id}`} className="btn-ghost btn-line shrink-0 px-3 py-1.5 text-xs sm:hidden">{canEdit ? t("Ver y editar") : t("Ver detalles")}</Link>
                 {canEdit && (
-                  <div className="flex shrink-0 items-center gap-3 text-xs">
+                  <div className="hidden shrink-0 items-center gap-3 text-xs sm:flex">
                     <EditDialog label={t("Editar")} title={t("Editar a {name}", { name: c.name })} className="font-semibold text-accent hover:underline">
                       <ActionForm action={updateClient} submit={t("Guardar cambios")} success={t("Cliente actualizado")}>
                         <input type="hidden" name="id" value={c.id} />
@@ -167,10 +161,10 @@ export default async function Clientes({ searchParams }: PageProps<"/app/cliente
             ))}
           </section>
           {canEdit && (
-            <section className="card">
-              <h2 className="mb-3 font-bold">{t("Agregar cliente")}</h2>
+            // Como "+ Nuevo proyecto": un botón del ancho de la tarjeta que abre el formulario en un modal grande.
+            <EditDialog size="lg" label={t("+ Agregar cliente")} title={t("Agregar cliente")} className="card block w-full cursor-pointer text-left font-bold transition-colors hover:text-accent">
               <ActionForm action={addClient} success={t("Cliente agregado")}><ClientFields /></ActionForm>
-            </section>
+            </EditDialog>
           )}
         </div>
       </div>

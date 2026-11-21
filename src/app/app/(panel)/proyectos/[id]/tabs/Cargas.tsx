@@ -38,13 +38,13 @@ export async function Cargas({ projectId, canEdit }: { projectId: number; canEdi
       <section className="card overflow-x-auto">
         <h2 className="mb-3 font-bold">{t("Espacios del proyecto")}</h2>
         {rows.length === 0 ? <Empty>{t("Aún no hay espacios. Agrega el primero para calcular su carga térmica.")}</Empty> : (
-          <table className="tbl">
+          <table className="tbl tbl-stack">
             <thead><tr><th>{t("Espacio")}</th><th>{t("Área (m²)")}</th><th>{t("Personas")}</th><th>{t("Orientación")}</th><th>{t("Carga (kW)")}</th><th>{t("Carga (TR)")}</th>{canEdit && <th />}</tr></thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id}>
                   <td className="font-medium">{r.name}<div className="text-xs font-normal text-mute">{r.usage}</div></td>
-                  <td>{num(r.areaM2)}</td><td>{r.people}</td><td className="capitalize">{r.orientation}</td><td>{r.loadKw}</td><td className="font-semibold text-accent">{r.loadTr}</td>
+                  <td data-label={t("Área (m²)")}>{num(r.areaM2)}</td><td data-label={t("Personas")}>{r.people}</td><td data-label={t("Orientación")} className="capitalize">{r.orientation}</td><td data-label={t("Carga (kW)")}>{r.loadKw}</td><td data-label={t("Carga (TR)")} className="font-semibold text-accent">{r.loadTr}</td>
                   {canEdit && (
                     <td>
                       <RowActions
@@ -63,7 +63,7 @@ export async function Cargas({ projectId, canEdit }: { projectId: number; canEdi
                 </tr>
               ))}
             </tbody>
-            <tfoot><tr><td colSpan={4} className="px-3 py-3 font-bold">{t("Total")}</td><td className="px-3 py-3 font-bold">{kw}</td><td className="px-3 py-3 font-bold text-accent">{tr}</td>{canEdit && <td />}</tr></tfoot>
+            <tfoot><tr><td colSpan={4} className="px-3 py-3 font-bold">{t("Total")}</td><td data-label={t("Carga (kW)")} className="px-3 py-3 font-bold">{kw}</td><td data-label={t("Carga (TR)")} className="px-3 py-3 font-bold text-accent">{tr}</td>{canEdit && <td />}</tr></tfoot>
           </table>
         )}
         <Estimado />

@@ -11,7 +11,7 @@ export const useDialogClose = () => useContext(CloseContext);
  * Botón + ventana (<dialog> nativo: atrapa el foco, se cierra con Esc y tapa el resto de la página).
  * El contenido solo se dibuja mientras está abierta; así los campos no se repiten en la página.
  */
-export function EditDialog({ label, title, children, className = "text-sm font-semibold text-accent hover:underline" }: { label: React.ReactNode; title: string; children: React.ReactNode; className?: string }) {
+export function EditDialog({ label, title, children, className = "text-sm font-semibold text-accent hover:underline", size = "md" }: { label: React.ReactNode; title: string; children: React.ReactNode; className?: string; size?: "md" | "lg" }) {
   const t = useT();
   const ref = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
@@ -27,7 +27,7 @@ export function EditDialog({ label, title, children, className = "text-sm font-s
         aria-label={title}
         onClose={() => setOpen(false)}
         onClick={(e) => { if (e.target === ref.current) close(); }} // clic en el fondo
-        className="edit-dialog m-auto w-[min(92vw,34rem)] rounded-3xl border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+        className={`edit-dialog m-auto ${size === "lg" ? "w-[min(94vw,46rem)]" : "w-[min(92vw,34rem)]"} rounded-3xl border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm`}
       >
         {open && (
           <CloseContext.Provider value={close}>

@@ -43,8 +43,8 @@ export async function Estimado() {
   return <p className="mt-3 text-xs text-mute">{t("Estimado con fórmulas simplificadas. Validar por ingeniería antes de usarse.")}</p>;
 }
 
-export function Empty({ children }: { children: ReactNode }) {
-  return <p className="rounded-xl bg-slate-50 px-4 py-6 text-center text-sm text-mute">{children}</p>;
+export function Empty({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <p className={`rounded-xl bg-slate-50 px-4 py-6 text-center text-sm text-mute ${className}`}>{children}</p>;
 }
 
 export function ProgressBar({ value }: { value: number }) {

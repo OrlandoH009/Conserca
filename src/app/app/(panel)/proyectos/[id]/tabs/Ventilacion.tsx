@@ -55,12 +55,12 @@ export async function Ventilacion({ projectId, canEdit }: { projectId: number; c
         <section className="card overflow-x-auto">
           <h2 className="mb-3 font-bold">{t("Caudales por zona")}</h2>
           {rows.length === 0 ? <Empty>{t("Aún no hay zonas de ventilación.")}</Empty> : (
-            <table className="tbl">
+            <table className="tbl tbl-stack">
               <thead><tr><th>{t("Zona")}</th><th>{t("Tipo")}</th><th>{t("Área (m²)")}</th><th>{t("Cambios/h")}</th><th>{t("Puertas")}</th><th>{t("Caudal (m³/h)")}</th>{canEdit && <th />}</tr></thead>
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.id}>
-                    <td className="font-medium">{r.name}</td><td>{t(VENT_LABEL[r.kind])}</td><td>{r.areaM2 ?? "—"}</td><td>{r.ach ?? "—"}</td><td>{r.doors ?? "—"}</td><td className="font-semibold text-accent">{num(r.flowM3h)}</td>
+                    <td className="font-medium">{r.name}</td><td data-label={t("Tipo")}>{t(VENT_LABEL[r.kind])}</td><td data-label={t("Área (m²)")}>{r.areaM2 ?? "—"}</td><td data-label={t("Cambios/h")}>{r.ach ?? "—"}</td><td data-label={t("Puertas")}>{r.doors ?? "—"}</td><td data-label={t("Caudal (m³/h)")} className="font-semibold text-accent">{num(r.flowM3h)}</td>
                     {canEdit && (
                       <td>
                         <RowActions

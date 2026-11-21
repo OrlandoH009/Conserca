@@ -5,7 +5,7 @@ import { useT } from "@/components/site/LocaleProvider";
 import type { R } from "@/lib/action-utils";
 import { toast } from "./Toaster";
 
-/** Datos de contacto con botón para copiarlos; quien atiende escribe por la aplicación que prefiera. Al copiar, la solicitud pasa a "En proceso". */
+/** Datos de contacto con botón para copiarlos; quien atiende escribe por la aplicación que prefiera. Al copiar, la solicitud pasa a "En contacto". */
 export function ContactOptions({ id, phone, email, action }: { id: number; phone: string | null; email: string | null; action: (fd: FormData) => Promise<R> }) {
   const t = useT();
   const marked = useRef(false);

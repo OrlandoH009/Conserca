@@ -162,6 +162,30 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-inter),
   .tbl { min-width: 34rem; }
 }
 
+/* Tabla compacta: filas más bajas. */
+.tbl.tbl-compact td { padding-top: .5rem; padding-bottom: .5rem; }
+
+/* Celular: las tablas de listas (.tbl-stack) se vuelven tarjetas apiladas para caber sin desplazarse de lado.
+   La primera celda es el título; las demás muestran su encabezado (data-label) a la izquierda y el valor a la derecha. */
+@media (max-width: 639px) {
+  .tbl.tbl-stack { min-width: 0; }
+  .tbl-stack thead { display: none; }
+  .tbl-stack, .tbl-stack tbody, .tbl-stack tfoot, .tbl-stack tr { display: block; }
+  .tbl-stack tfoot { border-top: 2px solid var(--line); margin-top: .5rem; padding-top: .5rem; }
+  .tbl-stack td:empty { display: none !important; }
+  .tbl-stack tr { border-bottom: 1px solid var(--line); padding: .75rem 0; }
+  .tbl-stack tr:first-child { padding-top: 0; }
+  .tbl-stack tr:last-child { border-bottom: 0; padding-bottom: 0; }
+  .tbl.tbl-stack td { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 0; padding: .2rem 0; text-align: right; }
+  .tbl-stack td[data-label]::before { content: attr(data-label); flex-shrink: 0; font-size: .75rem; color: var(--mute); text-align: left; }
+  .tbl.tbl-stack tr > :first-child { display: block; padding: 0 0 .4rem; text-align: left; }
+  /* Variante compacta (matriz de permisos): los datos van en 3 columnas, etiqueta arriba y valor abajo. */
+  .tbl-stack.tbl-compact tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .4rem .75rem; padding: .6rem 0; }
+  .tbl-stack.tbl-compact tr > :first-child { grid-column: 1 / -1; padding: 0; }
+  .tbl.tbl-stack.tbl-compact td { flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: .15rem; padding: 0; text-align: left; }
+  .tbl-stack.tbl-compact td[data-label]::before { font-size: .7rem; }
+}
+
 /* Con soporte de scroll-driven animations (Chrome/Edge/Safari recientes), tarjetas y filas aparecen al llegar a la pantalla al ir bajando. */
 @supports (animation-timeline: view()) {
   .card, .tbl tbody tr { animation: rise linear both; animation-timeline: view(); animation-range: entry 0% entry 40%; animation-delay: 0s !important; }

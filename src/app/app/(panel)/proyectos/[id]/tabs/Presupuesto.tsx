@@ -33,12 +33,12 @@ export async function Presupuesto({ projectId, canEdit }: { projectId: number; c
             {rows.length > 0 && <a href={`/api/proyectos/${projectId}/presupuesto`} download className="btn-ghost px-3 py-1.5 text-xs">{t("Descargar CSV")}</a>}
           </div>
           {rows.length === 0 ? <Empty>{t("Aún no hay partidas.")}</Empty> : (
-            <table className="tbl">
+            <table className="tbl tbl-stack">
               <thead><tr><th>{t("Partida")}</th><th>{t("Unidad")}</th><th>{t("Cantidad")}</th><th>{t("Precio unitario")}</th><th>{t("Importe")}</th>{canEdit && <th />}</tr></thead>
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.id}>
-                    <td className="font-medium">{r.description}</td><td>{r.unit}</td><td>{num(r.quantity)}</td><td>{money(r.unitPrice)}</td><td className="font-semibold">{money(r.quantity * r.unitPrice)}</td>
+                    <td className="font-medium">{r.description}</td><td data-label={t("Unidad")}>{r.unit}</td><td data-label={t("Cantidad")}>{num(r.quantity)}</td><td data-label={t("Precio unitario")}>{money(r.unitPrice)}</td><td data-label={t("Importe")} className="font-semibold">{money(r.quantity * r.unitPrice)}</td>
                     {canEdit && (
                       <td>
                         <RowActions

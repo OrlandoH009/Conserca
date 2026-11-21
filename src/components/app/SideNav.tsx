@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useT } from "@/components/site/LocaleProvider";
 
-export function SideNav({ items, onNavigate }: { items: { href: string; label: string; badge?: number }[]; onNavigate?: () => void }) {
+// from: de qué lado entran las opciones (-14 izquierda en la barra de PC, 14 derecha en el menú del celular).
+export function SideNav({ items, onNavigate, from = -14 }: { items: { href: string; label: string; badge?: number }[]; onNavigate?: () => void; from?: number }) {
   const path = usePathname();
   const t = useT();
   return (
@@ -14,8 +15,8 @@ export function SideNav({ items, onNavigate }: { items: { href: string; label: s
         {items.map((it, n) => {
           const on = it.href === "/app" ? path === "/app" : path.startsWith(it.href);
           return (
-            <motion.div key={it.href} initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.1 + n * 0.06, ease: [0.22, 1, 0.36, 1] }}>
-              <Link href={it.href} onClick={onNavigate} className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:translate-x-0.5 ${on ? "font-semibold text-ink" : "text-mute hover:bg-slate-50 hover:text-ink"}`}>
+            <motion.div key={it.href} initial={{ opacity: 0, x: from }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.1 + n * 0.06, ease: [0.22, 1, 0.36, 1] }}>
+              <Link href={it.href} onClick={onNavigate} className={`relative flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium lg:py-2.5 lg:text-sm transition-colors hover:translate-x-0.5 ${on ? "font-semibold text-ink" : "text-mute hover:bg-slate-50 hover:text-ink"}`}>
                 {/* Fondo y barrita de la sección actual: aparecen con un fundido (con layoutId rebotaban desde abajo al cambiar de página con scroll). */}
                 {on && <span className="absolute inset-0 animate-[pop_.3s_ease-out] rounded-lg bg-line/50 motion-reduce:animate-none" />}
                 {on && <span className="absolute inset-y-2 left-0 w-1 animate-[pop_.3s_ease-out] rounded-full bg-mono motion-reduce:animate-none" />}

@@ -63,9 +63,10 @@ export async function Cobros({ projectId, canEdit }: { projectId: number; canEdi
         )}
 
         {rows.length > 0 && (
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          // Un solo recuadro dividido en celdas, igual que los números del Panel general.
+          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line lg:grid-cols-4">
             {tiles.map(([l, v]) => (
-              <div key={l} className="card"><p className="text-sm text-mute">{l}</p><p className="mt-1 text-xl font-bold tabular-nums">{money(v)}</p></div>
+              <div key={l} className="bg-surface p-4 sm:p-5"><p className="text-xs text-mute sm:text-sm">{l}</p><p className="mt-1 text-lg font-bold tabular-nums sm:text-xl">{money(v)}</p></div>
             ))}
           </div>
         )}

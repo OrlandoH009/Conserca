@@ -26,12 +26,12 @@ export async function Distribucion({ projectId, canEdit }: { projectId: number; 
       <section className="card overflow-x-auto">
         <h2 className="mb-3 font-bold">{t("Conductos, rejillas y difusores")}</h2>
         {rows.length === 0 ? <Empty>{t("Aún no hay elementos de distribución.")}</Empty> : (
-          <table className="tbl">
+          <table className="tbl tbl-stack">
             <thead><tr><th>{t("Elemento")}</th><th>{t("Tipo")}</th><th>{t("Caudal (m³/h)")}</th><th>{t("Medida")}</th>{canEdit && <th />}</tr></thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id}>
-                  <td className="font-medium">{r.name}</td><td>{r.kind}</td><td>{num(r.flowM3h)}</td><td>{r.size}</td>
+                  <td className="font-medium">{r.name}</td><td data-label={t("Tipo")}>{r.kind}</td><td data-label={t("Caudal (m³/h)")}>{num(r.flowM3h)}</td><td data-label={t("Medida")}>{r.size}</td>
                   {canEdit && (
                     <td>
                       <RowActions
