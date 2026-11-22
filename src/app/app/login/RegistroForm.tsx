@@ -3,6 +3,7 @@
 import { MotionConfig, motion } from "motion/react";
 import { startTransition, useActionState } from "react";
 import { useT } from "@/components/site/LocaleProvider";
+import { ResetButton } from "@/components/app/ConfirmButton";
 import { CONFIG } from "@/lib/config";
 import { register, type LoginState } from "./actions";
 import { PasswordInput } from "./PasswordInput";
@@ -19,6 +20,7 @@ export function RegistroForm() {
         <div className="absolute left-[-9999px]" aria-hidden>
           <label>{t("Sitio web")}<input name="website" tabIndex={-1} autoComplete="off" /></label>
         </div>
+        <motion.p variants={item} className="text-xs text-mute">{t("Los campos con * son obligatorios")}</motion.p>
         <motion.div variants={item}>
           <label className="label" htmlFor="r-name">{t("Nombre")}</label>
           <input id="r-name" name="name" className="input" autoComplete="name" required />
@@ -52,6 +54,7 @@ export function RegistroForm() {
         )}
         <motion.div variants={item}>
           <button className="btn w-full py-3" disabled={pending}>{pending ? t("Creando…") : t("Crear cuenta")}</button>
+          <ResetButton className="btn-ghost btn-line mt-2 w-full py-2.5" />
         </motion.div>
       </motion.form>
     </MotionConfig>

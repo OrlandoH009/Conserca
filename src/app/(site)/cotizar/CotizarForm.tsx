@@ -4,6 +4,7 @@ import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 import { CONTACTS, DETAIL_MAX, PLANS, SIZES, SPACE_TYPES, STAGES, TIMES, WHEN } from "@/lib/quote-options";
 import { useT } from "@/components/site/LocaleProvider";
+import { ResetButton } from "@/components/app/ConfirmButton";
 import { SERVICES } from "@/lib/services";
 import { submitQuote, type QuoteState } from "./actions";
 import { EASE as ease } from "@/lib/motion";
@@ -38,7 +39,7 @@ function Step({ n, title, hint, children }: { n: number; title: string; hint?: s
     <motion.fieldset initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ duration: 0.5, ease }}>
       <legend className="mb-4 flex items-center gap-3 font-semibold">
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent-solid text-sm text-white">{n}</span>
-        <span>{t(title)}{hint && <span className="ml-2 text-sm font-normal text-mute">{t(hint)}</span>}</span>
+        <span>{t(title)}{hint !== "(opcional)" && <span aria-hidden className="text-red-600 dark:text-red-400"> *</span>}{hint && <span className="ml-2 text-sm font-normal text-mute">{t(hint)}</span>}</span>
       </legend>
       <div className="flex flex-wrap gap-3">{children}</div>
     </motion.fieldset>
@@ -65,12 +66,13 @@ export function CotizarForm({ user }: { user: User }) {
   return (
     <MotionConfig reducedMotion="user">
       {/* onSubmit en vez de action={...}: así React no vacía el formulario cuando el servidor devuelve un error. */}
-      <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); startTransition(() => action(fd)); }} className="rounded-3xl border border-line bg-surface p-5 sm:p-8 md:p-10">
-        <div className="mb-10 rounded-xl bg-soft px-4 py-3 text-sm">
+      <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); startTransition(() => action(fd)); }} onReset={() => { setMore(false); setLen(0); }} className="rounded-3xl border border-line bg-surface p-5 sm:p-8 md:p-10">
+        <div className="mb-3 rounded-xl bg-soft px-4 py-3 text-sm">
           <p className="font-semibold text-accent">{user.name}</p>
           <p className="text-mute">{[user.phone, user.email].filter(Boolean).join(" · ")}</p>
           <p className="mt-1 text-xs text-mute">{t("Te respondemos a estos datos de tu cuenta.")}</p>
         </div>
+        <p className="mb-10 text-xs text-mute">{t("Los campos con * son obligatorios")}</p>
 
         <div className="space-y-14">
           <Group title="Tu proyecto">
@@ -112,7 +114,10 @@ export function CotizarForm({ user }: { user: User }) {
         </div>
 
         {state.error && <p ref={err} role="alert" className="mt-8 rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-700">{t(state.error)}</p>}
-        <button className="btn btn-lg mt-8 w-full md:w-auto md:px-14" disabled={pending}>{pending ? t("Enviando…") : t("Enviar solicitud")}</button>
+        <div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center">
+          <button className="btn btn-lg w-full md:w-auto md:px-14" disabled={pending}>{pending ? t("Enviando…") : t("Enviar solicitud")}</button>
+          <ResetButton className="btn-ghost btn-line w-full md:w-auto" />
+        </div>
       </form>
     </MotionConfig>
   );

@@ -3,6 +3,7 @@
 import { useT } from "@/components/site/LocaleProvider";
 import { useActionState, useEffect, useId, useRef } from "react";
 import type { R } from "@/lib/action-utils";
+import { ResetButton } from "./ConfirmButton";
 import { useDialogClose } from "./EditDialog";
 import { Spinner } from "./SubmitButton";
 import { toast } from "./Toaster";
@@ -32,10 +33,13 @@ export function ActionForm({
   useEffect(() => { if (state.ok) { ref.current?.reset(); toast.ok(successText); closeDialog?.(); } }, [state, successText, closeDialog]);
   return (
     <form ref={ref} action={run} className={className}>
+      <p className="req-note mb-3 text-xs text-mute">{t("Los campos con * son obligatorios")}</p>
       {children}
-      <div className="mt-4 flex items-center gap-3">
+      <div className="mt-4 flex flex-wrap items-center gap-2 sm:gap-3">
         <button className={ghost ? "btn-ghost" : "btn"} disabled={pending}>{pending ? <><Spinner /> {t("Guardando…")}</> : submitText}</button>
-        {state.error && <p role="alert" className="text-sm text-red-700">{t(state.error)}</p>}
+        <ResetButton />
+        {closeDialog && <button type="button" onClick={closeDialog} className="btn-ghost btn-line">{t("Cancelar")}</button>}
+        {state.error && <p role="alert" className="basis-full text-sm text-red-700">{t(state.error)}</p>}
       </div>
     </form>
   );

@@ -7,8 +7,8 @@ import { useT } from "@/components/site/LocaleProvider";
 import { EASE as ease } from "@/lib/motion";
 
 
-/** Pestañas del proyecto: la línea azul se desliza de una a otra y cada pestaña entra escalonada. */
-export function ProjectTabs({ projectId, tabs, active }: { projectId: number; tabs: { key: string; label: string }[]; active: string }) {
+/** Pestañas del proyecto: la línea azul se desliza de una a otra y cada pestaña entra escalonada. Debajo, qué es la pestaña actual. */
+export function ProjectTabs({ projectId, tabs, active }: { projectId: number; tabs: { key: string; label: string; hint: string }[]; active: string }) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
@@ -27,7 +27,7 @@ export function ProjectTabs({ projectId, tabs, active }: { projectId: number; ta
   return (
     <MotionConfig reducedMotion="user">
       {/* Celular: mini menú desplegable con la sección actual; al elegir otra, navega y se cierra. */}
-      <div ref={box} className="relative mb-5 sm:hidden">
+      <div ref={box} className="relative mb-3 sm:hidden">
         <button type="button" onClick={() => setOpen(!open)} aria-haspopup="menu" aria-expanded={open} className="input flex w-full cursor-pointer items-center justify-between gap-2 font-semibold">
           <span className="truncate">{t(current.label)}</span>
           <svg viewBox="0 0 20 20" className={`h-4 w-4 shrink-0 text-mute transition-transform duration-200 ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m5 8 5 5 5-5" /></svg>
@@ -44,16 +44,17 @@ export function ProjectTabs({ projectId, tabs, active }: { projectId: number; ta
         )}
       </div>
 
-      <div className="mb-6 hidden gap-1 overflow-x-auto overflow-y-hidden border-b border-line sm:flex">
+      <div className="mb-3 hidden gap-1 overflow-x-auto overflow-y-hidden border-b border-line sm:flex">
         {tabs.map((tab, i) => (
           <motion.div key={tab.key} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.05, ease }} className="relative">
-            <Link href={`/app/proyectos/${projectId}?tab=${tab.key}`} scroll={false} replace className={`block whitespace-nowrap px-3 py-2.5 text-sm transition-colors sm:px-4 ${tab.key === active ? "font-semibold text-accent" : "text-mute hover:text-ink"}`}>
+            <Link href={`/app/proyectos/${projectId}?tab=${tab.key}`} scroll={false} replace title={t(tab.hint)} className={`block whitespace-nowrap px-3 py-2.5 text-sm transition-colors sm:px-4 ${tab.key === active ? "font-semibold text-accent" : "text-mute hover:text-ink"}`}>
               {t(tab.label)}
             </Link>
             {tab.key === active && <motion.span layoutId="project-tab-line" className="absolute inset-x-0 -bottom-px h-[3px] rounded-full bg-accent" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
           </motion.div>
         ))}
       </div>
+      <p className="mb-6 text-sm text-mute">{t(current.hint)}</p>
     </MotionConfig>
   );
 }

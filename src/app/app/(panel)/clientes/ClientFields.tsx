@@ -7,7 +7,7 @@ export async function ClientFields({ c }: { c?: { name: string; contact: string 
   return (
     <div className="space-y-3">
       <F label={t("Nombre")} name="name" defaultValue={c?.name} />
-      <F label={t("Contacto")} name="contact" required={false} defaultValue={c?.contact ?? ""} />
+      <F label={t("Persona de contacto")} name="contact" required={false} placeholder={t("Nombre de la persona con quien hablamos")} defaultValue={c?.contact ?? ""} />
       <F label={t("Correo")} name="email" type="email" required={false} defaultValue={c?.email ?? ""} />
       <F label={t("Teléfono")} name="phone" required={false} defaultValue={c?.phone ?? ""} />
       <p className="label pt-2">{t("Para facturar")}</p>

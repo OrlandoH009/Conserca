@@ -101,6 +101,11 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-inter),
   .input { @apply h-11 w-full rounded-xl border border-field bg-surface px-3 text-base text-ink sm:text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20; }
   textarea.input { @apply h-auto min-h-24 py-2.5; }
   .label { @apply mb-1.5 block text-[13px] font-semibold text-ink/80; }
+  /* Campo obligatorio: asterisco junto a su etiqueta, sale solo del atributo `required` del campo. */
+  .label:has(+ :required, + * :required)::after { content: " *"; color: #dc2626; }
+  .dark .label:has(+ :required, + * :required)::after { color: #f87171; }
+  /* La nota "Los campos con * son obligatorios" solo se ve si el formulario tiene alguno. */
+  form:not(:has(:required)) .req-note { display: none; }
   .badge { @apply inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold; }
   .tbl { @apply w-full text-left text-sm; }
   .tbl th { @apply border-b border-line px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-mute; }

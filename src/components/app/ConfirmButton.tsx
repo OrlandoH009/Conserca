@@ -12,6 +12,7 @@ export function useConfirm() {
   const ref = useRef<HTMLDialogElement>(null);
   const resolve = useRef<((ok: boolean) => void) | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const downOnBackdrop = useRef(false);
 
   useEffect(() => { if (message) ref.current?.showModal(); }, [message]);
 
@@ -23,8 +24,10 @@ export function useConfirm() {
       ref={ref}
       role="alertdialog"
       aria-label={message ?? undefined}
-      onClose={() => { resolve.current?.(false); resolve.current = null; setMessage(null); }}
-      onClick={(e) => { if (e.target === ref.current) finish(false); }} // clic en el fondo
+      onClose={(e) => { if (e.target !== ref.current) return; resolve.current?.(false); resolve.current = null; setMessage(null); }}
+      // Solo cierra si el clic empezó y terminó en el fondo: arrastrar al seleccionar texto no cuenta.
+      onMouseDown={(e) => { downOnBackdrop.current = e.target === ref.current; }}
+      onClick={(e) => { if (downOnBackdrop.current && e.target === ref.current) finish(false); }}
       className="edit-dialog m-auto w-[min(92vw,26rem)] rounded-3xl border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm"
     >
       {message && (
@@ -59,6 +62,27 @@ export function ConfirmButton({ message, className = "", children }: { message: 
         }}
       >
         {children}
+      </button>
+      {dialog}
+    </>
+  );
+}
+
+/** Botón que borra lo escrito en su formulario (vuelve a los valores iniciales) después de confirmar. */
+export function ResetButton({ className = "btn-ghost btn-line" }: { className?: string }) {
+  const t = useT();
+  const { ask, dialog } = useConfirm();
+  return (
+    <>
+      <button
+        type="button"
+        className={className}
+        onClick={async (e) => {
+          const form = e.currentTarget.form; // se guarda antes de esperar: React no conserva el evento
+          if (await ask(t("¿Borrar todo lo que escribiste y empezar de nuevo?"))) form?.reset();
+        }}
+      >
+        {t("Borrar todo")}
       </button>
       {dialog}
     </>

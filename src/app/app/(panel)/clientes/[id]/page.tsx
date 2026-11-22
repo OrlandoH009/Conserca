@@ -34,7 +34,7 @@ export default async function Cliente({ params }: PageProps<"/app/clientes/[id]"
   );
 
   if (!canEdit) {
-    const rows: [string, string | null][] = [[t("Nombre"), c.name], [t("Contacto"), c.contact], [t("Correo"), c.email], [t("Teléfono"), c.phone], [t("NIT / NRC"), c.taxId], [t("Correo para enviar la factura"), c.billingEmail], [t("Quién autoriza que se facture"), c.authorizer]];
+    const rows: [string, string | null][] = [[t("Nombre"), c.name], [t("Persona de contacto"), c.contact], [t("Correo"), c.email], [t("Teléfono"), c.phone], [t("NIT / NRC"), c.taxId], [t("Correo para enviar la factura"), c.billingEmail], [t("Quién autoriza que se facture"), c.authorizer]];
     return (
       <>
         {head}

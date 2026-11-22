@@ -17,8 +17,8 @@ type Item = { href: string; label: string; area?: Area; badge?: number };
 const ITEMS: Item[] = [
   { href: "/app", label: "Panel general" },
   { href: "/app/proyectos", label: "Proyectos", area: "proyectos" },
-  { href: "/app/calculadoras", label: "Calculadoras", area: "calculos" },
   { href: "/app/clientes", label: "Clientes y cotizaciones", area: "clientes" },
+  { href: "/app/calculadoras", label: "Calculadoras", area: "calculos" },
   { href: "/app/usuarios", label: "Usuarios y permisos", area: "usuarios" },
   { href: "/app/avisos", label: "Avisos" },
 ];
