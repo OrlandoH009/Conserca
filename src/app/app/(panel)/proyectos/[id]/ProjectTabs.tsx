@@ -7,12 +7,15 @@ import { useT } from "@/components/site/LocaleProvider";
 import { EASE as ease } from "@/lib/motion";
 
 
-/** Pestañas del proyecto: la línea azul se desliza de una a otra y cada pestaña entra escalonada. Debajo, qué es la pestaña actual. */
-export function ProjectTabs({ projectId, tabs, active }: { projectId: number; tabs: { key: string; label: string; hint: string }[]; active: string }) {
+type Tab = { key: string; label: string; hint: string; group: string };
+
+/** Pestañas del proyecto agrupadas (Diseño / Administración) con forma de botón; el fondo azul se desliza a la activa. Debajo, qué es la pestaña actual. */
+export function ProjectTabs({ projectId, tabs, active }: { projectId: number; tabs: Tab[]; active: string }) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const current = tabs.find((x) => x.key === active) ?? tabs[0];
+  const groups = [...new Set(tabs.map((x) => x.group))].map((g) => [g, tabs.filter((x) => x.group === g)] as const);
 
   // El menú del celular se cierra con clic fuera o Esc.
   useEffect(() => {
@@ -34,23 +37,34 @@ export function ProjectTabs({ projectId, tabs, active }: { projectId: number; ta
         </button>
         {open && (
           <div role="menu" className="absolute inset-x-0 top-full z-20 mt-2 animate-[pop_.15s_ease-out] rounded-xl border border-line bg-surface p-1.5 shadow-[0_18px_40px_-16px_rgba(11,126,168,0.45)] motion-reduce:animate-none">
-            {tabs.map((tab) => (
-              <Link key={tab.key} role="menuitem" href={`/app/proyectos/${projectId}?tab=${tab.key}`} scroll={false} replace onClick={() => setOpen(false)} aria-current={tab.key === active ? "page" : undefined} className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors active:bg-soft ${tab.key === active ? "bg-soft font-semibold text-accent" : "text-ink"}`}>
+            {tabs.map((tab, i) => (
+              <div key={tab.key}>
+              {tab.group !== tabs[i - 1]?.group && <p className={`px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-mute ${i ? "mt-2 border-t border-line pt-3" : "pt-1"}`}>{t(tab.group)}</p>}
+              <Link role="menuitem" href={`/app/proyectos/${projectId}?tab=${tab.key}`} scroll={false} replace onClick={() => setOpen(false)} aria-current={tab.key === active ? "page" : undefined} className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors active:bg-soft ${tab.key === active ? "bg-soft font-semibold text-accent" : "text-ink"}`}>
                 {t(tab.label)}
                 {tab.key === active && <span aria-hidden>✓</span>}
               </Link>
+              </div>
             ))}
           </div>
         )}
       </div>
 
-      <div className="mb-3 hidden gap-1 overflow-x-auto overflow-y-hidden border-b border-line sm:flex">
-        {tabs.map((tab, i) => (
-          <motion.div key={tab.key} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.05, ease }} className="relative">
-            <Link href={`/app/proyectos/${projectId}?tab=${tab.key}`} scroll={false} replace title={t(tab.hint)} className={`block whitespace-nowrap px-3 py-2.5 text-sm transition-colors sm:px-4 ${tab.key === active ? "font-semibold text-accent" : "text-mute hover:text-ink"}`}>
-              {t(tab.label)}
-            </Link>
-            {tab.key === active && <motion.span layoutId="project-tab-line" className="absolute inset-x-0 -bottom-px h-[3px] rounded-full bg-accent" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
+      <div className="mb-3 hidden flex-wrap items-center gap-x-4 gap-y-3 sm:flex">
+        {groups.map(([g, list], gi) => (
+          <motion.div key={g} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: gi * 0.08, ease }} className="flex items-center gap-2.5">
+            {gi > 0 && <span aria-hidden className="mr-1.5 h-7 w-px bg-line" />}
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-mute">{t(g)}</span>
+            <div className="flex gap-1 rounded-full border border-line bg-surface p-1">
+              {list.map((tab) => (
+                <div key={tab.key} className="relative">
+                  {tab.key === active && <motion.span layoutId="project-tab-pill" className="absolute inset-0 rounded-full bg-accent-solid" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
+                  <Link href={`/app/proyectos/${projectId}?tab=${tab.key}`} scroll={false} replace title={t(tab.hint)} aria-current={tab.key === active ? "page" : undefined} className={`relative block whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-colors ${tab.key === active ? "font-semibold text-white" : "text-ink/75 hover:bg-soft hover:text-accent"}`}>
+                    {t(tab.label)}
+                  </Link>
+                </div>
+              ))}
+            </div>
           </motion.div>
         ))}
       </div>

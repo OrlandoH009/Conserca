@@ -28,13 +28,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT())("Proyecto") };
 }
 
-const TABS: { key: string; label: string; hint: string; area: Area; C: (p: { projectId: number; canEdit: boolean }) => Promise<React.ReactNode> | React.ReactNode }[] = [
-  { key: "cargas", label: "Cargas térmicas", hint: "Cuánto calor entra a cada espacio, para saber qué capacidad de aire acondicionado necesita.", area: "calculos", C: Cargas },
-  { key: "distribucion", label: "Distribución de aire", hint: "Ductos, difusores y rejillas que llevan el aire a cada espacio, con su caudal y medida.", area: "calculos", C: Distribucion },
-  { key: "ventilacion", label: "Ventilación mecánica", hint: "Aire fresco y extracción para sótanos, baños, bodegas y escaleras de emergencia.", area: "calculos", C: Ventilacion },
-  { key: "presupuesto", label: "Presupuesto estimado de construcción", hint: "Partidas y montos estimados de la obra, con IVA, como referencia para el cliente.", area: "presupuestos", C: Presupuesto },
-  { key: "cobros", label: "Cobros", hint: "Plan de pagos del proyecto: qué ya se facturó y qué falta cobrar.", area: "cobros", C: Cobros },
-  { key: "actividad", label: "Actividad", hint: "Historial de lo que se ha hecho en el proyecto y quién lo hizo.", area: "proyectos", C: Actividad },
+const TABS: { key: string; label: string; hint: string; group: "Diseño" | "Administración"; area: Area; C: (p: { projectId: number; canEdit: boolean }) => Promise<React.ReactNode> | React.ReactNode }[] = [
+  { key: "cargas", label: "Cargas térmicas", hint: "Cuánto calor entra a cada espacio, para saber qué capacidad de aire acondicionado necesita.", group: "Diseño", area: "calculos", C: Cargas },
+  { key: "distribucion", label: "Distribución de aire", hint: "Ductos, difusores y rejillas que llevan el aire a cada espacio, con su caudal y medida.", group: "Diseño", area: "calculos", C: Distribucion },
+  { key: "ventilacion", label: "Ventilación mecánica", hint: "Aire fresco y extracción para sótanos, baños, bodegas y escaleras de emergencia.", group: "Diseño", area: "calculos", C: Ventilacion },
+  { key: "presupuesto", label: "Presupuesto", hint: "Partidas y montos estimados de la obra, con IVA, como referencia para el cliente.", group: "Administración", area: "presupuestos", C: Presupuesto },
+  { key: "cobros", label: "Cobros", hint: "Plan de pagos del proyecto: qué ya se facturó y qué falta cobrar.", group: "Administración", area: "cobros", C: Cobros },
+  { key: "actividad", label: "Actividad", hint: "Historial de lo que se ha hecho en el proyecto y quién lo hizo.", group: "Administración", area: "proyectos", C: Actividad },
 ];
 
 // Botones del encabezado más compactos en celular.
@@ -149,7 +149,7 @@ export default async function Proyecto({ params, searchParams }: PageProps<"/app
         </div>
       </section>
 
-      <ProjectTabs projectId={p.id} tabs={tabs.map(({ key, label, hint }) => ({ key, label, hint }))} active={tab.key} />
+      <ProjectTabs projectId={p.id} tabs={tabs.map(({ key, label, hint, group }) => ({ key, label, hint, group }))} active={tab.key} />
       {tab ? <TabPane key={tab.key}>{await tab.C({ projectId: p.id, canEdit: can(u.role, tab.area, "edit") })}</TabPane> : null}
     </>
   );

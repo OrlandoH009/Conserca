@@ -969,4 +969,5 @@ export const EN: Record<string, string> = {
   "Partidas y montos estimados de la obra, con IVA, como referencia para el cliente.": "Estimated line items and amounts for the construction, with VAT, as a reference for the client.",
   "Plan de pagos del proyecto: qué ya se facturó y qué falta cobrar.": "The project's payment plan: what has been invoiced and what is still to be collected.",
   "Historial de lo que se ha hecho en el proyecto y quién lo hizo.": "History of what has been done on the project and who did it.",
+  "Diseño": "Design",
 };
