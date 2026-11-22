@@ -19,7 +19,7 @@ export default async function Calculadoras() {
   const projects = u && can(u.role, "calculos", "edit") ? await ProjectController.projectOptions() : [];
   return (
     <>
-      <PageHead title={t("Calculadoras")} sub={t("Cálculos rápidos sin abrir un proyecto. Si quieres conservarlos, guárdalos en un proyecto.")} />
+      <PageHead title={t("Calculadoras")} sub={projects.length ? t("Cálculos rápidos sin abrir un proyecto. Si quieres conservarlos, guárdalos en un proyecto.") : t("Cálculos rápidos sin abrir un proyecto.")} />
       <Calculators projects={projects} saveSpace={saveCalcSpace} saveZone={saveCalcZone} />
     </>
   );

@@ -48,10 +48,11 @@ function Flow({ still }: { still: boolean }) {
   );
 }
 
+// Suben por la mitad derecha y se apagan antes de llegar al título, para no ensuciar el texto.
 const CARDS = [
-  { label: "Nombre", x: "12%", delay: 0, dur: 11 },
-  { label: "Teléfono", x: "52%", delay: 3.5, dur: 13 },
-  { label: "Cotización lista", x: "26%", delay: 7, dur: 12 },
+  { label: "Nombre", x: "34%", delay: 0, dur: 6 },
+  { label: "Teléfono", x: "76%", delay: 2.2, dur: 7 },
+  { label: "Cotización lista", x: "52%", delay: 4.4, dur: 6.5 },
 ];
 
 function Ripples({ still }: { still: boolean }) {
@@ -66,7 +67,7 @@ function Ripples({ still }: { still: boolean }) {
       </div>
       <motion.div className="absolute -left-16 top-16 h-60 w-60 rounded-full bg-white/10 blur-3xl" animate={still ? {} : { x: [0, 40, 0], y: [0, 30, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} />
       {CARDS.map((c) => (
-        <motion.div key={c.label} className="absolute flex items-center gap-2 rounded-2xl border border-white/30 bg-white/15 px-4 py-2.5 text-sm font-medium text-white backdrop-blur-sm" style={{ left: c.x }} initial={{ y: "92vh", opacity: 0 }} animate={still ? { y: "64vh", opacity: 0.8 } : { y: ["92vh", "6vh"], opacity: [0, 0.6, 0.6, 0] }} transition={{ duration: c.dur, repeat: Infinity, delay: c.delay, ease: "linear", times: [0, 0.12, 0.85, 1] }}>
+        <motion.div key={c.label} className="absolute flex items-center gap-2 rounded-2xl border border-white/30 bg-white/15 px-4 py-2.5 text-sm font-medium text-white backdrop-blur-sm" style={{ left: c.x }} initial={{ y: "92vh", opacity: 0 }} animate={still ? { y: "64vh", opacity: 0.8 } : { y: ["92vh", "60vh"], opacity: [0, 0.6, 0.6, 0] }} transition={{ duration: c.dur, repeat: Infinity, delay: c.delay, ease: "linear", times: [0, 0.12, 0.85, 1] }}>
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-xs text-accent">✓</span>
           {t(c.label)}
         </motion.div>

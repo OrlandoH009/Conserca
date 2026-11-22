@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import * as UserController from "@/controllers/user.controller";
 import { ActionForm, F } from "@/components/app/ActionForm";
+import { AutoSelect } from "@/components/app/AutoSelect";
 import { ConfirmButton } from "@/components/app/ConfirmButton";
 import { EditDialog } from "@/components/app/EditDialog";
 import { Badge, PageHead } from "@/components/app/ui";
@@ -36,13 +37,25 @@ export default async function Usuarios() {
                 <td data-label={t("Rol")}>
                   {/* Celular: solo el nombre del rol; se cambia desde la página del usuario. */}
                   <span className="text-sm sm:hidden">{t(ROLE_LABEL[x.role])}</span>
-                  <form action={setRole} className="hidden min-w-0 items-center gap-2 sm:flex">
-                    <input type="hidden" name="id" value={x.id} />
-                    <select key={x.role} name="role" defaultValue={x.role} className="input h-9 w-40 min-w-0 text-xs sm:w-44" aria-label={t("Rol de {name}", { name: x.name })} disabled={x.id === me.id}>
-                      {ROLES.map((r) => <option key={r} value={r}>{t(ROLE_LABEL[r])}</option>)}
-                    </select>
-                    {x.id !== me.id && <button className="btn-ghost px-3 py-1.5">{t("Guardar")}</button>}
-                  </form>
+                  {/* Escritorio: el rol se guarda solo al elegirlo; el propio no se cambia aquí. */}
+                  <div className="hidden sm:block">
+                    {x.id === me.id ? (
+                      <span className="text-sm">{t(ROLE_LABEL[x.role])}</span>
+                    ) : (
+                      <AutoSelect
+                        key={x.role}
+                        name="role"
+                        value={x.role}
+                        options={ROLES.map((r) => [r, ROLE_LABEL[r]])}
+                        action={setRole}
+                        fields={{ id: x.id }}
+                        label={t("Rol de {name}", { name: x.name })}
+                        okText={t("Rol actualizado")}
+                        className="input h-9 w-44 min-w-0 text-xs"
+                        confirm={{ admin: t("¿Dar a {name} acceso total (Gerente de Diseño)?", { name: x.name }), usuario: t("¿Pasar a {name} a Cliente? Ya no podrá entrar al panel.", { name: x.name }) }}
+                      />
+                    )}
+                  </div>
                 </td>
                 <td>
                   {/* Celular: un solo botón a la página del usuario (editar si tiene permiso, si no solo ver). */}
@@ -65,7 +78,7 @@ export default async function Usuarios() {
 
       <section className="card mt-6">
         <h2 className="font-bold">{t("Qué puede hacer cada rol")}</h2>
-        <p className="mb-3 mt-1 text-sm text-mute"><b className="text-ink">{t("Edita")}</b>{t(": ver y cambiar ·")} <b className="text-ink">{t("Ve")}</b>{t(": solo consultar ·")} <b className="text-ink">—</b>{t(": sin acceso. Estos permisos están definidos en el código (")}<code>src/lib/permissions.ts</code>).</p>
+        <p className="mb-3 mt-1 text-sm text-mute"><b className="text-ink">{t("Edita")}</b>{t(": ver y cambiar ·")} <b className="text-ink">{t("Ve")}</b>{t(": solo consultar ·")} <b className="text-ink">—</b>{t(": sin acceso.")}</p>
         <div className="overflow-x-auto">
           <table className="tbl tbl-stack tbl-compact">
             <thead><tr><th scope="col">{t("Rol")}</th>{AREAS.map(([, l]) => <th key={l} scope="col">{t(l)}</th>)}</tr></thead>

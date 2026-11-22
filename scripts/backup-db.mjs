@@ -1,6 +1,7 @@
 // Respaldo completo: base de datos (mysqldump) + PDF subidos → storage/backups/conserca-AAAAMMDD-HHMMSS.tar.gz
 // Uso: npm run db:backup
-// Opcional en .env: BACKUP_KEEP=14 (cuántos respaldos locales conservar) y RCLONE_REMOTE=gdrive:Conserca (copia además a Google Drive con rclone).
+// Opcional en .env: BACKUP_KEEP=14 (cuántos respaldos locales conservar) y RCLONE_REMOTE=gdrive:Conserca (copia además a Google Drive con rclone)
+// y BACKUP_REMOTE_DAYS=30 (en la nube se borran los respaldos con más días que esto).
 // Esa carpeta no se sube a git. Para recuperar: docs/RESTAURACION.md
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
@@ -18,7 +19,7 @@ mkdirSync(dir, { recursive: true });
 const sqlName = `conserca-${stamp}.sql`;
 const archive = path.join(dir, `conserca-${stamp}.tar.gz`);
 
-const dump = spawnSync(findBin("mysqldump", "MYSQLDUMP_PATH"), [...args, "--single-transaction", "--routines", "--default-character-set=utf8mb4", "--result-file", path.join(dir, sqlName), db], { env, encoding: "utf8" });
+const dump = spawnSync(findBin("mysqldump", "MYSQLDUMP_PATH"), [...args, "--single-transaction", "--no-tablespaces", "--routines", "--default-character-set=utf8mb4", "--result-file", path.join(dir, sqlName), db], { env, encoding: "utf8" });
 if (dump.status !== 0) { console.error("No se pudo respaldar la base:", dump.stderr || dump.error?.message); process.exit(1); }
 
 // Un solo archivo con la base y los PDF; -C es relativo al anterior (storage/backups → storage).
@@ -39,6 +40,11 @@ if (remote) {
   const up = spawnSync("rclone", ["copy", archive, remote], { encoding: "utf8" });
   if (up.status !== 0) { console.error("El respaldo local está bien, pero NO se pudo copiar a la nube:", up.stderr || up.error?.message); process.exit(2); }
   console.log("Copiado a la nube:", remote);
+  // Limpieza en la nube: solo después de subir bien el nuevo, y solo archivos con el nombre de los respaldos.
+  const days = Math.max(1, Number(process.env.BACKUP_REMOTE_DAYS) || 30);
+  const clean = spawnSync("rclone", ["delete", remote, "--min-age", `${days}d`, "--include", "conserca-*.tar.gz"], { encoding: "utf8" });
+  if (clean.status !== 0) console.error("Aviso: no se pudieron borrar los respaldos viejos de la nube:", clean.stderr || clean.error?.message);
+  else console.log(`En la nube se borraron los respaldos de más de ${days} días.`);
 } else {
   console.log("Aviso: RCLONE_REMOTE no está definido; el respaldo solo está en este servidor.");
 }

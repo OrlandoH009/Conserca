@@ -22,7 +22,7 @@ export async function Distribucion({ projectId, canEdit }: { projectId: number; 
   const t = await getT();
   const rows = await CalcController.airElementsOf(projectId);
   return (
-    <div className="grid gap-5 xl:grid-cols-[2fr_1fr]">
+    <div className={`grid gap-5 ${canEdit ? "xl:grid-cols-[2fr_1fr]" : ""}`} /* sin formulario, la tabla usa todo el ancho */>
       <section className="card overflow-x-auto">
         <h2 className="mb-3 font-bold">{t("Conductos, rejillas y difusores")}</h2>
         {rows.length === 0 ? <Empty>{t("Aún no hay elementos de distribución.")}</Empty> : (

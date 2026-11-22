@@ -192,8 +192,8 @@ export async function getDetail(projectId: number) {
 /** Movimientos del proyecto (más recientes primero) para la pestaña de actividad; los de cobros solo los ve quien tiene acceso a Cobros. */
 export async function activityOf(projectId: number) {
   const u = await requireAccess("proyectos");
-  const rows = await EventModel.listByProject(projectId);
-  return can(u.role, "cobros") ? rows : rows.filter((e) => e.type !== "cobro");
+  const rows = await EventModel.listByProjectWithAuthor(projectId);
+  return can(u.role, "cobros") ? rows : rows.filter((r) => r.event.type !== "cobro");
 }
 
 /** Todo lo que lleva la memoria de cálculo imprimible. */

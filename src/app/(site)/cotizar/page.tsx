@@ -8,7 +8,9 @@ import { CotizarForm } from "./CotizarForm";
 import { QuickForm } from "./QuickForm";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getT())("Solicitar cotización") };
+  const t = await getT();
+  const u = await currentUser();
+  return { title: u && u.role !== "usuario" ? t("Cuenta del equipo") : t("Solicitar cotización") };
 }
 
 // Sin sesión: cotización rápida. Con sesión: cotización personalizada con los datos de la cuenta.

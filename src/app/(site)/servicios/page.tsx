@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Reveal } from "@/components/motion/Reveal";
 import { ServiceTile } from "@/components/site/ServiceIcon";
+import { currentUser } from "@/lib/auth";
 import { getT } from "@/lib/i18n-server";
 import { SERVICES } from "@/lib/services";
 
@@ -13,6 +14,8 @@ export async function generateMetadata(): Promise<Metadata> {
 // (el pie queda debajo); si la ventana es baja, la página baja un poco en vez de encoger o recortar el texto.
 export default async function Servicios() {
   const t = await getT();
+  const u = await currentUser();
+  const staff = !!u && u.role !== "usuario"; // el equipo no cotiza: sin el botón flotante
   return (
     <div className="mx-auto flex max-w-6xl flex-col px-4 pb-24 pt-20 sm:px-6 sm:pb-28 sm:pt-28 lg:min-h-svh lg:pb-20 lg:pt-20">
       <Reveal>
@@ -36,7 +39,7 @@ export default async function Servicios() {
           </Reveal>
         ))}
       </div>
-      <Link href="/cotizar" className="pulse-ring group fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-accent-solid to-accent-solid-2 px-5 py-3 text-sm sm:bottom-6 sm:right-6 sm:gap-2.5 sm:px-8 sm:py-4 sm:text-lg font-bold text-white shadow-[0_16px_40px_-10px_rgba(11,126,168,0.9)] transition duration-300 hover:-translate-y-1 hover:scale-105 active:scale-95">{t("Cotizar mi proyecto")}<svg viewBox="0 0 20 20" className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4 10h12M11 5l5 5-5 5" /></svg></Link>
+      {!staff && <Link href="/cotizar" className="fab-cotizar pulse-ring group fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-accent-solid to-accent-solid-2 px-5 py-3 text-sm sm:bottom-6 sm:right-6 sm:gap-2.5 sm:px-8 sm:py-4 sm:text-lg font-bold text-white shadow-[0_16px_40px_-10px_rgba(11,126,168,0.9)] transition duration-300 hover:-translate-y-1 hover:scale-105 active:scale-95">{t("Cotizar mi proyecto")}<svg viewBox="0 0 20 20" className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4 10h12M11 5l5 5-5 5" /></svg></Link>}
     </div>
   );
 }

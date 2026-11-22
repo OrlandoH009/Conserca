@@ -26,6 +26,8 @@ export default async function Panel({ searchParams }: PageProps<"/app">) {
   const unbilled = pay ? pay.toInvoice.length + pay.later : 0; // cobros que aún no se facturan
   const shown = kpis.filter(([, v]) => v !== null);
   const total = s.byStatus.reduce((n, r) => n + r.n, 0);
+  const cols = ["", "xl:grid-cols-1", "xl:grid-cols-2", "xl:grid-cols-3", "xl:grid-cols-4"][shown.length]; // tantas columnas como números, sin celdas vacías
+  const hasSide = (pay && pay.toInvoice.length + pay.toCollect.length > 0) || s.overdue.length > 0; // sin columna derecha vacía
 
   return (
     <>
@@ -35,7 +37,7 @@ export default async function Panel({ searchParams }: PageProps<"/app">) {
         <p className="mb-5 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">{t("Se acerca el cierre de año: hay {n} cobros sin facturar. Revisa que ninguno se quede fuera.", { n: unbilled })}</p>
       )}
       {/* Un solo recuadro dividido en celdas (2×2 en celular, en fila en PC); las líneas son el fondo asomando por el gap de 1px. */}
-      <div className={`grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line ${shown.length > 3 ? "xl:grid-cols-4" : "xl:grid-cols-3"}`}>
+      <div className={`grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line ${cols}`}>
         {shown.map(([l, v, href]) => (
           <Link key={l} href={href} className="bg-surface p-4 transition-colors hover:bg-soft active:bg-soft odd:last:col-span-2 sm:p-5 xl:odd:last:col-span-1">
             <p className="text-xs leading-snug text-mute sm:text-sm">{l}</p>
@@ -44,7 +46,7 @@ export default async function Panel({ searchParams }: PageProps<"/app">) {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-5 xl:grid-cols-[2fr_1fr]">
+      <div className={`mt-6 grid gap-5 ${hasSide ? "xl:grid-cols-[2fr_1fr]" : ""}`}>
         <div className="space-y-5">
           <section className="card">
             <h2 className="mb-3 font-bold">{t("Proyectos recientes")}</h2>

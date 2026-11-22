@@ -25,7 +25,7 @@ export async function Presupuesto({ projectId, canEdit }: { projectId: number; c
   const t = await getT();
   const { rows, totals } = await BudgetController.budgetOf(projectId);
   return (
-    <div className="grid gap-5 xl:grid-cols-[2fr_1fr]">
+    <div className={`grid gap-5 ${canEdit ? "xl:grid-cols-[2fr_1fr]" : ""}`} /* sin formulario, la tabla usa todo el ancho */>
       <div className="space-y-5">
         <section className="card overflow-x-auto">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">

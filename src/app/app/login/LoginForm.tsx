@@ -22,6 +22,10 @@ export function LoginForm() {
           <label className="label" htmlFor="password">{t("Contraseña")}</label>
           <PasswordInput id="password" name="password" autoComplete="current-password" required />
         </motion.div>
+        <motion.label variants={item} className="flex cursor-pointer items-start gap-2.5 text-sm text-mute">
+          <input name="remember" type="checkbox" className="mt-0.5 h-4 w-4 accent-[var(--accent)]" />
+          <span><span className="font-medium text-ink">{t("Recuérdame")}</span><span className="block text-xs">{t("No se cierra la sesión hasta que tú la cierres. Úsalo solo en tu propio equipo.")}</span></span>
+        </motion.label>
         {state.error && (
           <motion.p role="alert" className="rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-700" initial={{ opacity: 0, x: 0 }} animate={{ opacity: 1, x: [0, -8, 8, -6, 6, 0] }} transition={{ duration: 0.45 }}>
             {t(state.error)}

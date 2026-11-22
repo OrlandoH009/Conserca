@@ -4,6 +4,7 @@ import { Reveal } from "@/components/motion/Reveal";
 import { ScrollServices } from "@/components/motion/ScrollServices";
 import { ServiceScene } from "@/components/motion/ServiceScene";
 import { Hero } from "@/components/site/Hero";
+import { currentUser } from "@/lib/auth";
 import { getT } from "@/lib/i18n-server";
 
 const STEPS = [
@@ -28,9 +29,11 @@ const NUMBERS: [number, string][] = [
 
 export default async function Home() {
   const t = await getT();
+  const u = await currentUser();
+  const staff = !!u && u.role !== "usuario"; // el equipo no cotiza: sin botones hacia /cotizar
   return (
     <>
-      <Hero />
+      <Hero staff={staff} />
 
       <section className="bg-surface py-16 sm:py-28">
         <div className="mx-auto max-w-4xl px-6 text-center">
@@ -47,7 +50,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <ScrollServices />
+      <ScrollServices staff={staff} />
 
       <section className="defer-render bg-gradient-to-b from-surface to-bg py-14 sm:py-24">
         <div className="mx-auto grid max-w-6xl gap-8 px-6 sm:grid-cols-3 sm:gap-10">
@@ -104,7 +107,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="defer-render px-4 pb-16 sm:px-6 sm:pb-28">
+      {!staff && <section className="defer-render px-4 pb-16 sm:px-6 sm:pb-28">
         <Reveal>
           <div className="mx-auto max-w-5xl rounded-[2rem] bg-mono px-6 py-12 text-center text-on-mono sm:px-8 sm:py-16 dark:bg-accent-solid dark:text-white">
             <h2 className="text-3xl font-semibold tracking-tight sm:text-5xl">{t("Cuéntanos tu proyecto.")}</h2>
@@ -112,7 +115,7 @@ export default async function Home() {
             <Link href="/cotizar" className="mt-6 inline-flex rounded-full bg-on-mono px-6 py-3 text-sm sm:mt-8 sm:px-7 sm:py-3.5 sm:text-base font-semibold text-mono transition dark:bg-white dark:text-accent-solid hover:scale-[1.03]">{t("Solicitar cotización")}</Link>
           </div>
         </Reveal>
-      </section>
+      </section>}
     </>
   );
 }

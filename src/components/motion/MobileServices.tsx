@@ -8,7 +8,7 @@ import { Reveal } from "./Reveal";
 import { ServiceScene } from "./ServiceScene";
 
 /** "Lo que hacemos" en celular: tarjetas que aparecen una a una al bajar, sin el efecto de scroll fijo del escritorio. */
-export function MobileServices() {
+export function MobileServices({ staff = false }: { staff?: boolean }) {
   const t = useT();
   return (
     <section className="px-4 py-10 md:hidden" aria-label={t("Servicios")}>
@@ -37,9 +37,9 @@ export function MobileServices() {
           </Reveal>
         ))}
       </div>
-      <Reveal delay={0.1}>
+      {!staff && <Reveal delay={0.1}>
         <Link href="/cotizar" className="btn btn-lg mt-8 w-full">{t("Cotizar mi proyecto")}</Link>
-      </Reveal>
+      </Reveal>}
     </section>
   );
 }

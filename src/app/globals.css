@@ -106,6 +106,8 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-inter),
   .dark .label:has(+ :required, + * :required)::after { color: #f87171; }
   /* La nota "Los campos con * son obligatorios" solo se ve si el formulario tiene alguno. */
   form:not(:has(:required)) .req-note { display: none; }
+  /* Si la página tiene el botón flotante de Cotizar, el pie deja espacio para que no tape sus enlaces. */
+  body:has(.fab-cotizar) footer { padding-bottom: 5.5rem; }
   .badge { @apply inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold; }
   .tbl { @apply w-full text-left text-sm; }
   .tbl th { @apply border-b border-line px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-mute; }

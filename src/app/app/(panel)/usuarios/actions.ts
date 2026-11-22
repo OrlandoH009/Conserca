@@ -12,9 +12,11 @@ export async function createUser(_p: R, fd: FormData): Promise<R> {
   });
 }
 
-export async function setRole(fd: FormData) {
-  await UserController.setRole(fd);
-  revalidatePath("/app/usuarios");
+export async function setRole(fd: FormData): Promise<R> {
+  return run(async () => {
+    await UserController.setRole(fd);
+    revalidatePath("/app/usuarios");
+  });
 }
 
 export async function updateUser(_p: R, fd: FormData): Promise<R> {

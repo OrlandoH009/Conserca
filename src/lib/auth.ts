@@ -3,16 +3,11 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import * as UserModel from "@/models/user.model";
 import { can, type Area } from "./permissions";
-import { SESSION_COOKIE, SESSION_DAYS, signToken, verifyToken } from "./token";
+import { cookieOptions, SESSION_COOKIE, signToken, verifyToken } from "./token";
 
-export async function startSession(userId: number) {
-  (await cookies()).set(SESSION_COOKIE, await signToken(userId), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: SESSION_DAYS * 86400,
-  });
+/** `remember`: la sesión no vence hasta que la persona la cierre; si no, 12 horas o hasta cerrar el navegador. */
+export async function startSession(userId: number, remember = false) {
+  (await cookies()).set(SESSION_COOKIE, await signToken(userId, remember), cookieOptions(remember));
 }
 
 export async function endSession() {

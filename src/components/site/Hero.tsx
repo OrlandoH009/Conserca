@@ -12,7 +12,7 @@ const item = (i: number) => ({
   transition: { duration: 0.9, delay: 0.15 + i * 0.14, ease },
 });
 
-export function Hero() {
+export function Hero({ staff = false }: { staff?: boolean }) {
   const t = useT();
   return (
     <MotionConfig reducedMotion="user">
@@ -28,7 +28,7 @@ export function Hero() {
             {t("Cálculo, diseño y supervisión de sistemas de aire acondicionado y ventilación. Nos enfocamos en que todo esté bien pensado y bien vigilado.")}
           </motion.p>
           <motion.div {...item(3)} className="mt-7 flex flex-wrap sm:mt-9 items-center justify-center gap-3">
-            <Link href="/cotizar" className="btn btn-lg">{t("Solicitar cotización")}</Link>
+            {!staff && <Link href="/cotizar" className="btn btn-lg">{t("Solicitar cotización")}</Link>}
             <Link href="/servicios" className="btn-ghost btn-lg">{t("Ver servicios")}</Link>
           </motion.div>
         </div>

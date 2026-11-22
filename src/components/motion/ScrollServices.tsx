@@ -10,7 +10,7 @@ import { ServiceScene } from "./ServiceScene";
 import { SERVICES } from "@/lib/services";
 
 /** "Lo que hacemos" en escritorio: se cambia de servicio solo con clic (sin efecto de scroll). */
-export function ScrollServices() {
+export function ScrollServices({ staff = false }: { staff?: boolean }) {
   const t = useT();
   const [i, setI] = useState(0);
   const s = SERVICES[i];
@@ -47,10 +47,10 @@ export function ScrollServices() {
                 </li>
               ))}
             </ul>
-            <Link href="/cotizar" className="pulse-ring group relative mt-10 inline-flex items-center gap-3 rounded-full bg-accent-solid px-8 py-4 text-lg font-bold text-white shadow-[0_14px_34px_-10px_rgba(11,126,168,0.8)] transition duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:shadow-[0_20px_40px_-10px_rgba(11,126,168,0.9)] active:scale-[.98]">
+            {!staff && <Link href="/cotizar" className="pulse-ring group relative mt-10 inline-flex items-center gap-3 rounded-full bg-accent-solid px-8 py-4 text-lg font-bold text-white shadow-[0_14px_34px_-10px_rgba(11,126,168,0.8)] transition duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:shadow-[0_20px_40px_-10px_rgba(11,126,168,0.9)] active:scale-[.98]">
                             {t("Cotizar mi proyecto")}
               <svg viewBox="0 0 20 20" className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4 10h12M11 5l5 5-5 5" /></svg>
-            </Link>
+            </Link>}
           </div>
           <div className="relative min-h-[320px]">
             <AnimatePresence mode="wait">
@@ -79,7 +79,7 @@ export function ScrollServices() {
         </div>
       </div>
     </section>
-    <MobileServices />
+    <MobileServices staff={staff} />
     </>
   );
 }

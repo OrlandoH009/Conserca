@@ -31,7 +31,7 @@ export async function login(fd: FormData): Promise<LoginResult> {
     return { error: "Correo o contraseña incorrectos", email: p.data.email };
   }
   fails.delete(p.data.email);
-  await startSession(u.id);
+  await startSession(u.id, fd.get("remember") === "on");
   return { ok: true, role: u.role };
 }
 
