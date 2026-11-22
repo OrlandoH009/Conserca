@@ -13,9 +13,10 @@ export async function RowActions({ title, edit, onRemove, removeFields, confirm 
 }) {
   const t = await getT();
   return (
-    <div className="flex items-center gap-3 whitespace-nowrap text-xs">
-      <EditDialog label={t("Editar")} title={title} className="font-semibold text-accent hover:underline">{edit}</EditDialog>
-      <ActionButton action={onRemove} fields={removeFields} confirm={confirm ?? t("¿Quitar este elemento? Esta acción no se puede deshacer.")} okText={t("Elemento quitado")} className="font-semibold text-red-600 hover:underline">{t("Quitar")}</ActionButton>
+    // Celular: se ven como botones (fáciles de tocar); en PC, enlaces discretos.
+    <div className="flex items-center gap-2 whitespace-nowrap text-sm sm:gap-3 sm:text-xs">
+      <EditDialog label={t("Editar")} title={title} className="rounded-full border border-line px-4 py-1.5 font-semibold text-accent active:bg-soft sm:rounded-none sm:border-0 sm:p-0 sm:hover:underline">{edit}</EditDialog>
+      <ActionButton action={onRemove} fields={removeFields} confirm={confirm ?? t("¿Quitar este elemento? Esta acción no se puede deshacer.")} okText={t("Elemento quitado")} className="rounded-full border border-red-300/60 px-4 py-1.5 font-semibold text-red-600 active:bg-red-50 sm:rounded-none sm:border-0 sm:p-0 sm:hover:underline">{t("Quitar")}</ActionButton>
     </div>
   );
 }

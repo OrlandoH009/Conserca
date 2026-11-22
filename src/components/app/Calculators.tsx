@@ -56,7 +56,7 @@ function SaveBox({ projects, fields, action, okText, withUsage }: { projects: Pr
     <div className="mt-5 border-t border-line pt-4">
       <p className="text-sm font-semibold">{t("Guardar este cálculo en un proyecto")}</p>
       <div className={`mt-2 grid gap-2 ${withUsage ? "sm:grid-cols-2" : ""}`}>
-        <select className="input truncate sm:col-span-full" /* el proyecto en su propio renglón: los nombres son largos */ value={projectId} onChange={(e) => setProjectId(e.target.value)} aria-label={t("Proyecto")}>
+        <select className="input sm:col-span-full" /* el proyecto en su propio renglón: los nombres son largos */ value={projectId} onChange={(e) => setProjectId(e.target.value)} aria-label={t("Proyecto")}>
           {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
         <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("Nombre")} aria-label={t("Nombre")} />

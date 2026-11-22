@@ -35,11 +35,12 @@ export function ActionForm({
     <form ref={ref} action={run} className={className}>
       <p className="req-note mb-3 text-xs text-mute">{t("Los campos con * son obligatorios")}</p>
       {children}
-      <div className="mt-4 flex flex-wrap items-center gap-2 sm:gap-3">
-        <button className={ghost ? "btn-ghost" : "btn"} disabled={pending}>{pending ? <><Spinner /> {t("Guardando…")}</> : submitText}</button>
+      {/* Celular: botones a todo el ancho (en ventana, Borrar todo y Cancelar lado a lado bajo Guardar); en PC, en fila. */}
+      <div className={`mt-4 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3 ${closeDialog ? "grid grid-cols-2" : "grid grid-cols-1"}`}>
+        <button className={`${ghost ? "btn-ghost" : "btn"} ${closeDialog ? "col-span-2" : ""}`} disabled={pending}>{pending ? <><Spinner /> {t("Guardando…")}</> : submitText}</button>
         <ResetButton />
         {closeDialog && <button type="button" onClick={closeDialog} className="btn-ghost btn-line">{t("Cancelar")}</button>}
-        {state.error && <p role="alert" className="basis-full text-sm text-red-700">{t(state.error)}</p>}
+        {state.error && <p role="alert" className={`basis-full text-sm text-red-700 ${closeDialog ? "col-span-2" : ""}`}>{t(state.error)}</p>}
       </div>
     </form>
   );

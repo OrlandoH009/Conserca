@@ -94,11 +94,12 @@ function MobileBanner({ mode }: { mode: "login" | "registro" }) {
   return (
     <header className="relative shrink-0 overflow-hidden bg-accent-solid px-5 pb-10 pt-5 text-white md:hidden">
       <AuthArt mode={mode} />
-      <div className="relative flex items-center justify-between">
-        <Link href="/" aria-label={t("Conserca, ir al inicio")} className="inline-flex"><Logo onAccent className="h-10" /></Link>
-        <div className="flex items-center gap-1">
+      <div className="relative flex items-center justify-between gap-3">
+        {/* Celular angosto: logo un poco más chico para que "EN" e "Ir al sitio" quepan en un renglón. */}
+        <Link href="/" aria-label={t("Conserca, ir al inicio")} className="inline-flex min-w-0"><Logo onAccent className="h-8 min-[400px]:h-10" /></Link>
+        <div className="flex shrink-0 items-center gap-1">
           <LangToggle className="text-white hover:bg-white/15 hover:text-white" />
-          <Link href="/" className="rounded-full border border-white/40 bg-white/10 px-3.5 py-1.5 text-xs font-semibold backdrop-blur-sm transition active:scale-95">{t("← Ir al sitio")}</Link>
+          <Link href="/" className="rounded-full border border-white/40 bg-white/10 px-3.5 py-1.5 text-xs font-semibold backdrop-blur-sm transition active:scale-95 whitespace-nowrap">{t("← Ir al sitio")}</Link>
         </div>
       </div>
       <AnimatePresence mode="wait">

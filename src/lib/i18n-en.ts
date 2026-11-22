@@ -208,6 +208,7 @@ export const EN: Record<string, string> = {
   "Correo": "Email",
   "Contraseña": "Password",
   "Entrar": "Log in",
+  "Abrir proyecto": "Open project",
   "Recuérdame": "Remember me",
   "No se cierra la sesión hasta que tú la cierres. Úsalo solo en tu propio equipo.": "You stay logged in until you log out. Use it only on your own device.",
   "Entrando…": "Logging in…",

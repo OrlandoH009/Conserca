@@ -69,7 +69,7 @@ export function ProfileModal({ user, onClose }: { user: U; onClose: () => void }
           >
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-2xl font-semibold tracking-tight">{t("Editar perfil")}</h2>
-              <button onClick={tryClose} aria-label={t("Cerrar")} className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-mute transition hover:rotate-90 hover:bg-soft hover:text-accent">✕</button>
+              <button onClick={tryClose} aria-label={t("Cerrar")} className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-soft text-mute transition hover:rotate-90 hover:text-accent sm:h-8 sm:w-8 sm:bg-transparent sm:hover:bg-soft">✕</button>
             </div>
 
             {state.ok ? (

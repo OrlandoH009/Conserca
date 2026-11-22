@@ -39,7 +39,7 @@ export function PortalModal({ onClose }: { onClose: () => void }) {
             transition={{ type: "spring", stiffness: 280, damping: 24 }}
             className="relative w-full max-w-sm rounded-3xl border border-line bg-surface p-7 text-center shadow-2xl"
           >
-            <button onClick={close} aria-label={t("Cerrar")} className="absolute right-4 top-4 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-mute transition hover:rotate-90 hover:bg-soft hover:text-accent">✕</button>
+            <button onClick={close} aria-label={t("Cerrar")} className="absolute right-4 top-4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-soft text-mute transition hover:rotate-90 hover:text-accent sm:h-8 sm:w-8 sm:bg-transparent sm:hover:bg-soft">✕</button>
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-soft text-accent">
               <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
             </div>

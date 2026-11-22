@@ -80,6 +80,8 @@ export default async function Proyectos({ searchParams }: PageProps<"/app/proyec
                   </td>
                   <td data-label={t("Entrega")} className={late > 0 ? "font-medium text-red-600" : undefined} title={late > 0 ? `${t("Vencido hace")} ${late} ${late === 1 ? t("día") : t("días")}` : undefined}>{fmtDate(p.dueDate)}</td>
                   <td data-label={t("Estado")}><StatusBadge status={p.status} /></td>
+                  {/* Celular: botón visible para abrir (el nombre solo es un renglón de texto). */}
+                  <td className="sm:hidden"><Link href={`/app/proyectos/${p.id}`} className="btn-ghost btn-line mt-1 w-full py-2 text-sm">{t("Abrir proyecto")}</Link></td>
                 </tr>
               ))}
             </tbody>

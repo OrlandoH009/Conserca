@@ -33,8 +33,9 @@ export async function Nav() {
 type Links = [string, [string, string][]][];
 // Con sesión iniciada no se ofrece iniciar sesión ni registrarse: se lleva a su zona (cliente o panel del equipo).
 const footerLinks = (role: string | null): Links => [
-  ["Sitio", [["/", "Inicio"], ["/servicios", "Servicios"], role && role !== "usuario" ? ["/app/proyectos", "Panel de proyectos"] : ["/cotizar", "Solicitar cotización"]]],
-  ["Cuenta", role ? [role === "usuario" ? ["/mis-proyectos", "Mis proyectos"] : ["/app", "Mi panel"]] : [["/app/login", "Iniciar sesión"], ["/registro", "Crear cuenta"]]],
+  // El equipo no cotiza y tiene un solo acceso al panel (en Cuenta).
+  ["Sitio", [["/", "Inicio"], ["/servicios", "Servicios"], ...(role && role !== "usuario" ? [] : [["/cotizar", "Solicitar cotización"]] as [string, string][])]],
+  ["Cuenta", role ? [role === "usuario" ? ["/mis-proyectos", "Mis proyectos"] : ["/app/proyectos", "Panel de proyectos"]] : [["/app/login", "Iniciar sesión"], ["/registro", "Crear cuenta"]]],
   ["Legal", [["/terminos", "Términos y condiciones"], ["/privacidad", "Aviso de privacidad"]]],
 ];
 

@@ -60,6 +60,8 @@ export default async function Panel({ searchParams }: PageProps<"/app">) {
                       <td data-label={t("Etapa")}>{t(p.stage)}</td>
                       <td data-label={t("Entrega")}>{fmtDate(p.dueDate)}</td>
                       <td data-label={t("Estado")}><StatusBadge status={p.status} /></td>
+                      {/* Celular: botón visible para abrir (el nombre solo es un renglón de texto). */}
+                      <td className="sm:hidden"><Link href={`/app/proyectos/${p.id}`} className="btn-ghost btn-line mt-1 w-full py-2 text-sm">{t("Abrir proyecto")}</Link></td>
                     </tr>
                   ))}
                 </tbody>
