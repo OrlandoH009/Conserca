@@ -7,12 +7,24 @@ import { ResetButton } from "@/components/app/ConfirmButton";
 import { CONFIG } from "@/lib/config";
 import { register, type LoginState } from "./actions";
 import { PasswordInput } from "./PasswordInput";
+import { ResendVerification } from "./ResendVerification";
 
 const item = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const } } };
 
 export function RegistroForm() {
   const t = useT();
   const [state, action, pending] = useActionState<LoginState, FormData>(register, {});
+  // Cuenta creada: falta confirmar el correo con el enlace que le llegó.
+  if (state.sent) return (
+    <div className="space-y-4">
+      <div role="status" className="rounded-2xl bg-soft p-4 text-sm">
+        <p className="font-semibold">{t("Revisa tu correo")}</p>
+        <p className="mt-1">{t("Te enviamos un enlace a {email} para activar tu cuenta. Si no llega en unos minutos, revisa la carpeta de spam.", { email: state.sent })}</p>
+      </div>
+      {state.error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-700">{t(state.error)}</p>}
+      <ResendVerification email={state.sent} />
+    </div>
+  );
   return (
     <MotionConfig reducedMotion="user">
       {/* onSubmit en vez de action={...}: así React no vacía el formulario cuando el servidor devuelve un error. */}

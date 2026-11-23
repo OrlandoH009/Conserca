@@ -37,6 +37,22 @@ export async function verifyToken(token?: string): Promise<number | null> {
   return (await readToken(token))?.uid ?? null;
 }
 
+// Enlaces que van por correo (confirmar correo, cambiar contraseña). Llevan `id` y no `uid`, así nunca sirven como cookie de sesión.
+// `v` es lo que se compara al abrirlo: el correo (si cambia, el enlace deja de servir) o una huella de la contraseña (sirve una sola vez).
+type Link = { id: number; v: string };
+
+export const signLink = (purpose: "verify" | "reset", data: Link, ttl: string) =>
+  new SignJWT({ ...data, p: purpose }).setProtectedHeader({ alg: "HS256" }).setExpirationTime(ttl).sign(key());
+
+export async function readLink(purpose: "verify" | "reset", token: string): Promise<Link | null> {
+  try {
+    const { payload } = await jwtVerify(token, key());
+    return payload.p === purpose && typeof payload.id === "number" && typeof payload.v === "string" ? { id: payload.id, v: payload.v } : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Opciones de la cookie: recordada = dura REMEMBER_DAYS; si no, cookie de sesión (sin maxAge: el navegador la borra al cerrarse). */
 export const cookieOptions = (remember: boolean) => ({
   httpOnly: true,

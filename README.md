@@ -22,6 +22,10 @@ Los clientes piden cotizaciones —rápidas sin cuenta, o personalizadas con cue
 ### Cuentas de cliente
 - Login y registro en una sola pantalla (`/app/login`): un panel se desliza para mostrar el otro formulario. Las contraseñas se pueden mostrar u ocultar.
 - El registro pide nombre, correo, teléfono, contraseña (mínimo 10 caracteres) y **aceptar los Términos y el Aviso de privacidad**. Crea siempre un rol `usuario`, sin acceso al panel.
+- **Confirmar correo**: al registrarse llega un enlace (vence en 48 h); hasta abrirlo no se puede entrar. El login ofrece reenviarlo. Las cuentas que crea el Gerente quedan confirmadas.
+- **¿Olvidaste tu contraseña?** (`/app/login/restablecer`): manda un enlace de 1 hora y de un solo uso; abrirlo también confirma el correo.
+- **Avisos por correo**: todo aviso de la campana (proyecto iniciado, cambio de etapa o avance, entrega, cotización rechazada, cotización nueva para el equipo) llega también por correo, solo a correos confirmados.
+- Los correos salen por **Resend** (`src/lib/email.ts`); se configura con `RESEND_API_KEY`, `EMAIL_FROM` y `APP_URL` (ver `.env.example`). Sin `RESEND_API_KEY`, los correos se escriben en la consola del servidor.
 - **Editar perfil**: se puede cambiar el nombre libremente; **teléfono y contraseña piden la contraseña actual**. El correo no se puede cambiar. Avisa si hay cambios sin guardar.
 
 ### Cotización (`/cotizar`)

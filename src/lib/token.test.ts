@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { cookieOptions, readToken, REMEMBER_DAYS, SESSION_HOURS, signToken } from "./token";
+import { cookieOptions, readLink, readToken, REMEMBER_DAYS, SESSION_HOURS, signLink, signToken } from "./token";
 
 beforeAll(() => {
   process.env.SESSION_SECRET = "x".repeat(32);
@@ -21,5 +21,23 @@ describe("duración de la sesión", () => {
   });
   it("rechaza un token alterado", async () => {
     expect(await readToken((await signToken(7)) + "x")).toBeNull();
+  });
+});
+
+describe("enlaces por correo (confirmar correo, cambiar contraseña)", () => {
+  it("se leen solo con su mismo propósito", async () => {
+    const link = await signLink("verify", { id: 7, v: "ana@x.test" }, "48h");
+    expect(await readLink("verify", link)).toEqual({ id: 7, v: "ana@x.test" });
+    expect(await readLink("reset", link)).toBeNull();
+  });
+  it("nunca sirven como cookie de sesión", async () => {
+    expect(await readToken(await signLink("reset", { id: 7, v: "huella" }, "1h"))).toBeNull();
+  });
+  it("una sesión no sirve como enlace", async () => {
+    expect(await readLink("reset", await signToken(7))).toBeNull();
+  });
+  it("vencidos o alterados no sirven", async () => {
+    expect(await readLink("verify", await signLink("verify", { id: 7, v: "a" }, "-1s"))).toBeNull();
+    expect(await readLink("verify", (await signLink("verify", { id: 7, v: "a" }, "1h")) + "x")).toBeNull();
   });
 });

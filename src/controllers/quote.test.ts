@@ -10,7 +10,7 @@ vi.mock("@/models/client.model", () => ({}));
 vi.mock("@/models/project.model", () => ({}));
 vi.mock("@/models/payment.model", () => ({}));
 vi.mock("@/models/notification.model", () => ({}));
-vi.mock("./activity.controller", () => ({ record: vi.fn(), notifyStaff: vi.fn() }));
+vi.mock("./activity.controller", () => ({ record: vi.fn(), notifyStaff: vi.fn(), notifyUser: vi.fn() }));
 
 const TEAM = "Las cuentas del equipo no solicitan cotizaciones.";
 const quick = () => Object.entries({ name: "Ana Pérez", phone: "70001234", message: "Necesito climatizar una oficina" }).reduce((fd, [k, v]) => (fd.set(k, v), fd), new FormData());

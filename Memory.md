@@ -13,6 +13,15 @@ Para detalles estables ver: `README.md` (qué incluye, roles, stack), `DESIGN.md
 
 ## Historial
 
+### 2026-11-22 — Confirmar correo, «Olvidé mi contraseña» y avisos por correo con Resend (rama `verificacion-correo`, aún no en main)
+- **Registro:** ya no entra directo; se manda un enlace de confirmación (48 h) y hasta abrirlo el login responde «Confirma tu correo» con botón para reenviarlo. El enlace activa la cuenta, abre sesión y lleva a `/cotizar`. Columna nueva `users.email_verified_at` (null = sin confirmar).
+- **Cambiar contraseña:** `/app/login/restablecer` (enlace «¿Olvidaste tu contraseña?» en el login). El enlace dura 1 hora y sirve una vez (lleva una huella de la contraseña guardada). Abrirlo también confirma el correo.
+- **Avisos por correo:** `ActivityController.deliver` guarda el aviso y lo manda por correo a quien tiene el correo confirmado; si el correo falla, el aviso queda igual. Cubre avisos al cliente y al equipo (incluye el rechazo de cotización, que ahora usa `notifyUser`).
+- **Envío:** `src/lib/email.ts` llama a la API HTTP de Resend con `fetch` (sin dependencia nueva). Variables: `RESEND_API_KEY`, `EMAIL_FROM`, `APP_URL`. Sin clave, el correo se imprime en la consola.
+- **Enlaces firmados:** `signLink`/`readLink` en `lib/token.ts` (llevan `id`, no `uid`, para que nunca valgan como cookie de sesión; pruebas en `token.test.ts`).
+- **Base de datos:** `scripts/migrar-verificacion-correo-2026-11.sql` (agrega la columna y da por confirmadas las cuentas existentes). Correrlo en local y en Railway **antes** de desplegar: sin la columna, el login nuevo falla.
+- `tsc`, `eslint` y `vitest` (57) sin errores. Falta probar en el navegador (la migración local no se aplicó en esta sesión).
+
 ### 2026-11-06 — Roles fijos: solo los 3 del equipo + usuario de prueba (sin commit aún)
 - Por indicación del usuario (el PDF menciona a las 3 personas del equipo), los roles quedan **fijos en 4**: `admin` = Gerente de Diseño, `ingenieria` = Ing. Diseñador, `dibujo` = Técnico en Dibujo y `usuario` = cuenta de prueba/cliente del sitio. Se **quitaron** los roles `presupuestos` y `supervision` (permisos, tipos, semilla, README, pruebas).
 - Consecuencias: el Ing. Diseñador ahora **edita supervisión** (antes solo la veía; era un rol aparte); presupuestos lo edita solo el Gerente (Ingeniería lo ve); cobros solo el Gerente.

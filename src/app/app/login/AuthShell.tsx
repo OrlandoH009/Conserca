@@ -21,7 +21,7 @@ const rise = { hidden: { opacity: 0, y: 48, filter: "blur(6px)" }, show: { opaci
 const BACK = "inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-sm font-semibold text-accent transition duration-300 hover:-translate-x-1 hover:bg-soft";
 
 /** Login y registro en una sola pantalla: el panel azul con el texto se desliza al otro lado y deja ver el otro formulario. */
-export function AuthShell({ initial }: { initial: "login" | "registro" }) {
+export function AuthShell({ initial, notice }: { initial: "login" | "registro"; notice?: string }) {
   const [mode, setMode] = useState(initial);
   const reg = mode === "registro";
   const mobile = useSyncExternalStore(onResize, () => matchMedia("(max-width: 767px)").matches, () => false); // sin panel que deslizar: el formulario aparece sin esperar
@@ -57,6 +57,7 @@ export function AuthShell({ initial }: { initial: "login" | "registro" }) {
             <div className="mb-6 hidden items-center justify-between md:flex"><Link href="/" className={BACK}>{t("← Ir al sitio")}</Link><LangToggle /></div>
             <h2 className="text-2xl font-bold tracking-tight md:text-3xl">{t("Iniciar sesión")}</h2>
             <p className="mb-7 mt-2 text-mute">{t("Para el equipo de Conserca y para clientes con cuenta.")}</p>
+            {notice && <p role="status" className="mb-5 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">{t(notice)}</p>}
             <LoginForm />
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm text-mute md:hidden">{t("¿No tienes cuenta?")} <button onClick={() => setMode("registro")} className="btn-ghost px-4 py-1.5">{t("Regístrate")}</button></div>
           </div>

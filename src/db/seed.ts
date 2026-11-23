@@ -23,7 +23,7 @@ async function main() {
     await db.execute(sql.raw("ALTER TABLE " + name + " AUTO_INCREMENT = 1"));
   }
 
-  await db.insert(t.users).values(USERS.map((u) => ({ name: u.name, email: u.email, role: u.role, passwordHash: bcrypt.hashSync(u.password, 10) })));
+  await db.insert(t.users).values(USERS.map((u) => ({ name: u.name, email: u.email, role: u.role, passwordHash: bcrypt.hashSync(u.password, 10), emailVerifiedAt: new Date() })));
   const us = await db.select().from(t.users).orderBy(t.users.id);
   const eng = us.find((u) => u.role === "ingenieria")!;
   const cli = us.find((u) => u.role === "usuario")!;

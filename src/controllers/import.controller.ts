@@ -18,7 +18,7 @@ async function clientIdFor(r: ImportRow) {
 /**
  * Revisa el Excel y, con `commit=1` y sin errores, crea los proyectos. Lo que ya existe (mismo nombre) se omite,
  * así que volver a subir el archivo tras un fallo no duplica nada.
- * Las cuentas de cliente no se ligan por correo: el registro no verifica correos y otra persona podría ver el proyecto.
+ * Las cuentas de cliente no se ligan por correo: las que existían antes de confirmar correos (nov. 2026) se dieron por confirmadas sin estarlo, y otra persona podría ver el proyecto.
  */
 export async function importFile(fd: FormData): Promise<ImportResult> {
   const u = await assertAccess("cobros", "edit");

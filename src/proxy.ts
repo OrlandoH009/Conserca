@@ -1,11 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { cookieOptions, readToken, RENEW_BELOW_DAYS, SESSION_COOKIE, signToken } from "@/lib/token";
 
-// Revisión rápida, antes de pintar nada: sin sesión válida no se entra a /app (excepto el login) ni a /mis-proyectos ni a /avisos. /cotizar es público.
+// Revisión rápida, antes de pintar nada: sin sesión válida no se entra a /app (excepto el login, confirmar correo y cambiar contraseña) ni a /mis-proyectos ni a /avisos. /cotizar es público.
 // La autorización real ocurre en cada página y acción (lib/auth.ts).
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  if (pathname === "/app/login") return NextResponse.next();
+  if (pathname === "/app/login" || pathname.startsWith("/app/login/")) return NextResponse.next();
   const s = await readToken(req.cookies.get(SESSION_COOKIE)?.value);
   if (!s) return NextResponse.redirect(new URL("/app/login", req.url));
   const res = NextResponse.next();

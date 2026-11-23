@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import { db, users } from "@/db";
 
 export type User = typeof users.$inferSelect;
@@ -16,6 +16,10 @@ export const setRole = (id: number, role: Role) => db.update(users).set({ role }
 export const findWithHash = async (id: number) => (await db.select().from(users).where(eq(users.id, id)))[0] ?? null;
 export const updateProfile = (id: number, v: { name: string; phone: string | null }) => db.update(users).set(v).where(eq(users.id, id));
 export const setPassword = (id: number, passwordHash: string) => db.update(users).set({ passwordHash }).where(eq(users.id, id));
+export const markVerified = (id: number) => db.update(users).set({ emailVerifiedAt: new Date() }).where(eq(users.id, id));
+/** Correos ya confirmados de esas personas (solo a ellos se mandan avisos por correo). */
+export const verifiedEmails = (ids: number[]) =>
+  ids.length ? db.select({ id: users.id, email: users.email }).from(users).where(and(inArray(users.id, ids), isNotNull(users.emailVerifiedAt))) : Promise.resolve([]);
 export const update = (id: number, v: { name: string; email: string; phone: string | null; role: Role }) => db.update(users).set(v).where(eq(users.id, id));
 export const remove = (id: number) => db.delete(users).where(eq(users.id, id));
 export const countByRole = (role: Role) => db.$count(users, eq(users.role, role));

@@ -11,6 +11,7 @@ export const users = mysqlTable("users", {
   phone: varchar("phone", { length: 40 }),
   passwordHash: varchar("password_hash", { length: 100 }).notNull(),
   role: varchar("role", { length: 20 }).$type<"admin" | "ingenieria" | "dibujo" | "usuario">().notNull(),
+  emailVerifiedAt: timestamp("email_verified_at"), // null = aún no confirma su correo (no puede entrar ni recibe avisos por correo)
   createdAt: createdAt(),
 });
 

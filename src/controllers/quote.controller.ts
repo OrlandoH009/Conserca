@@ -10,7 +10,6 @@ import { STAGES } from "@/lib/stages";
 import * as ActivityController from "./activity.controller";
 import * as PaymentController from "./payment.controller";
 import * as ClientModel from "@/models/client.model";
-import * as NotificationModel from "@/models/notification.model";
 import * as ProjectModel from "@/models/project.model";
 import * as QuoteModel from "@/models/quote.model";
 
@@ -130,7 +129,7 @@ export async function reject(fd: FormData) {
   if (!q) throw new UserError("Esa cotización ya no existe");
   if (q.projectId) throw new UserError("Ya se creó un proyecto con esta cotización");
   await QuoteModel.reject(v.id, v.reason);
-  if (q.userId) await NotificationModel.create({ userId: q.userId, text: `Tu solicitud de cotización fue rechazada. Motivo: ${v.reason}`.slice(0, 300), href: "/mis-proyectos" });
+  if (q.userId) await ActivityController.notifyUser(q.userId, `Tu solicitud de cotización fue rechazada. Motivo: ${v.reason}`, "/mis-proyectos");
 }
 
 export async function remove(fd: FormData) {

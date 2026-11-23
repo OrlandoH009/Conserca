@@ -26,7 +26,8 @@ export async function create(fd: FormData) {
     fd,
   );
   if (await UserModel.findByEmail(v.email)) throw new UserError("Ya existe un usuario con ese correo");
-  await UserModel.create({ name: v.name, email: v.email, role: v.role as UserModel.Role, passwordHash: await bcrypt.hash(v.password, 10) });
+  // Lo crea el Gerente: el correo se da por confirmado (la persona no se registra sola).
+  await UserModel.create({ name: v.name, email: v.email, role: v.role as UserModel.Role, passwordHash: await bcrypt.hash(v.password, 10), emailVerifiedAt: new Date() });
 }
 
 export async function setRole(fd: FormData) {

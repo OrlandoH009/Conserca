@@ -1,10 +1,12 @@
 "use client";
 
 import { MotionConfig, motion } from "motion/react";
+import Link from "next/link";
 import { useActionState } from "react";
 import { useT } from "@/components/site/LocaleProvider";
 import { login, type LoginState } from "./actions";
 import { PasswordInput } from "./PasswordInput";
+import { ResendVerification } from "./ResendVerification";
 
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } } };
 
@@ -21,6 +23,10 @@ export function LoginForm() {
         <motion.div variants={item}>
           <label className="label" htmlFor="password">{t("Contraseña")}</label>
           <PasswordInput id="password" name="password" autoComplete="current-password" required />
+          {/* Celular: con fondo y borde para que se note que se puede tocar; en PC queda como enlace. */}
+          <div className="mt-2 flex justify-end">
+            <Link href="/app/login/restablecer" className="rounded-full bg-soft px-3 py-1.5 text-sm font-semibold text-accent ring-1 ring-line active:scale-95 lg:bg-transparent lg:px-0 lg:py-0 lg:ring-0 lg:hover:underline">{t("¿Olvidaste tu contraseña?")}</Link>
+          </div>
         </motion.div>
         <motion.label variants={item} className="flex cursor-pointer items-start gap-2.5 text-sm text-mute">
           <input name="remember" type="checkbox" className="mt-0.5 h-4 w-4 accent-[var(--accent)]" />
@@ -35,6 +41,7 @@ export function LoginForm() {
           <button className="btn w-full py-3" disabled={pending}>{pending ? t("Entrando…") : t("Entrar")}</button>
         </motion.div>
       </motion.form>
+      {state.unverified && state.email && <div className="mt-3"><ResendVerification email={state.email} /></div>}
     </MotionConfig>
   );
 }
