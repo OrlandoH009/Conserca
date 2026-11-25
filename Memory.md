@@ -13,11 +13,11 @@ Para detalles estables ver: `README.md` (qué incluye, roles, stack), `DESIGN.md
 
 ## Historial
 
-### 2026-11-22 — Confirmar correo, «Olvidé mi contraseña» y avisos por correo con Resend (rama `verificacion-correo`, aún no en main)
+### 2026-11-22 — Confirmar correo, «Olvidé mi contraseña» y avisos por correo con Gmail (rama `verificacion-correo`, aún no en main)
 - **Registro:** ya no entra directo; se manda un enlace de confirmación (48 h) y hasta abrirlo el login responde «Confirma tu correo» con botón para reenviarlo. El enlace activa la cuenta, abre sesión y lleva a `/cotizar`. Columna nueva `users.email_verified_at` (null = sin confirmar).
 - **Cambiar contraseña:** `/app/login/restablecer` (enlace «¿Olvidaste tu contraseña?» en el login). El enlace dura 1 hora y sirve una vez (lleva una huella de la contraseña guardada). Abrirlo también confirma el correo.
 - **Avisos por correo:** `ActivityController.deliver` guarda el aviso y lo manda por correo a quien tiene el correo confirmado; si el correo falla, el aviso queda igual. Cubre avisos al cliente y al equipo (incluye el rechazo de cotización, que ahora usa `notifyUser`).
-- **Envío:** `src/lib/email.ts` llama a la API HTTP de Resend con `fetch` (sin dependencia nueva). Variables: `RESEND_API_KEY`, `EMAIL_FROM`, `APP_URL`. Sin clave, el correo se imprime en la consola.
+- **Envío:** `src/lib/email.ts` manda desde una cuenta de Gmail con la API de Gmail (HTTPS + OAuth, `fetch`, sin dependencia nueva). Se cambió de Resend a Gmail el 2026-11-24 para no pagar dominio; SMTP no sirve porque Railway lo bloquea. Variables: `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN`, `EMAIL_FROM`, `APP_URL`. Sin refresh token, el correo se imprime en la consola. La app de Google Cloud debe estar *En producción* (en prueba el token vence a los 7 días).
 - **Enlaces firmados:** `signLink`/`readLink` en `lib/token.ts` (llevan `id`, no `uid`, para que nunca valgan como cookie de sesión; pruebas en `token.test.ts`).
 - **Base de datos:** `scripts/migrar-verificacion-correo-2026-11.sql` (agrega la columna y da por confirmadas las cuentas existentes). Correrlo en local y en Railway **antes** de desplegar: sin la columna, el login nuevo falla.
 - `tsc`, `eslint` y `vitest` (57) sin errores. Falta probar en el navegador (la migración local no se aplicó en esta sesión).

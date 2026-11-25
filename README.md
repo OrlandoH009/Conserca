@@ -25,7 +25,13 @@ Los clientes piden cotizaciones —rápidas sin cuenta, o personalizadas con cue
 - **Confirmar correo**: al registrarse llega un enlace (vence en 48 h); hasta abrirlo no se puede entrar. El login ofrece reenviarlo. Las cuentas que crea el Gerente quedan confirmadas.
 - **¿Olvidaste tu contraseña?** (`/app/login/restablecer`): manda un enlace de 1 hora y de un solo uso; abrirlo también confirma el correo.
 - **Avisos por correo**: todo aviso de la campana (proyecto iniciado, cambio de etapa o avance, entrega, cotización rechazada, cotización nueva para el equipo) llega también por correo, solo a correos confirmados.
-- Los correos salen por **Resend** (`src/lib/email.ts`); se configura con `RESEND_API_KEY`, `EMAIL_FROM` y `APP_URL` (ver `.env.example`). Sin `RESEND_API_KEY`, los correos se escriben en la consola del servidor.
+- Los correos salen desde **una cuenta de Gmail** con la API de Gmail (`src/lib/email.ts`), sin dominio propio y sin SMTP (Railway bloquea SMTP fuera del plan Pro). Límite de Gmail: unos 500 correos al día. Se configura con `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN`, `EMAIL_FROM` y `APP_URL` (ver `.env.example`). Sin `GMAIL_REFRESH_TOKEN`, los correos se escriben en la consola del servidor.
+  - **Sacar las claves (una vez):**
+    1. Crear una cuenta de Gmail solo para el sistema.
+    2. En [Google Cloud Console](https://console.cloud.google.com/), con esa cuenta: crear un proyecto y activar la **Gmail API**.
+    3. **Pantalla de consentimiento OAuth**: tipo *Externo*, y luego **Publicar la app** (*En producción*). Si se queda *En prueba*, el refresh token vence a los 7 días y los correos dejan de salir.
+    4. **Credenciales → ID de cliente de OAuth**, tipo *Aplicación web*, con la URI de redirección `https://developers.google.com/oauthplayground`. De aquí salen `GMAIL_CLIENT_ID` y `GMAIL_CLIENT_SECRET`.
+    5. En [OAuth Playground](https://developers.google.com/oauthplayground): ⚙ → *Use your own OAuth credentials* (pegar las dos claves), escribir el permiso `https://www.googleapis.com/auth/gmail.send`, *Authorize APIs* con la cuenta del sistema (Google avisa que la app no está verificada: *Avanzado → Ir a…*), y *Exchange authorization code for tokens*. El **Refresh token** es `GMAIL_REFRESH_TOKEN`.
 - **Editar perfil**: se puede cambiar el nombre libremente; **teléfono y contraseña piden la contraseña actual**. El correo no se puede cambiar. Avisa si hay cambios sin guardar.
 
 ### Cotización (`/cotizar`)

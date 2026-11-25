@@ -1,5 +1,6 @@
-// Correos con Resend, usando su API HTTP (no hace falta instalar nada).
-// Sin RESEND_API_KEY no se envía nada: el correo se muestra en la consola del servidor (sirve para probar en local).
+// Correos desde una cuenta de Gmail, usando la API de Gmail por HTTPS (no hace falta dominio ni instalar nada).
+// No se usa SMTP porque Railway lo bloquea fuera del plan Pro.
+// Sin GMAIL_REFRESH_TOKEN no se envía nada: el correo se muestra en la consola del servidor (sirve para probar en local).
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
@@ -23,22 +24,75 @@ export function emailHtml(lines: string[], button?: Button) {
 </td></tr></table></body></html>`;
 }
 
-/** Envía un correo. Lanza error si Resend lo rechaza; quien llama decide si eso detiene la acción o solo se anota. */
+const b64 = (s: string) => Buffer.from(s, "utf8").toString("base64");
+const encWord = (s: string) => (/^[\x20-\x7e]*$/.test(s) ? s : `=?UTF-8?B?${b64(s)}?=`);
+const CRLF = "\r\n";
+const wrap = (s: string) => s.replace(/.{76}/g, `$&${CRLF}`); // líneas cortas, como pide el formato de correo
+
+/** Mensaje MIME (texto + HTML) que pide la API de Gmail. Rechaza saltos de línea en encabezados (evita inyectar destinatarios). */
+export function buildMime(to: string, subject: string, text: string, html: string, from?: string) {
+  if (/[\r\n]/.test(to + (from ?? ""))) throw new Error("Dirección de correo no válida");
+  const named = from?.match(/^(.*?)\s*<([^>]+)>$/);
+  const boundary = "conserca-" + Math.random().toString(36).slice(2);
+  return [
+    ...(from ? [`From: ${named ? `${encWord(named[1].replace(/"/g, ""))} <${named[2]}>` : from}`] : []),
+    `To: ${to}`,
+    `Subject: ${encWord(subject)}`,
+    "MIME-Version: 1.0",
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+    "",
+    `--${boundary}`,
+    'Content-Type: text/plain; charset="UTF-8"',
+    "Content-Transfer-Encoding: base64",
+    "",
+    wrap(b64(text)),
+    `--${boundary}`,
+    'Content-Type: text/html; charset="UTF-8"',
+    "Content-Transfer-Encoding: base64",
+    "",
+    wrap(b64(html)),
+    `--${boundary}--`,
+    "",
+  ].join(CRLF);
+}
+
+let token: { value: string; exp: number } | null = null;
+
+/** Permiso de Google de 1 hora, sacado del refresh token; se reusa hasta que esté por vencer. */
+async function accessToken(refreshToken: string) {
+  if (token && token.exp > Date.now() + 60_000) return token.value;
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    body: new URLSearchParams({
+      client_id: process.env.GMAIL_CLIENT_ID ?? "",
+      client_secret: process.env.GMAIL_CLIENT_SECRET ?? "",
+      refresh_token: refreshToken,
+      grant_type: "refresh_token",
+    }),
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!res.ok) throw new Error(`Google no dio permiso (${res.status}): ${(await res.text()).slice(0, 200)}`);
+  const j = (await res.json()) as { access_token: string; expires_in: number };
+  token = { value: j.access_token, exp: Date.now() + j.expires_in * 1000 };
+  return token.value;
+}
+
+/** Envía un correo. Lanza error si Gmail lo rechaza; quien llama decide si eso detiene la acción o solo se anota. */
 export async function sendEmail(to: string, subject: string, lines: string[], button?: Button) {
   const text = [...lines, button ? `${button.label}: ${button.href}` : ""].filter(Boolean).join("\n\n");
-  const key = process.env.RESEND_API_KEY;
-  if (!key) {
-    console.info(`[correo sin enviar: falta RESEND_API_KEY] Para: ${to}\nAsunto: ${subject}\n${text}\n`);
+  const refresh = process.env.GMAIL_REFRESH_TOKEN;
+  if (!refresh) {
+    console.info(`[correo sin enviar: falta GMAIL_REFRESH_TOKEN] Para: ${to}\nAsunto: ${subject}\n${text}\n`);
     return;
   }
-  const res = await fetch("https://api.resend.com/emails", {
+  const raw = Buffer.from(buildMime(to, subject, text, emailHtml(lines, button), process.env.EMAIL_FROM || undefined)).toString("base64url");
+  const res = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
     method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    // Sin dominio propio verificado, Resend solo deja enviar desde onboarding@resend.dev y solo al correo de la cuenta de Resend.
-    body: JSON.stringify({ from: process.env.EMAIL_FROM || "Conserca <onboarding@resend.dev>", to: [to], subject, html: emailHtml(lines, button), text }),
-    signal: AbortSignal.timeout(10_000), // si Resend no responde, la acción no se queda colgada
+    headers: { Authorization: `Bearer ${await accessToken(refresh)}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ raw }),
+    signal: AbortSignal.timeout(10_000), // si Gmail no responde, la acción no se queda colgada
   });
-  if (!res.ok) throw new Error(`Resend respondió ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  if (!res.ok) throw new Error(`Gmail respondió ${res.status}: ${(await res.text()).slice(0, 200)}`);
 }
 
 export const logMailError = (e: unknown) => console.error("[correo] No se pudo enviar:", e);
